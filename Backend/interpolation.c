@@ -1,6 +1,20 @@
 // gcc -o interpolation interpolation.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lrt -pthread -lpaho-mqtt3c -lcjson
 //Beispiel nachricht: 
-//[{\"motors\": [100, 100, 100],\"pulswidth\"=10}, {\"motors\": [-10, 0, 20], \"pulswidth\"=10}, {\"motors\": [5, 2, 3],\"pulswidth\"=10}] 
+//
+// [
+//     {
+//         \"motorpulses\": [100, 100, 100],
+//          \"timing\"=[10,10,5]
+//     }, 
+//     {
+//         \"motorpulses\": [-10, 0, 20],
+//         \"timing\"=[30,30,5],
+//     }, 
+//     {
+//         \"motorpulses\": [5, 2, 3],
+//         \"timing\"=[30,30,5]
+//     }
+// ] 
 
 #include <pigpio.h>
 #include <stdio.h>
@@ -22,8 +36,8 @@
 
 const int motor_gpios[MOTOR_COUNT] = {17, 27, 24};
 const int dir_gpios[MOTOR_COUNT] = {23, 9, 7};
-const int pulseWidthDefault = 500; // Pulsbreite in Mikrosekunden
-const int pauseBetweenPulsesDefault = 500; // Pause zwischen Pulsen in Mikrosekunden
+const int pulseWidthDefault = 5; 
+const int pauseBetweenPulsesDefault = 5;
 const int directionChangeDelayDefault = 5;
 MQTTClient client;
 
@@ -47,21 +61,26 @@ void parse_and_execute_json_sequences(const char* jsonString) {
 
     const cJSON *sequence = NULL;
     cJSON_ArrayForEach(sequence, json) {
-        cJSON *motors = cJSON_GetObjectItemCaseSensitive(sequence, "motors");
-        cJSON *pulseWidth = cJSON_GetObjectItemCaseSensitive(sequence, "pulswidth");
-        int sequencePulseWidth = pulseWidthDefault; // Verwenden des Standardwerts
-
+        cJSON *motors = cJSON_GetObjectItemCaseSensitive(sequence, "motorpulses");
+        cJSON *timing = cJSON_GetObjectItemCaseSensitive(sequence, "timing");
+        int sequencePulseWidth = pulseWidthDefault;
+        int sequencepauseBetweenPulses = pauseBetweenPulsesDefault;
+        int sequencedirectionChangeDelay = directionChangeDelayDefault;
         if (cJSON_IsArray(motors)) {
             int pulses[MOTOR_COUNT];
             for (int i = 0; i < cJSON_GetArraySize(motors); i++) {
                 cJSON *pulse = cJSON_GetArrayItem(motors, i);
                 pulses[i] = pulse->valueint;
             }
-            // Überprüfen, ob ein 'pulseWidth'-Wert vorhanden ist, und diesen verwenden, falls ja
-            if (pulseWidth && cJSON_IsNumber(pulseWidth)) {
-                sequencePulseWidth = pulseWidth->valueint;
+
+            // Prüfen, ob das "timing"-Array existiert und die erwartete Anzahl von Elementen enthält
+            if (cJSON_IsArray(timing) && cJSON_GetArraySize(timing) == 3) {
+                sequencePulseWidth = cJSON_GetArrayItem(timing, 0)->valueint;
+                sequencePauseBetweenPulses = cJSON_GetArrayItem(timing, 1)->valueint;
+                sequenceDirectionChangeDelay = cJSON_GetArrayItem(timing, 2)->valueint;
             }
-            execute_interpolated_sequence(pulses, sequencePulseWidth, pauseBetweenPulsesDefault, directionChangeDelayDefault);
+
+            execute_interpolated_sequence(pulses, sequencePulseWidth, sequencePauseBetweenPulses, sequenceDirectionChangeDelay);
         }
     }
 
@@ -122,7 +141,7 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
             combinedPulses[pulseIndex++] = (gpioPulse_t){
                 .gpioOn = 0,
                 .gpioOff = (1 << dir_gpios[i]),
-                .usDelay = directionChangeDelayUs // Gleich wie bei Start für Konsistenz, kann angepasst werden
+                .usDelay = directionChangeDelayUs
             };
         }
     }
