@@ -1,109 +1,112 @@
-// gcc -o interpolation interpolation.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lrt -pthread -lpaho-mqtt3c -lcjson
-//Beispiel nachricht: 
-//
-// [
-//     {
-//         \"motorpulses\": [100, 100, 100],
-//          \"timing\"=[10,10,5]
-//     }, 
-//     {
-//         \"motorpulses\": [-10, 0, 20],
-//         \"timing\"=[30,30,5],
-//     }, 
-//     {
-//         \"motorpulses\": [5, 2, 3],
-//         \"timing\"=[30,30,5]
-//     }
-// ] 
+// gcc -o Interpolation1 Interpolation1.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lrt -pthread -lpaho-mqtt3c -lcjson
+// Beispiel nachricht: // mosquitto_pub -t motors/sequence -m "[{ \"motorpulses\": [5000, 100, 100], \"timing\":[700,700,5] }]"
+// mosquitto_pub -t motors/emergencyStop -m "true"
+/**
+ * Programm zur präzise Echtzeit Steuerung und Interpolierung der Motoren über MQTT mit dem Raspberry Pi.
+ * Es nutzt die pigpio-Bibliothek zur Ansteuerung der Motoren und cJSON für die Verarbeitung von JSON-Nachrichten.
+ * MQTT wird verwendet, um Befehle zu empfangen und zu verarbeiten, die die Motorsteuerungssequenzen definieren.
+ */
 
 #include <pigpio.h>
 #include <stdio.h>
-#include <unistd.h> // Für usleep-Funktionen
+#include <unistd.h>
 #include <stdlib.h>
-#include "MQTTClient.h"
-#include "cJSON.h"
 #include <string.h>
+#include "MQTTAsync.h"
+#include "cJSON.h"
+#include "signal.h"
+#include <pthread.h>
 
-// Konstanten für die Motor-GPIO-Pins und Pulse
 #define MOTOR_COUNT 3
-#define SEQUENCE_COUNT 46
+#define ADDRESS "tcp://localhost:1883"
+#define CLIENTID "MotorControllerClient"
+#define TOPIC "motors/sequence"
+#define STOP_TOPIC "motors/emergencyStop"
+#define QOS 1
 
-// MQTT-Definitions
-#define ADDRESS     "tcp://localhost:1883"
-#define CLIENTID    "MotorControllerClient"
-#define TOPIC       "motor/sequence"
-#define QOS         1
-
-const int motor_gpios[MOTOR_COUNT] = {17, 27, 24};
-const int dir_gpios[MOTOR_COUNT] = {23, 9, 7};
-const int pulseWidthDefault = 5; 
-const int pauseBetweenPulsesDefault = 5;
-const int directionChangeDelayDefault = 5;
-MQTTClient client;
-
+int motor_gpios[MOTOR_COUNT] = {17, 27, 22};
+int dir_gpios[MOTOR_COUNT] = {2, 3, 4};
+int enb_gpios[MOTOR_COUNT] = {14, 15, 18};
+int pulseWidthDefault = 5;
+int pauseBetweenPulsesDefault = 5;
+int directionChangeDelayDefault = 5;
+volatile sig_atomic_t emergency_stop_triggered = 0;
+MQTTAsync client;
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
 
 // Prototypen
+
 void initialize_motors();
+void parse_and_execute_json_sequences(const char *jsonString);
 void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs);
 void initialize_mqtt();
-int on_message(void *context, char *topicName, int topicLen, MQTTClient_message *message);
-void parse_and_execute_json_sequences(const char* jsonString);
+void onConnect(void* context, MQTTAsync_successData* response);
+void onConnectFailure(void* context, MQTTAsync_failureData* response);
+int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
+void connectionLost(void *context, char *cause);
+void* message_processing_thread(void* arg);
+void trigger_emergency_stop();
 
-void parse_and_execute_json_sequences(const char* jsonString) {
+void* message_processing_thread(void* arg) {
+    char* payloadStr = (char*) arg;
+    parse_and_execute_json_sequences(payloadStr);
+    free(payloadStr);
+    return NULL;
+}
+
+void initialize_motors() {
+    if (gpioInitialise() < 0) {
+        fprintf(stderr, "Pigpio initialization failed\n");
+        exit(1);
+    }
+
+    for (int i = 0; i < MOTOR_COUNT; i++) {
+        gpioSetMode(motor_gpios[i], PI_OUTPUT);
+        gpioSetMode(dir_gpios[i], PI_OUTPUT);
+        gpioSetMode(enb_gpios[i], PI_OUTPUT);
+        gpioWrite(enb_gpios[i], 1);  // Enable motors
+    }
+}
+void parse_and_execute_json_sequences(const char *jsonString) {
     cJSON *json = cJSON_Parse(jsonString);
-    if (json == NULL) {
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            fprintf(stderr, "Fehler vor: %s\n", error_ptr);
-        }
+    if (!json) {
+        fprintf(stderr, "Error before: %s\n", cJSON_GetErrorPtr());
         return;
     }
 
-    const cJSON *sequence = NULL;
+    cJSON *sequence = NULL;
     cJSON_ArrayForEach(sequence, json) {
         cJSON *motors = cJSON_GetObjectItemCaseSensitive(sequence, "motorpulses");
         cJSON *timing = cJSON_GetObjectItemCaseSensitive(sequence, "timing");
-        int sequencePulseWidth = pulseWidthDefault;
-        int sequencepauseBetweenPulses = pauseBetweenPulsesDefault;
-        int sequencedirectionChangeDelay = directionChangeDelayDefault;
-        if (cJSON_IsArray(motors)) {
-            int pulses[MOTOR_COUNT];
-            for (int i = 0; i < cJSON_GetArraySize(motors); i++) {
-                cJSON *pulse = cJSON_GetArrayItem(motors, i);
-                pulses[i] = pulse->valueint;
-            }
 
-            // Prüfen, ob das "timing"-Array existiert und die erwartete Anzahl von Elementen enthält
-            if (cJSON_IsArray(timing) && cJSON_GetArraySize(timing) == 3) {
-                sequencePulseWidth = cJSON_GetArrayItem(timing, 0)->valueint;
-                sequencePauseBetweenPulses = cJSON_GetArrayItem(timing, 1)->valueint;
-                sequenceDirectionChangeDelay = cJSON_GetArrayItem(timing, 2)->valueint;
-            }
-
-            execute_interpolated_sequence(pulses, sequencePulseWidth, sequencePauseBetweenPulses, sequenceDirectionChangeDelay);
+        int pulses[MOTOR_COUNT];
+        for (int i = 0; i < cJSON_GetArraySize(motors); i++) {
+            pulses[i] = cJSON_GetArrayItem(motors, i)->valueint;
         }
+
+        int sequencePulseWidth = (timing && cJSON_GetArraySize(timing) > 0) ? cJSON_GetArrayItem(timing, 0)->valueint : pulseWidthDefault;
+        int sequencePauseBetweenPulses = (timing && cJSON_GetArraySize(timing) > 1) ? cJSON_GetArrayItem(timing, 1)->valueint : pauseBetweenPulsesDefault;
+        int sequenceDirectionChangeDelay = (timing && cJSON_GetArraySize(timing) > 2) ? cJSON_GetArrayItem(timing, 2)->valueint : directionChangeDelayDefault;
+
+        execute_interpolated_sequence(pulses, sequencePulseWidth, sequencePauseBetweenPulses, sequenceDirectionChangeDelay);
     }
 
     cJSON_Delete(json);
 }
 
-void initialize_motors() {
-    if (gpioInitialise() < 0) {
-        fprintf(stderr, "Pigpio-Initialisierung fehlgeschlagen\n");
-        exit(1);
-    }
-
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
-        gpioSetMode(motor_gpios[i], PI_OUTPUT);
-        gpioSetMode(dir_gpios[i], PI_OUTPUT); // Initialisiere Richtungs-Pins als Ausgänge
-    }
-}
-
-void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs) {
+void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs)
+{
+    /**
+     * Führt eine interpolierte Motorsequenz basierend auf den gegebenen Pulsen und Timing-Parametern aus.
+     */
     gpioWaveClear();
-
-    int maxPulses = 0;
     for (int i = 0; i < MOTOR_COUNT; ++i) {
+        gpioWrite(enb_gpios[i], 1); // Motoren Aktivieren
+    }
+    int maxPulses = 0;
+    for (int i = 0; i < MOTOR_COUNT; ++i)
+    {
         maxPulses = (abs(pulses[i]) > maxPulses) ? abs(pulses[i]) : maxPulses;
     }
 
@@ -111,8 +114,10 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
     int pulseIndex = 0;
 
     // Zu Beginn der Sequenz: Richtungsänderung einfügen, falls notwendig, mit einer Verzögerung vor dem ersten Puls
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
-        if (pulses[i] < 0) { // Nur wenn die Pulse negativ sind, setze den dir_GPIO auf HIGH
+    for (int i = 0; i < MOTOR_COUNT; ++i)
+    {
+        if (pulses[i] < 0)
+        { // Nur wenn die Pulse negativ sind, setze den dir_GPIO auf HIGH
             combinedPulses[pulseIndex++] = (gpioPulse_t){
                 .gpioOn = (1 << dir_gpios[i]),
                 .gpioOff = 0,
@@ -122,12 +127,17 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
     }
 
     // Generiere Pulse für jeden Motor
-    for (int pulseNum = 0; pulseNum < maxPulses; ++pulseNum) {
+    for (int pulseNum = 0; pulseNum < maxPulses; ++pulseNum)
+    {
         unsigned int bitsOn = 0, bitsOff = 0;
-        for (int motorIndex = 0; motorIndex < MOTOR_COUNT; ++motorIndex) {
-            if (pulseNum < abs(pulses[motorIndex])) {
+        for (int motorIndex = 0; motorIndex < MOTOR_COUNT; ++motorIndex)
+        {
+            if (pulseNum < abs(pulses[motorIndex]))
+            {
                 bitsOn |= (1 << motor_gpios[motorIndex]);
-            } else {
+            }
+            else
+            {
                 bitsOff |= (1 << motor_gpios[motorIndex]);
             }
         }
@@ -136,66 +146,104 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
     }
 
     // Richtungsänderungen am Ende der Sequenz einfügen, falls notwendig
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
-        if (pulses[i] < 0) { // Setze den dir_GPIO zurück auf LOW nach negativen Pulsen
+    for (int i = 0; i < MOTOR_COUNT; ++i)
+    {
+        if (pulses[i] < 0)
+        { // Setze den dir_GPIO zurück auf LOW nach negativen Pulsen
             combinedPulses[pulseIndex++] = (gpioPulse_t){
                 .gpioOn = 0,
                 .gpioOff = (1 << dir_gpios[i]),
-                .usDelay = directionChangeDelayUs
-            };
+                .usDelay = directionChangeDelayUs};
         }
     }
 
     gpioWaveAddGeneric(pulseIndex, combinedPulses);
     int wave_id = gpioWaveCreate();
-    if (wave_id >= 0) {
+    if (wave_id >= 0)
+    {
         gpioWaveTxSend(wave_id, PI_WAVE_MODE_ONE_SHOT);
-        while (gpioWaveTxBusy()) usleep(10);
+        while (gpioWaveTxBusy())
+            usleep(10);
         gpioWaveDelete(wave_id);
-    } else {
+    }
+    else
+    {
         fprintf(stderr, "Fehler beim Erzeugen der Waveform\n");
     }
 }
 
 void initialize_mqtt() {
-    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-    MQTTClient_setCallbacks(client, NULL, NULL, on_message, NULL);
+    MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    MQTTAsync_setCallbacks(client, NULL, connectionLost, onMessage, NULL);
 
-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    MQTTClient_connect(client, &conn_opts);
-
-    MQTTClient_subscribe(client, TOPIC, QOS);
+    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+    conn_opts.automaticReconnect = 1;
+    conn_opts.onSuccess = onConnect;
+    conn_opts.onFailure = onConnectFailure;
+    conn_opts.context = client;
+    MQTTAsync_connect(client, &conn_opts);
 }
 
-int on_message(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
-    char* payloadStr = malloc(message->payloadlen + 1);
-    memcpy(payloadStr, message->payload, message->payloadlen);
-    payloadStr[message->payloadlen] = '\0'; // Ensure null-terminated string
+void onConnect(void* context, MQTTAsync_successData* response) {
+    printf("Connected\n");
+    MQTTAsync_subscribe(client, TOPIC, QOS, NULL);
+    MQTTAsync_subscribe(client, STOP_TOPIC, QOS, NULL);
+}
 
-    // Ausgabe des empfangenen Payloads
-    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+void onConnectFailure(void* context, MQTTAsync_failureData* response) {
+    fprintf(stderr, "Connect failed, rc %d\n", response ? response->code : 0);
+}
 
-    // Verarbeite die empfangene Nachricht
-    parse_and_execute_json_sequences(payloadStr);
+int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
+    char* payloadStr = strndup(message->payload, message->payloadlen);
 
-    free(payloadStr);
-    MQTTClient_freeMessage(&message);
-    MQTTClient_free(topicName);
+    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0) {
+        // Notstop-Nachricht empfangen
+        fprintf(stderr, "Emergency stop triggered!\n");
+        emergency_stop_triggered = 1;
+        free(payloadStr);
+        trigger_emergency_stop(); // Führe Notstop aus ohne einen neuen Thread zu starten
+    } else {
+        // Starte einen neuen Thread für die Verarbeitung anderer Nachrichten
+        pthread_t thread;
+        if (pthread_create(&thread, NULL, message_processing_thread, payloadStr) != 0) {
+            fprintf(stderr, "Failed to create thread\n");
+            free(payloadStr);  // Freigabe von Speicher, falls Thread-Erstellung fehlschlägt
+        } else {
+            pthread_detach(thread);  // Detach the thread to prevent memory leaks
+        }
+    }
+
+    MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topicName);
     return 1;
 }
 
+void connectionLost(void *context, char *cause) {
+    fprintf(stderr, "Connection lost, cause: %s\n", cause);
+    initialize_mqtt();
+}
+void trigger_emergency_stop() {
+    pthread_mutex_lock(&lock);
+    emergency_stop_triggered = 1; 
+    gpioWaveTxStop();
+    emergency_stop_triggered = 0;
+    pthread_cond_broadcast(&cond); // Wecke alle wartenden Threads auf, falls nötig
+    pthread_mutex_unlock(&lock);
+}
 
 int main() {
-    
     initialize_motors();
     initialize_mqtt();
 
-    while (1) {
-        usleep(100000);
+    while (!emergency_stop_triggered) {
+        sleep(1);  // Main thread doing minimal work
     }
-    
-    MQTTClient_disconnect(client, 1000);
-    MQTTClient_destroy(&client);
+
+    MQTTAsync_disconnect(client, NULL);
+    MQTTAsync_destroy(&client);
     gpioTerminate();
     return 0;
 }
