@@ -5,10 +5,10 @@
 
 
 // robot geometry
-const float e = 115.0;     // end effector
-const float f = 457.3;     // base
-const float re = 232.0;
-const float rf = 112.0;
+const float e = 50;     // end effector
+const float f = 100;     // base
+const float re = 400.0;
+const float rf = 150.0;
 
 // trigonometric constants
 const float sqrt3 = sqrt(3.0);
@@ -52,14 +52,7 @@ int main() {
     float x0, y0, z0;
     float theta1, theta2, theta3;
 
-    // Beispiel für Vorwärtskinematik
-    theta1 = 30.0; theta2 = 45.0; theta3 = 60.0;
-    if (delta_calcForward(theta1, theta2, theta3, &x0, &y0, &z0) == 0) {
-        printf("Vorwärtskinematik:\n");
-        printf("X = %f\nY = %f\nZ = %f\n", x0, y0, z0);
-    } else {
-        printf("Position existiert nicht.\n");
-    }
+    x0 = 5; y0 = 0; z0 = -280;
 
     // Beispiel für Rückwärtskinematik
     if (delta_calcInverse(x0, y0, z0, &theta1, &theta2, &theta3) == 0) {
