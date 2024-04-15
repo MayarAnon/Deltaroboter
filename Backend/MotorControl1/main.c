@@ -8,6 +8,25 @@
 #include "mqttClient.h"
 #include "utils.h"
 #include "config.h"
+void cleanup_resources() {
+    // MQTT Ressourcen trennen und freigeben
+    MQTTAsync_disconnect(client, NULL);
+    MQTTAsync_destroy(&client);
+
+    // GPIO Bibliothek beenden
+    gpioTerminate();
+
+    // Freigeben der dynamisch zugewiesenen Speicherbereiche
+    free(globalConfig.address);
+    free(globalConfig.clientId);
+    free(globalConfig.topic);
+    free(globalConfig.stopTopic);
+    free(globalConfig.motor_gpios);
+    free(globalConfig.dir_gpios);
+    free(globalConfig.enb_gpios);
+}
+
+
 int main() {
     globalConfig = load_config("config.json");
     pthread_t watchdog;
@@ -24,15 +43,6 @@ int main() {
         sleep(1);  // Hauptthread führt minimale Arbeit aus
     }
 
-    MQTTAsync_disconnect(client, NULL);
-    MQTTAsync_destroy(&client);
-    gpioTerminate();
-    free(globalConfig.address);
-    free(globalConfig.clientId);
-    free(globalConfig.topic);
-    free(globalConfig.stopTopic);
-    free(globalConfig.motor_gpios);
-    free(globalConfig.dir_gpios);
-    free(globalConfig.enb_gpios);
+    cleanup_resources();
     return 0;
 }
