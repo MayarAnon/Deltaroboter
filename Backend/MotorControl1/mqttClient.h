@@ -13,6 +13,7 @@
 #define QOS 1
 extern MQTTAsync client;
 void initialize_mqtt();
+void initialize_mqtt_using_config(Config config);
 void onConnect(void* context, MQTTAsync_successData* response);
 void onConnectFailure(void* context, MQTTAsync_failureData* response);
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
