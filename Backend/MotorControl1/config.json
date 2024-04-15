@@ -1,0 +1,15 @@
+{
+    "mqtt": {
+      "address": "tcp://localhost:1883",
+      "clientId": "MotorControllerClient",
+      "topic": "motors/sequence",
+      "stopTopic": "motors/emergencyStop",
+      "qos": 1
+    },
+    "defaults": {
+      "pulseWidth": 5,
+      "pauseBetweenPulses": 5,
+      "directionChangeDelay": 5
+    }
+}
+  
