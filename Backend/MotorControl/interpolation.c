@@ -32,9 +32,9 @@ int pauseBetweenPulsesDefault = 5;
 int directionChangeDelayDefault = 5;
 volatile sig_atomic_t emergency_stop_triggered = 0;
 MQTTAsync client;
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
-
+volatile int waveTransmissionActive = 0;
+pthread_mutex_t waveMutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t waveCond = PTHREAD_COND_INITIALIZER;
 // Prototypen
 
 void initialize_motors();
@@ -47,6 +47,19 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
 void connectionLost(void *context, char *cause);
 void* message_processing_thread(void* arg);
 void trigger_emergency_stop();
+void* waveWatchdog(void* arg);
+
+void* waveWatchdog(void* arg) {
+    while (1) {
+        pthread_mutex_lock(&waveMutex);
+        while (waveTransmissionActive && gpioWaveTxBusy()) {
+            pthread_cond_wait(&waveCond, &waveMutex);
+        }
+        pthread_mutex_unlock(&waveMutex);
+        usleep(100);  // Überwachungsintervall, eventuell anpassen
+    }
+    return NULL;
+}
 
 void* message_processing_thread(void* arg) {
     char* payloadStr = (char*) arg;
@@ -159,15 +172,20 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
 
     gpioWaveAddGeneric(pulseIndex, combinedPulses);
     int wave_id = gpioWaveCreate();
-    if (wave_id >= 0)
-    {
+    if (wave_id >= 0) {
+        pthread_mutex_lock(&waveMutex);
+        waveTransmissionActive = 1;
         gpioWaveTxSend(wave_id, PI_WAVE_MODE_ONE_SHOT);
-        while (gpioWaveTxBusy())
-            usleep(10);
+
+        // Warte auf die Beendigung der Wellenform-Übertragung
+        while (waveTransmissionActive && gpioWaveTxBusy()) {
+            pthread_cond_wait(&waveCond, &waveMutex);
+        }
+        waveTransmissionActive = 0;
+        pthread_mutex_unlock(&waveMutex);
+
         gpioWaveDelete(wave_id);
-    }
-    else
-    {
+    } else {
         fprintf(stderr, "Fehler beim Erzeugen der Waveform\n");
     }
 }
@@ -226,15 +244,14 @@ void connectionLost(void *context, char *cause) {
     initialize_mqtt();
 }
 void trigger_emergency_stop() {
-    pthread_mutex_lock(&lock);
-    emergency_stop_triggered = 1; 
     gpioWaveTxStop();
     emergency_stop_triggered = 0;
-    pthread_cond_broadcast(&cond); // Wecke alle wartenden Threads auf, falls nötig
-    pthread_mutex_unlock(&lock);
 }
 
 int main() {
+    pthread_t watchdog;
+    pthread_create(&watchdog, NULL, waveWatchdog, NULL);
+    pthread_detach(watchdog);
     initialize_motors();
     initialize_mqtt();
 
