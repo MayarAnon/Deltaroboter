@@ -1,7 +1,9 @@
 #include "utils.h"
 #include <unistd.h>
 #include <signal.h>
-
+#include <stdlib.h>
+#include <pigpio.h>
+#include "mqttClient.h" 
 volatile sig_atomic_t emergency_stop_triggered = 0;
 volatile int waveTransmissionActive = 0;
 pthread_mutex_t waveMutex = PTHREAD_MUTEX_INITIALIZER;

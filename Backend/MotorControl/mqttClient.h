@@ -11,6 +11,7 @@
 #define TOPIC "motors/sequence"
 #define STOP_TOPIC "motors/emergencyStop"
 #define QOS 1
+extern MQTTAsync client;
 void initialize_mqtt();
 void onConnect(void* context, MQTTAsync_successData* response);
 void onConnectFailure(void* context, MQTTAsync_failureData* response);

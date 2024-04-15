@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "utils.h"
-
+#include "MotorControl.h"
 
 
 MQTTAsync client;
@@ -88,4 +88,3 @@ void parse_and_execute_json_sequences(const char *jsonString) {
 
     cJSON_Delete(json);
 }
-
