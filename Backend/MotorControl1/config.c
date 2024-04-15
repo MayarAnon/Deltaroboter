@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 Config load_config(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
@@ -34,6 +33,19 @@ Config load_config(const char* filename) {
     config.pauseBetweenPulses = cJSON_GetObjectItemCaseSensitive(defaults, "pauseBetweenPulses")->valueint;
     config.directionChangeDelay = cJSON_GetObjectItemCaseSensitive(defaults, "directionChangeDelay")->valueint;
 
+    cJSON* motor_count_json = cJSON_GetObjectItemCaseSensitive(json, "motor_count");
+    config.motor_count = motor_count_json ? motor_count_json->valueint : 3;  // Default auf 3
+
+    config.motor_gpios = malloc(sizeof(int) * config.motor_count);
+    config.dir_gpios = malloc(sizeof(int) * config.motor_count);
+    config.enb_gpios = malloc(sizeof(int) * config.motor_count);
+
+    cJSON* gpio = cJSON_GetObjectItemCaseSensitive(json, "gpio");
+    for (int i = 0; i < config.motor_count; i++) {
+        config.motor_gpios[i] = cJSON_GetArrayItem(cJSON_GetObjectItemCaseSensitive(gpio, "motor_gpios"), i)->valueint;
+        config.dir_gpios[i] = cJSON_GetArrayItem(cJSON_GetObjectItemCaseSensitive(gpio, "dir_gpios"), i)->valueint;
+        config.enb_gpios[i] = cJSON_GetArrayItem(cJSON_GetObjectItemCaseSensitive(gpio, "enb_gpios"), i)->valueint;
+    }
     cJSON_Delete(json);
     return config;
 }

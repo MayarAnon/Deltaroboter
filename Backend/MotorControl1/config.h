@@ -10,6 +10,10 @@ typedef struct Config {
     int pulseWidth;
     int pauseBetweenPulses;
     int directionChangeDelay;
+    int* motor_gpios;
+    int* dir_gpios;
+    int* enb_gpios;
+    int motor_count;
 } Config;
 
 Config load_config(const char* filename);

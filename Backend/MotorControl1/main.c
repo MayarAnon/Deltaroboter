@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "config.h"
 int main() {
-    Config config = load_config("config.json");
+    globalConfig = load_config("config.json");
     pthread_t watchdog;
     if (pthread_create(&watchdog, NULL, waveWatchdog, NULL) != 0) {
         fprintf(stderr, "Failed to create watchdog thread\n");
@@ -18,8 +18,8 @@ int main() {
     pthread_detach(watchdog);
 
     initialize_motors();
-    // initialize_mqtt();
-    initialize_mqtt_using_config(config);
+    initialize_mqtt();
+    
     while (!emergency_stop_triggered) {
         sleep(1);  // Hauptthread führt minimale Arbeit aus
     }
@@ -27,5 +27,12 @@ int main() {
     MQTTAsync_disconnect(client, NULL);
     MQTTAsync_destroy(&client);
     gpioTerminate();
+    free(globalConfig.address);
+    free(globalConfig.clientId);
+    free(globalConfig.topic);
+    free(globalConfig.stopTopic);
+    free(globalConfig.motor_gpios);
+    free(globalConfig.dir_gpios);
+    free(globalConfig.enb_gpios);
     return 0;
 }
