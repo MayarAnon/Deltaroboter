@@ -3,8 +3,9 @@
 
 #include <pthread.h>
 #include "signal.h"
-
+#include <semaphore.h>
+extern sem_t queueSemaphore;
 extern volatile sig_atomic_t emergency_stop_triggered;
 void trigger_emergency_stop();
-void* message_processing_thread(void* arg);
+void* sequence_worker_thread(void* arg);
 #endif

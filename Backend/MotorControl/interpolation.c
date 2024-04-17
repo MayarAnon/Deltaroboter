@@ -56,7 +56,6 @@ void onConnect(void *context, MQTTAsync_successData *response);
 void onConnectFailure(void *context, MQTTAsync_failureData *response);
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
 void connectionLost(void *context, char *cause);
-void *message_processing_thread(void *arg);
 void trigger_emergency_stop();
 
 
@@ -122,13 +121,7 @@ void* sequence_worker_thread(void* arg) {
     }
     return NULL;
 }
-void *message_processing_thread(void *arg)
-{
-    char *payloadStr = (char *)arg;
-    parse_and_execute_json_sequences(payloadStr);
-    free(payloadStr);
-    return NULL;
-}
+
 
 void initialize_motors()
 {

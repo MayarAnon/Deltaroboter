@@ -5,7 +5,9 @@
 #include "utils.h"
 #include "MotorControl.h"
 #include "config.h"
+#include "queue.h"
 Config globalConfig;
+Queue messageQueue;
 MQTTAsync client;
 void initialize_mqtt() {
     MQTTAsync_create(&client, globalConfig.address, globalConfig.clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
@@ -40,13 +42,7 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
         free(payloadStr);
         trigger_emergency_stop();
     } else {
-        pthread_t thread;
-        if (pthread_create(&thread, NULL, message_processing_thread, payloadStr) != 0) {
-            fprintf(stderr, "Failed to create thread\n");
-            free(payloadStr);
-        } else {
-            pthread_detach(thread);
-        }
+        enqueue(&messageQueue, payloadStr);
     }
 
     MQTTAsync_freeMessage(&message);
