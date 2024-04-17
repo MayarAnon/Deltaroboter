@@ -32,24 +32,6 @@ int pauseBetweenPulsesDefault = 5;
 int directionChangeDelayDefault = 5;
 volatile sig_atomic_t emergency_stop_triggered = 0;
 MQTTAsync client;
-
-// Prototypen
-
-void initialize_motors();
-void parse_and_execute_json_sequences(const char *jsonString);
-void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs);
-void initialize_mqtt();
-void onConnect(void *context, MQTTAsync_successData *response);
-void onConnectFailure(void *context, MQTTAsync_failureData *response);
-int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
-void connectionLost(void *context, char *cause);
-void *message_processing_thread(void *arg);
-void trigger_emergency_stop();
-void* sequence_worker_thread(void* arg);
-void initQueue(Queue* q);
-void enqueue(Queue* q, char* data);
-char* dequeue(Queue* q);
-
 typedef struct node {
     char* data;
     struct node* next;
@@ -60,6 +42,25 @@ typedef struct {
     Node* tail;
     pthread_mutex_t lock;
 } Queue;
+// Prototypen
+
+void initQueue(Queue* q);
+void enqueue(Queue* q, char* data);
+char* dequeue(Queue* q);
+void* sequence_worker_thread(void* arg);
+void initialize_motors();
+void parse_and_execute_json_sequences(const char *jsonString);
+void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs);
+void initialize_mqtt();
+void onConnect(void *context, MQTTAsync_successData *response);
+void onConnectFailure(void *context, MQTTAsync_failureData *response);
+int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
+void connectionLost(void *context, char *cause);
+void *message_processing_thread(void *arg);
+void trigger_emergency_stop();
+
+
+
 
 Queue messageQueue;
 sem_t queueSemaphore;
@@ -268,6 +269,7 @@ void onConnect(void *context, MQTTAsync_successData *response)
 {
     printf("Connected\n");
     int subscribed = MQTTAsync_subscribe(client, TOPIC, QOS, NULL);
+    int subscribedStop = MQTTAsync_subscribe(client, STOP_TOPIC, QOS, NULL);
     if (subscribed != MQTTASYNC_SUCCESS)
     {
         fprintf(stderr, "Failed to subscribe to topic\n");
@@ -279,16 +281,24 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response)
     fprintf(stderr, "Connect failed, rc %d\n", response ? response->code : 0);
 }
 
-int onMessage(void* context, char* topicName, int topicLen, MQTTAsync_message* message) {
-    char* payloadStr = strndup(message->payload, message->payloadlen);
-    printf("Received message on topic '%s': %s\n", topicName, payloadStr);
-    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0) {
+int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message)
+{
+    char *payloadStr = strndup(message->payload, message->payloadlen);
+    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+
+    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0)
+    {
+        // Notstop-Nachricht empfangen
         fprintf(stderr, "Emergency stop triggered!\n");
-        trigger_emergency_stop();
+        emergency_stop_triggered = 1;
         free(payloadStr);
-    } else {
-        enqueue(&messageQueue, payloadStr); // Füge Nachricht zur Warteschlange hinzu
+        trigger_emergency_stop(); // Führe Notstop aus ohne einen neuen Thread zu starten
     }
+    else
+    {
+        enqueue(&messageQueue, payloadStr);
+    }
+
     MQTTAsync_freeMessage(&message);
     MQTTAsync_free(topicName);
     return 1;
