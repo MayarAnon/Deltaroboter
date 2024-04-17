@@ -16,7 +16,7 @@
 #include "cJSON.h"
 #include "signal.h"
 #include <pthread.h>
-
+#include <semaphore.h>
 #define MOTOR_COUNT 3
 #define ADDRESS "tcp://localhost:1883"
 #define CLIENTID "MotorControllerClient"
@@ -45,8 +45,82 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
 void connectionLost(void *context, char *cause);
 void *message_processing_thread(void *arg);
 void trigger_emergency_stop();
+void* sequence_worker_thread(void* arg);
+void initQueue(Queue* q);
+void enqueue(Queue* q, char* data);
+char* dequeue(Queue* q);
 
+typedef struct node {
+    char* data;
+    struct node* next;
+} Node;
 
+typedef struct {
+    Node* head;
+    Node* tail;
+    pthread_mutex_t lock;
+} Queue;
+
+Queue messageQueue;
+sem_t queueSemaphore;
+
+// Initialisiert die Warteschlange
+void initQueue(Queue* q) {
+    q->head = NULL;
+    q->tail = NULL;
+    pthread_mutex_init(&q->lock, NULL);
+}
+
+// Fügt Elemente zur Warteschlange hinzu
+void enqueue(Queue* q, char* data) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
+    if (newNode == NULL) {
+        perror("Failed to allocate node");
+        exit(EXIT_FAILURE);
+    }
+    newNode->data = data;
+    newNode->next = NULL;
+
+    pthread_mutex_lock(&q->lock);
+    if (q->tail != NULL) {
+        q->tail->next = newNode;
+    }
+    q->tail = newNode;
+    if (q->head == NULL) {
+        q->head = newNode;
+    }
+    pthread_mutex_unlock(&q->lock);
+    sem_post(&queueSemaphore);
+}
+
+// Entfernt und gibt das erste Element der Warteschlange zurück
+char* dequeue(Queue* q) {
+    sem_wait(&queueSemaphore);
+    pthread_mutex_lock(&q->lock);
+    if (q->head == NULL) {
+        pthread_mutex_unlock(&q->lock);
+        return NULL; // Warteschlange ist leer
+    }
+    Node* temp = q->head;
+    char* data = temp->data;
+    q->head = q->head->next;
+    if (q->head == NULL) {
+        q->tail = NULL;
+    }
+    pthread_mutex_unlock(&q->lock);
+    free(temp);
+    return data;
+}
+
+// Worker-Thread-Funktion
+void* sequence_worker_thread(void* arg) {
+    while (1) {
+        char* payloadStr = dequeue(&messageQueue);
+        parse_and_execute_json_sequences(payloadStr);
+        free(payloadStr);
+    }
+    return NULL;
+}
 void *message_processing_thread(void *arg)
 {
     char *payloadStr = (char *)arg;
@@ -205,33 +279,16 @@ void onConnectFailure(void *context, MQTTAsync_failureData *response)
     fprintf(stderr, "Connect failed, rc %d\n", response ? response->code : 0);
 }
 
-int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message)
-{
-    char *payloadStr = strndup(message->payload, message->payloadlen);
-    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
-    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0)
-    {
-        // Notstop-Nachricht empfangen
+int onMessage(void* context, char* topicName, int topicLen, MQTTAsync_message* message) {
+    char* payloadStr = strndup(message->payload, message->payloadlen);
+    printf("Received message on topic '%s': %s\n", topicName, payloadStr);
+    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0) {
         fprintf(stderr, "Emergency stop triggered!\n");
-        emergency_stop_triggered = 1;
+        trigger_emergency_stop();
         free(payloadStr);
-        trigger_emergency_stop(); // Führe Notstop aus ohne einen neuen Thread zu starten
+    } else {
+        enqueue(&messageQueue, payloadStr); // Füge Nachricht zur Warteschlange hinzu
     }
-    else
-    {
-        // Starte einen neuen Thread für die Verarbeitung anderer Nachrichten
-        pthread_t thread;
-        if (pthread_create(&thread, NULL, message_processing_thread, payloadStr) != 0)
-        {
-            fprintf(stderr, "Failed to create thread\n");
-            free(payloadStr); // Freigabe von Speicher, falls Thread-Erstellung fehlschlägt
-        }
-        else
-        {
-            pthread_detach(thread); // Detach the thread to prevent memory leaks
-        }
-    }
-
     MQTTAsync_freeMessage(&message);
     MQTTAsync_free(topicName);
     return 1;
@@ -250,12 +307,17 @@ void trigger_emergency_stop()
 
 int main()
 {
+    initQueue(&messageQueue);
+    sem_init(&queueSemaphore, 0, 0);
+    pthread_t workerThread;
+    pthread_create(&workerThread, NULL, sequence_worker_thread, NULL);
+    pthread_detach(workerThread);
+
     initialize_motors();
     initialize_mqtt();
 
-    while (!emergency_stop_triggered)
-    {
-        sleep(1); // Main thread doing minimal work
+    while (!emergency_stop_triggered) {
+        sleep(1);
     }
 
     MQTTAsync_disconnect(client, NULL);
