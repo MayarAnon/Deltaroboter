@@ -10,7 +10,7 @@ typedef enum {
     YZ_PLANE,
     ZX_PLANE
 } Plane;
-
+float calculateInitialAngle(Coordinate start, Coordinate center, Plane plane);
 Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane plane, float angle, int steps);
 Coordinate* linearInterpolation(Coordinate start, Coordinate end, int steps);
 

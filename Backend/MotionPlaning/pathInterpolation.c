@@ -15,6 +15,20 @@ typedef enum {
 
 
 
+// Funktion zur Berechnung des Startwinkels basierend auf der aktuellen Flugebene
+float calculateInitialAngle(Coordinate start, Coordinate center, Plane plane) {
+    switch (plane) {
+        case XY_PLANE:
+            return atan2(start.y - center.y, start.x - center.x);
+        case YZ_PLANE:
+            return atan2(start.z - center.z, start.y - center.y);
+        case ZX_PLANE:
+            return atan2(start.x - center.x, start.z - center.z);
+    }
+    return 0;  // Standard-Rückgabewert, falls keine passende Ebene gefunden wird (Sicherheitsmaßnahme)
+}
+
+// Hauptfunktion zur Erzeugung der Kreisinterpolation
 Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane plane, float angle, int steps) {
     Coordinate* points = (Coordinate*)malloc(steps * sizeof(Coordinate));
     if (points == NULL) {
@@ -23,35 +37,34 @@ Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane pla
     }
 
     float radius = sqrt(pow(start.x - center.x, 2) + pow(start.y - center.y, 2) + pow(start.z - center.z, 2));
-    float angleIncrement = angle / (steps - 1);
-    float currentAngle = 0;
+    float angleRadians = angle * M_PI / 180;
+    float angleIncrement = angleRadians / (steps - 1);
+    float currentAngle = calculateInitialAngle(start, center, plane);
 
     for (int i = 0; i < steps; i++) {
         switch (plane) {
             case XY_PLANE:
                 points[i].x = center.x + radius * cos(currentAngle);
                 points[i].y = center.y + radius * sin(currentAngle);
-                points[i].z = start.z;
+                points[i].z = start.z; // Z-coordinate remains constant
                 break;
             case YZ_PLANE:
                 points[i].y = center.y + radius * cos(currentAngle);
                 points[i].z = center.z + radius * sin(currentAngle);
-                points[i].x = start.x;
+                points[i].x = start.x; // X-coordinate remains constant
                 break;
             case ZX_PLANE:
                 points[i].z = center.z + radius * cos(currentAngle);
                 points[i].x = center.x + radius * sin(currentAngle);
-                points[i].y = start.y;
+                points[i].y = start.y; // Y-coordinate remains constant
                 break;
         }
+        //printf("Step %d: (%f, %f, %f)\n", i, points[i].x, points[i].y, points[i].z);  // Debug output for each step
         currentAngle += angleIncrement;
     }
 
     return points;
 }
-
-
-
 // Implementierung der Funktion
 Coordinate* linearInterpolation(Coordinate start, Coordinate end, int steps) {
     if (steps < 2) {
