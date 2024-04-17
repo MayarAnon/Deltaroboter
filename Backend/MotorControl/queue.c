@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <semaphore.h>
+#include "utils.h"
 void initQueue(Queue* q) {
     q->head = NULL;
     q->tail = NULL;

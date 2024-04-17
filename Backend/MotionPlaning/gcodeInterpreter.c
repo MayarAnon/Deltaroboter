@@ -5,10 +5,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <math.h>
 #include "pathInterpolation.h"
 #include "inverseKinematic.h"
 #include "cJSON.h"
+#include "mqttClient.h"
+#include <ctype.h>
 
 typedef struct {
     float theta1, theta2, theta3;
@@ -29,10 +32,33 @@ Plane currentPlane = XY_PLANE;
 void readFile(const char* filename);
 void processLine(const char* line);
 double calculateAngle(double xs, double ys, double xm, double ym, double xe, double ye, int direction);
+void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
+void removeNonPrintable(char *str);
+void onMessage(char *topicName, char *payloadStr) {
+    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+}
+
+
 
 int main() {
+    // Topics, zu denen wir subscriben möchten.
+    const char* topics[] = {"Topic1", "Topic2"};
+    int topicCount = sizeof(topics) / sizeof(topics[0]);
+
+    
+    // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.
+    initializeMqtt(topics, topicCount, onMessage);
+
+    // Veröffentlicht eine Nachricht auf "Topic1".
+    
     
     readFile("test.gcode");
+
+    while (1) {
+        usleep(100000);
+    }
+    destroyMqtt();
+    
     return 0;
 }
 
@@ -58,12 +84,13 @@ void readFile(const char* filename) {
 
 void processLine(const char* line) {
     char command[4];
-    float x, y,z, i, j, f;
+    float x, y,z, i, j, f,t;
     int numParams;
 
     // Initialize parameters
-    x = y = z = i = j = f = 0.0;
-
+    x = y  = i = j = t = 0.0;
+    f = 100;
+    z = -280.0;
     // Determine the type of command
     numParams = sscanf(line, "%s", command);
 
@@ -74,54 +101,22 @@ void processLine(const char* line) {
     if (strcmp(command, "G0") == 0) {
         // Read G0/G1  Point to Point
         //Parameter aus string lesen 
+        Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
         numParams = sscanf(line, "%*s X%f Y%f Z%f F%f", &x, &y,&z,&f);
-        if (numParams < 2) {
-            printf("Error reading parameters for %s command\n", command);
-            return;
-        }
-        float theta1, theta2, theta3;
-        
-        if (delta_calcInverse(x, y, z, &theta1, &theta2, &theta3) == 0) {
-        int Motor1 = (((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO);
-        int Motor2 = (((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO);
-        int Motor3 = (((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO);
-
-        // Create the root node of the JSON as an array
-        cJSON *jsonRoot = cJSON_CreateArray();
-        
-        // Create a JSON object
-        cJSON *jsonObj = cJSON_CreateObject();
-        
-        // Adding motorpulses array
-        cJSON_AddItemToObject(jsonObj, "motorpulses", cJSON_CreateIntArray((int[]){Motor1, Motor2, Motor3}, 3));
-
-        // Adding timing array
-        cJSON_AddItemToObject(jsonObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
-        
-        // Add the object to the root array
-        cJSON_AddItemToArray(jsonRoot, jsonObj);
-
-        // Print and publish
-        char* jsonString = cJSON_Print(jsonRoot);
-        printf("%s\n", jsonString);  
-        //update current Positon
-        currentPosition.x = x;
-        currentPosition.y = y;
-        currentPosition.z = z;
-        //printf("currentPosition (%f,%f,%f) \n",x,y,z);
-        currentAngles.theta1 = theta1;
-        currentAngles.theta2 = theta2;
-        currentAngles.theta3 = theta3;
-        //free storage
-        free(jsonString);
-        cJSON_Delete(jsonRoot);
+        if (numParams >= 1) {  // At least X, Y, Z must be present
+            coordinates[0] = currentPosition;
+            coordinates[1].x = x;
+            coordinates[1].y = y;
+            coordinates[1].z = z;
+            
+            printf("(%f, %f, %f)\n", x, y, z);
         } else {
-            fprintf(stderr, "Error calculating inverse kinematics\n");
+            printf("Error reading parameters for command in line");
         }
         
-    }
-        
+        processInterpolationAndCreateJSON(coordinates,2, f);
     
+    }
     else if (strcmp(command, "G1") == 0) {
         // Read G0/G1 command parameters
         numParams = sscanf(line, "%*s X%f Y%f Z%f F%f", &x, &y,&z, &f);
@@ -139,61 +134,27 @@ void processLine(const char* line) {
         int InterpolationSteps = (int)maxDiff;
 
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
-
+        /*
         for(int i=0;i<InterpolationSteps;i++){
             printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
             currentPosition.x = coordinates[i].x;
             currentPosition.y = coordinates[i].y;
             currentPosition.z = coordinates[i].z;
         }
-        
-        delta_calcInverse(currentPosition.x,currentPosition.y,currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        /*
-        Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
-        float lastTheta1 = currentAngles.theta1;
-        float lastTheta2 = currentAngles.theta2;
-        float lastTheta3 = currentAngles.theta3;
-
-        cJSON* jsonRoot = cJSON_CreateArray();
-
-        for (int i = 0; i < InterpolationSteps; i++) {
-            float theta1, theta2, theta3;
-            if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-                steps[i].Motor1 = ((theta1 - lastTheta1)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor2 = ((theta2 - lastTheta2)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor3 = ((theta3 - lastTheta3)/360) * STEPSPERREVOLUTION * GEARRATIO;
-
-                if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) { // Check if all deltas are zero
-                    cJSON* stepObj = cJSON_CreateObject();
-                    cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3}, 3));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){f, f,5}, 3));
-                    cJSON_AddItemToArray(jsonRoot, stepObj);
-
-                    //printf("Interpolation Step %d: DeltaTheta1 = %d, DeltaTheta2 = %d, DeltaTheta3 = %d\n",
-                    //    i, steps[i].Motor1, steps[i].Motor2, steps[i].Motor3);
-                }
-                // Update lastTheta values for next iteration
-                lastTheta1 = theta1;
-                lastTheta2 = theta2;
-                lastTheta3 = theta3;
-            } else {
-                printf("Punkt existiert nicht");
-            }
-        }
-        currentPosition = targetPosition;
-        delta_calcInverse(targetPosition.x, targetPosition.y, targetPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        char* jsonString = cJSON_Print(jsonRoot);  // Generate final JSON string
-        printf("%s\n", jsonString); 
-        free(jsonString);
-        cJSON_Delete(jsonRoot);
-
-        free(coordinates);
-        free(steps);
-        
         */
+        processInterpolationAndCreateJSON(coordinates,InterpolationSteps,f);
+        
+        
     }
+    else if (strcmp(command, "G2") == 0 || strcmp(command, "G3") == 0) {
 
-    else if (strcmp(command, "G2") == 0) {
+        int direction = 0;
+        if(strcmp(command, "G2") == 0){
+            direction = 1;
+        }
+        else if(strcmp(command, "G3") == 0){
+            direction = -1;
+        }
         
         //auf ein Achse zurückführen die X-Y Achse. wird nachher wieder auf Ursprüngliche Achese angewendet
         double angle, radius = 0;
@@ -202,28 +163,22 @@ void processLine(const char* line) {
         case XY_PLANE:
             
             numParams = sscanf(line, "%*s X%f Y%f I%f J%f F%f", &x, &y, &i, &j, &f);
-            angle = calculateAngle(currentPosition.x,currentPosition.y,currentPosition.x + i,currentPosition.y + j,x,y, 1);
-            radius = sqrt(pow((currentPosition.x + i) - currentPosition.x, 2) + pow((currentPosition.y + j) - currentPosition.y, 2));
-            center.x = currentPosition.x + i;
-            center.y = currentPosition.y + j;
-            center.z = currentPosition.z;
+            angle = calculateAngle(currentPosition.x,currentPosition.y,currentPosition.x + i,currentPosition.y + j,x,y, direction);
+            radius = hypot(i, j);
+            center = (Coordinate){currentPosition.x + i, currentPosition.y + j, currentPosition.z};
             break;
         case YZ_PLANE:
             numParams = sscanf(line, "%*s Y%f Z%f I%f J%f F%f", &y, &z, &i, &j, &f);
-            angle = calculateAngle(currentPosition.y,currentPosition.z,currentPosition.y + i,currentPosition.z + j,y,z, 1);
-            radius = sqrt(pow((currentPosition.y + i) - currentPosition.y, 2) + pow((currentPosition.z + j) - currentPosition.z, 2));
-            center.x = currentPosition.x;
-            center.y = currentPosition.y + i;
-            center.z = currentPosition.z + j;
+            angle = calculateAngle(currentPosition.y,currentPosition.z,currentPosition.y + i,currentPosition.z + j,y,z, direction);
+            radius = hypot(i, j);
+            center = (Coordinate){currentPosition.x, currentPosition.y + i, currentPosition.z + j};
             break;
         case ZX_PLANE:
             
             numParams = sscanf(line, "%*s Z%f X%f I%f J%f F%f", &z, &x, &i, &j, &f);
-            angle = calculateAngle(currentPosition.z,currentPosition.x,currentPosition.z + i,currentPosition.x + j,z,x, 1);
-            radius = sqrt(pow((currentPosition.z + i) - currentPosition.z, 2) + pow((currentPosition.x + j) - currentPosition.x, 2));
-            center.x = currentPosition.x + j;
-            center.y = currentPosition.y;
-            center.z = currentPosition.z + i;
+            angle = calculateAngle(currentPosition.z,currentPosition.x,currentPosition.z + i,currentPosition.x + j,z,x, direction);
+            radius = hypot(i, j);
+            center = (Coordinate){currentPosition.x + j, currentPosition.y, currentPosition.z + i};
             break;
         }
 
@@ -242,174 +197,27 @@ void processLine(const char* line) {
         double distance = fabs(angleRadient * radius); //distance in mm
         int InterpolationSteps = (int)(distance);
         
-        //printf("G2 circular move to (%f, %f) with center offsets (%f, %f) at feed rate %f\n", x, y, i, j, f);
-
-        //printf("currentPosition (%f,%f,%f) center (%f,%f,%f) angle %f InterpolationSteps %d\n",currentPosition.x,currentPosition.y,currentPosition.z,center.x,center.y,center.z,angle,InterpolationSteps);
         
         Coordinate* coordinates =  circularInterpolation(currentPosition,center,currentPlane,(float)(angle),InterpolationSteps);
-
+        /*
         for(int i=0;i<InterpolationSteps;i++){
             printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
             currentPosition.x = coordinates[i].x;
             currentPosition.y = coordinates[i].y;
             currentPosition.z = coordinates[i].z;
         }
-        
-        delta_calcInverse(currentPosition.x,currentPosition.y,currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        //printf("currentPosition (%f,%f,%f) \n",currentPosition.x,currentPosition.y,currentPosition.z);
-        /*
-        Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
-        float lastTheta1 = currentAngles.theta1;
-        float lastTheta2 = currentAngles.theta2;
-        float lastTheta3 = currentAngles.theta3;
-
-        cJSON* jsonRoot = cJSON_CreateArray();
-
-        for (int i = 0; i < InterpolationSteps; i++) {
-            float theta1, theta2, theta3;
-            if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-                steps[i].Motor1 = ((theta1 - lastTheta1)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor2 = ((theta2 - lastTheta2)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor3 = ((theta3 - lastTheta3)/360) * STEPSPERREVOLUTION * GEARRATIO;
-
-                if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) { // Check if all deltas are zero
-                    cJSON* stepObj = cJSON_CreateObject();
-                    cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3}, 3));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){f, f,5}, 3));
-                    cJSON_AddItemToArray(jsonRoot, stepObj);
-
-                    //printf("Interpolation Step %d: DeltaTheta1 = %d, DeltaTheta2 = %d, DeltaTheta3 = %d\n",
-                    //    i, steps[i].Motor1, steps[i].Motor2, steps[i].Motor3);
-                }
-                // Update lastTheta values for next iteration
-                lastTheta1 = theta1;
-                lastTheta2 = theta2;
-                lastTheta3 = theta3;
-            } else {
-                printf("Punkt existiert nicht");
-            }
-        }
-        //currentPosition = targetPosition;
-        //delta_calcInverse(targetPosition.x, targetPosition.y, targetPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        char* jsonString = cJSON_Print(jsonRoot);  // Generate final JSON string
-        printf("%s\n", jsonString); 
-        free(jsonString);
-        cJSON_Delete(jsonRoot);
-
-        free(coordinates);
-        free(steps);
         */
-        // Optionally handle feed rate f and center (i, j) here
-    }
-    else if (strcmp(command, "G3") == 0) {
-        //auf ein Achse zurückführen die X-Y Achse. wird nachher wieder auf Ursprüngliche Achese angewendet
-        double angle, radius = 0;
-        Coordinate center;
-        switch(currentPlane) {
-        case XY_PLANE:
-            
-            numParams = sscanf(line, "%*s X%f Y%f I%f J%f F%f", &x, &y, &i, &j, &f);
-            angle = calculateAngle(currentPosition.x,currentPosition.y,currentPosition.x + i,currentPosition.y + j,x,y, -1);
-            radius = sqrt(pow((currentPosition.x + i) - currentPosition.x, 2) + pow((currentPosition.y + j) - currentPosition.y, 2));
-            center.x = currentPosition.x + i;
-            center.y = currentPosition.y + j;
-            center.z = currentPosition.z;
-            break;
-        case YZ_PLANE:
-            numParams = sscanf(line, "%*s Y%f Z%f I%f J%f F%f", &y, &z, &i, &j, &f);
-            angle = calculateAngle(currentPosition.y,currentPosition.z,currentPosition.y + i,currentPosition.z + j,y,z, -1);
-            radius = sqrt(pow((currentPosition.y + i) - currentPosition.y, 2) + pow((currentPosition.z + j) - currentPosition.z, 2));
-            center.x = currentPosition.x;
-            center.y = currentPosition.y + i;
-            center.z = currentPosition.z + j;
-            break;
-        case ZX_PLANE:
-            
-            numParams = sscanf(line, "%*s Z%f X%f I%f J%f F%f", &z, &x, &i, &j, &f);
-            angle = calculateAngle(currentPosition.z,currentPosition.x,currentPosition.z + i,currentPosition.x + j,z,x, -1);
-            radius = sqrt(pow((currentPosition.z + i) - currentPosition.z, 2) + pow((currentPosition.x + j) - currentPosition.x, 2));
-            center.x = currentPosition.x + j;
-            center.y = currentPosition.y;
-            center.z = currentPosition.z + i;
-            break;
-        }
-
-        //Prüfen ob Parameter vollständig
-        if (numParams < 2) {
-            printf("Error reading parameters for %s command\n", command);
-            return;
-        }
-        
-        //Berechnen des zurückzulegenden winkels
-        if (angle != 0) {
-        //printf("Winkel: %f Grad Radius %f \n", angle,radius);
-        }
-        // Berechnen der Interpolationsschritte über die Distanz welche zurückgelegt wird 
-        double angleRadient = (angle * PI)/180;
-        double distance = fabs(angleRadient * radius); //distance in mm
-        int InterpolationSteps = (int)(distance);
-        
-        //printf("G2 circular move to (%f, %f) with center offsets (%f, %f) at feed rate %f\n", x, y, i, j, f);
-
-        //printf("currentPosition (%f,%f,%f) center (%f,%f,%f) angle %f InterpolationSteps %d\n",currentPosition.x,currentPosition.y,currentPosition.z,center.x,center.y,center.z,angle,InterpolationSteps);
-        
-        Coordinate* coordinates =  circularInterpolation(currentPosition,center,currentPlane,(float)(angle),InterpolationSteps);
-
-        for(int i=0;i<InterpolationSteps;i++){
-            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
-            currentPosition.x = coordinates[i].x;
-            currentPosition.y = coordinates[i].y;
-            currentPosition.z = coordinates[i].z;
-        }
-        
-        delta_calcInverse(currentPosition.x,currentPosition.y,currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        //printf("currentPosition (%f,%f,%f) \n",currentPosition.x,currentPosition.y,currentPosition.z);
-        /*
-        Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
-        float lastTheta1 = currentAngles.theta1;
-        float lastTheta2 = currentAngles.theta2;
-        float lastTheta3 = currentAngles.theta3;
-
-        cJSON* jsonRoot = cJSON_CreateArray();
-
-        for (int i = 0; i < InterpolationSteps; i++) {
-            float theta1, theta2, theta3;
-            if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-                steps[i].Motor1 = ((theta1 - lastTheta1)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor2 = ((theta2 - lastTheta2)/360) * STEPSPERREVOLUTION * GEARRATIO;
-                steps[i].Motor3 = ((theta3 - lastTheta3)/360) * STEPSPERREVOLUTION * GEARRATIO;
-
-                if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) { // Check if all deltas are zero
-                    cJSON* stepObj = cJSON_CreateObject();
-                    cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3}, 3));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){f, f,5}, 3));
-                    cJSON_AddItemToArray(jsonRoot, stepObj);
-
-                    //printf("Interpolation Step %d: DeltaTheta1 = %d, DeltaTheta2 = %d, DeltaTheta3 = %d\n",
-                    //    i, steps[i].Motor1, steps[i].Motor2, steps[i].Motor3);
-                }
-                // Update lastTheta values for next iteration
-                lastTheta1 = theta1;
-                lastTheta2 = theta2;
-                lastTheta3 = theta3;
-            } else {
-                printf("Punkt existiert nicht");
-            }
-        }
-        //currentPosition = targetPosition;
-        //delta_calcInverse(targetPosition.x, targetPosition.y, targetPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3);
-        char* jsonString = cJSON_Print(jsonRoot);  // Generate final JSON string
-        printf("%s\n", jsonString); 
-        free(jsonString);
-        cJSON_Delete(jsonRoot);
-
-        free(coordinates);
-        free(steps);
-        */
-        // Optionally handle feed rate f and center (i, j) here
+        processInterpolationAndCreateJSON(coordinates,InterpolationSteps,f);
     }
     else if (strcmp(command, "G4") == 0) {
+        int numParams = sscanf(line, "%*s P%f", &t);
 
+        if (numParams < 1) {
+            fprintf(stderr, "Failed to read sleep time for G4 command\n");
+            return;
+        } else {
+            usleep(t * 1000);  // Perform the sleep
+        }
     }
     else if (strcmp(command, "G17") == 0) {
         
@@ -429,18 +237,114 @@ void processLine(const char* line) {
 
     }
     else if (strcmp(command, "G28") == 0) {
+        Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
         
+        coordinates[0] = currentPosition;
+        coordinates[1].x = 0.0;
+        coordinates[1].y = 0.0;
+        coordinates[1].z = -280.0;
+            
+        processInterpolationAndCreateJSON(coordinates,2,f);
+    
     }
     else if (strcmp(command, "M100") == 0) {
+        int sValue = 0;
+        int numParams = sscanf(line, "%*s S%d", &sValue);
+
+        if (numParams < 1) {
+            fprintf(stderr, "Failed to read sleep time for M100 command\n");
+            return;
+        } else {
+            // Prepare the JSON string
+            char jsonString[100];  // Ensure the buffer is large enough
+            snprintf(jsonString, sizeof(jsonString),
+                     "{\n"
+                     "\"parallelGripper\": %d,\n"
+                     "\"compliantGripper\": 0,\n"
+                     "\"magnetGripper\": 0,\n"
+                     "\"vacuumGripper\": 0\n"
+                     "}", sValue);
+
+            // Print the JSON string
+            printf("%s\n", jsonString);
+        }   
+
         
+            
+        
+    
     }
     else if (strcmp(command, "M200") == 0) {
+        int sValue = 0;
+        int numParams = sscanf(line, "%*s S%d", &sValue);
+
+        if (numParams < 1) {
+            fprintf(stderr, "Failed to read sleep time for M100 command\n");
+            return;
+        } else {
+            // Prepare the JSON string
+            char jsonString[100];  // Ensure the buffer is large enough
+            snprintf(jsonString, sizeof(jsonString),
+                     "{\n"
+                     "\"parallelGripper\": 0,\n"
+                     "\"compliantGripper\": %d,\n"
+                     "\"magnetGripper\": 0,\n"
+                     "\"vacuumGripper\": 0\n"
+                     "}", sValue);
+
+            // Print the JSON string
+            printf("%s\n", jsonString);
+        }
+
+        
+            
         
     }
     else if (strcmp(command, "M300") == 0) {
-        
+        int sValue = 0;
+        int numParams = sscanf(line, "%*s S%d", &sValue);
+
+        if (numParams < 1) {
+            fprintf(stderr, "Failed to read sleep time for M100 command\n");
+            return;
+        } else {
+            // Prepare the JSON string
+            char jsonString[100];  // Ensure the buffer is large enough
+            snprintf(jsonString, sizeof(jsonString),
+                     "{\n"
+                     "\"parallelGripper\": 0,\n"
+                     "\"compliantGripper\": 0,\n"
+                     "\"magnetGripper\": %d,\n"
+                     "\"vacuumGripper\": 0\n"
+                     "}", sValue);
+
+            // Print the JSON string
+            printf("%s\n", jsonString);
+        }
     }
     else if (strcmp(command, "M400") == 0) {
+        int sValue = 0;
+        int numParams = sscanf(line, "%*s S%d", &sValue);
+
+        if (numParams < 1) {
+            fprintf(stderr, "Failed to read sleep time for M100 command\n");
+            return;
+        } else {
+            // Prepare the JSON string
+            char jsonString[100];  // Ensure the buffer is large enough
+            snprintf(jsonString, sizeof(jsonString),
+                     "{\n"
+                     "\"parallelGripper\": 0,\n"
+                     "\"compliantGripper\": 0,\n"
+                     "\"magnetGripper\": 0,\n"
+                     "\"vacuumGripper\": %d\n"
+                     "}", sValue);
+
+            // Print the JSON string
+            printf("%s\n", jsonString);
+        }
+    }
+    else if (strcmp(command, ";") == 0) {
         
     }
     else {
@@ -450,6 +354,63 @@ void processLine(const char* line) {
 
 
 
+void removeNonPrintable(char *str) {
+    char *src = str, *dst = str;
+    while(*src) {
+        // Erlaube nur druckbare Zeichen ohne Zeilenumbrüche und Tabs
+        if (*src >= 32 && *src <= 126) {
+            *dst++ = *src;
+        }
+        src++;
+    }
+    *dst = '\0'; // Null-terminate the cleaned string
+}
+
+
+
+void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
+    Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
+    
+    cJSON* jsonRoot = cJSON_CreateArray();
+
+    for (int i = 0; i < InterpolationSteps; i++) {
+        float theta1, theta2, theta3;
+
+        currentPosition.x = coordinates[i].x;
+        currentPosition.y = coordinates[i].y;
+        currentPosition.z = coordinates[i].z;
+
+        if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
+            steps[i].Motor1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO;
+            steps[i].Motor2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO;
+            steps[i].Motor3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO;
+
+            if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) {
+                cJSON* stepObj = cJSON_CreateObject();
+                cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3}, 3));
+                cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
+                cJSON_AddItemToArray(jsonRoot, stepObj);
+            }
+            currentAngles.theta1 = theta1;
+            currentAngles.theta2 = theta2;
+            currentAngles.theta3 = theta3;
+        } else {
+            printf("Punkt existiert nicht\n");
+        }
+    }   
+
+    char* jsonString = cJSON_Print(jsonRoot);
+    
+    removeNonPrintable(jsonString);
+    printf("%s\n", jsonString);
+    publishMessage("motors/sequence",jsonString);
+
+    
+    free(jsonString);
+    cJSON_Delete(jsonRoot);
+    free(steps);
+    free(coordinates);
+}
 
 
 

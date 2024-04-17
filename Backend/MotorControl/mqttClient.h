@@ -4,6 +4,7 @@
 #include "config.h"
 #include "MQTTAsync.h"
 #include "cJSON.h"
+#include "queue.h"
 extern MQTTAsync client;
 extern Config globalConfig;
 extern Queue messageQueue;

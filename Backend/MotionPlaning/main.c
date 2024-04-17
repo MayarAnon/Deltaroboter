@@ -34,7 +34,7 @@ typedef struct {
 // Globale Variable für die aktuelle Position
 Coordinate currentPosition = {0.0, 0.0,-280.0}; //Starten mit Homekoordinaten 
 Angles currentAngles = {-41.489,-41.489,-41.489}; //Starten mit Homewinkeln
-int speed = 30;
+int speed = 100;
 int directionChangeTime = 5;
 
 //Parsen Nachricht x y z herausbekommen 

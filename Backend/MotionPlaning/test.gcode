@@ -1,6 +1,10 @@
-G1 X5 Y0 Z-280 F100
-G2 X5 Y8 I0 J4 F100
-G1 X-5 Y0 Z-280 F100
-G1 X5 Y0 Z-280 F100
-G3 X5 Y-8 I0 J-4 F100
-G1 X-5 Y0 Z-280 F100
+G2 X200 Y0 I100 J0 F100
+G4 P500
+G2 X200 Y0 I100 J0 F90
+G4 P500
+G2 X200 Y0 I100 J0 F80
+G4 P500
+G2 X200 Y0 I100 J0 F70
+
+
+mosquitto_pub -t motors/sequence -m "[{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] }]"

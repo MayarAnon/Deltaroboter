@@ -36,9 +36,6 @@ void cleanup_resources() {
     free(globalConfig.dir_gpios);
     free(globalConfig.enb_gpios);
     sem_destroy(&queueSemaphore);
-    while (!messageQueue.empty()) {
-        free(dequeue(&messageQueue));
-    }
 }
 
 

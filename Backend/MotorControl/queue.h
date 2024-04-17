@@ -3,6 +3,7 @@
 
 #include <pthread.h>
 #include <semaphore.h>
+
 typedef struct node {
     char* data;
     struct node* next;
