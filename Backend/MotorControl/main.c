@@ -1,4 +1,4 @@
-//gcc -o MotorController main.c MotorControl.c mqttClient.c utils.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lpaho-mqtt3as -lcjson -lpthread
+//gcc -o MotorController config.c main.c MotorControl.c mqttClient.c utils.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lpaho-mqtt3as -lcjson -lpthread
 
 
 #include <stdio.h>
@@ -7,17 +7,29 @@
 #include "MotorControl.h"
 #include "mqttClient.h"
 #include "utils.h"
+#include "config.h"
+void cleanup_resources() {
+    // MQTT Ressourcen trennen und freigeben
+    MQTTAsync_disconnect(client, NULL);
+    MQTTAsync_destroy(&client);
+
+    // GPIO Bibliothek beenden
+    gpioTerminate();
+
+    // Freigeben der dynamisch zugewiesenen Speicherbereiche
+    free(globalConfig.address);
+    free(globalConfig.clientId);
+    free(globalConfig.topic);
+    free(globalConfig.stopTopic);
+    free(globalConfig.motor_gpios);
+    free(globalConfig.dir_gpios);
+    free(globalConfig.enb_gpios);
+}
 
 
 int main() {
-   
-    pthread_t watchdog;
-    if (pthread_create(&watchdog, NULL, waveWatchdog, NULL) != 0) {
-        fprintf(stderr, "Failed to create watchdog thread\n");
-        exit(1);
-    }
-    pthread_detach(watchdog);
-
+    globalConfig = load_config("config.json");
+    
     initialize_motors();
     initialize_mqtt();
     
@@ -25,8 +37,6 @@ int main() {
         sleep(1);  // Hauptthread führt minimale Arbeit aus
     }
 
-    MQTTAsync_disconnect(client, NULL);
-    MQTTAsync_destroy(&client);
-    gpioTerminate();
+    cleanup_resources();
     return 0;
 }

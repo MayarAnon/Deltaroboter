@@ -1,0 +1,21 @@
+{
+    "mqtt": {
+      "address": "tcp://localhost:1883",
+      "clientId": "MotorControllerClient",
+      "topic": "motors/sequence",
+      "stopTopic": "motors/emergencyStop",
+      "qos": 1
+    },
+    "defaults": {
+      "pulseWidth": 5,
+      "pauseBetweenPulses": 5,
+      "directionChangeDelay": 5
+    },
+    "gpio": {
+      "motor_gpios": [17, 27, 22],
+      "dir_gpios": [2, 3, 4],
+      "enb_gpios": [14, 15, 18]
+    },
+    "motor_count": 3
+}
+  

@@ -1,5 +1,5 @@
-// gcc -o Interpolation1 Interpolation1.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lrt -pthread -lpaho-mqtt3c -lcjson
-// Beispiel nachricht: // mosquitto_pub -t motors/sequence -m "[{ \"motorpulses\": [5000, 100, 100], \"timing\":[700,700,5] }]"
+// gcc -o interpolation interpolation.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lrt -pthread -lpaho-mqtt3as -lcjson
+// Beispiel nachricht: // mosquitto_pub -t motors/sequence -m "[{ \"motorpulses\": [500, 100, 100], \"timing\":[70,70,5] },{ \"motorpulses\": [-500, 100, 100], \"timing\":[30,30,5] },{ \"motorpulses\": [5000, 100, 100], \"timing\":[70,70,5] }]"
 // mosquitto_pub -t motors/emergencyStop -m "true"
 /**
  * Programm zur präzise Echtzeit Steuerung und Interpolierung der Motoren über MQTT mit dem Raspberry Pi.
@@ -32,69 +32,63 @@ int pauseBetweenPulsesDefault = 5;
 int directionChangeDelayDefault = 5;
 volatile sig_atomic_t emergency_stop_triggered = 0;
 MQTTAsync client;
-volatile int waveTransmissionActive = 0;
-pthread_mutex_t waveMutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t waveCond = PTHREAD_COND_INITIALIZER;
+
 // Prototypen
 
 void initialize_motors();
 void parse_and_execute_json_sequences(const char *jsonString);
 void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, int pauseBetweenPulsesUs, int directionChangeDelayUs);
 void initialize_mqtt();
-void onConnect(void* context, MQTTAsync_successData* response);
-void onConnectFailure(void* context, MQTTAsync_failureData* response);
+void onConnect(void *context, MQTTAsync_successData *response);
+void onConnectFailure(void *context, MQTTAsync_failureData *response);
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
 void connectionLost(void *context, char *cause);
-void* message_processing_thread(void* arg);
+void *message_processing_thread(void *arg);
 void trigger_emergency_stop();
-void* waveWatchdog(void* arg);
 
-void* waveWatchdog(void* arg) {
-    while (1) {
-        pthread_mutex_lock(&waveMutex);
-        while (waveTransmissionActive && gpioWaveTxBusy()) {
-            pthread_cond_wait(&waveCond, &waveMutex);
-        }
-        pthread_mutex_unlock(&waveMutex);
-        usleep(100);  // Überwachungsintervall, eventuell anpassen
-    }
-    return NULL;
-}
 
-void* message_processing_thread(void* arg) {
-    char* payloadStr = (char*) arg;
+void *message_processing_thread(void *arg)
+{
+    char *payloadStr = (char *)arg;
     parse_and_execute_json_sequences(payloadStr);
     free(payloadStr);
     return NULL;
 }
 
-void initialize_motors() {
-    if (gpioInitialise() < 0) {
+void initialize_motors()
+{
+    if (gpioInitialise() < 0)
+    {
         fprintf(stderr, "Pigpio initialization failed\n");
         exit(1);
     }
 
-    for (int i = 0; i < MOTOR_COUNT; i++) {
+    for (int i = 0; i < MOTOR_COUNT; i++)
+    {
         gpioSetMode(motor_gpios[i], PI_OUTPUT);
         gpioSetMode(dir_gpios[i], PI_OUTPUT);
         gpioSetMode(enb_gpios[i], PI_OUTPUT);
-        gpioWrite(enb_gpios[i], 1);  // Enable motors
+        gpioWrite(enb_gpios[i], 1); // Enable motors
     }
 }
-void parse_and_execute_json_sequences(const char *jsonString) {
+void parse_and_execute_json_sequences(const char *jsonString)
+{
     cJSON *json = cJSON_Parse(jsonString);
-    if (!json) {
-        fprintf(stderr, "Error before: %s\n", cJSON_GetErrorPtr());
+    if (!json)
+    {
+        fprintf(stderr, "Error parsing JSON: %s\n", cJSON_GetErrorPtr());
         return;
     }
 
     cJSON *sequence = NULL;
-    cJSON_ArrayForEach(sequence, json) {
+    cJSON_ArrayForEach(sequence, json)
+    {
         cJSON *motors = cJSON_GetObjectItemCaseSensitive(sequence, "motorpulses");
         cJSON *timing = cJSON_GetObjectItemCaseSensitive(sequence, "timing");
 
         int pulses[MOTOR_COUNT];
-        for (int i = 0; i < cJSON_GetArraySize(motors); i++) {
+        for (int i = 0; i < cJSON_GetArraySize(motors); i++)
+        {
             pulses[i] = cJSON_GetArrayItem(motors, i)->valueint;
         }
 
@@ -104,7 +98,6 @@ void parse_and_execute_json_sequences(const char *jsonString) {
 
         execute_interpolated_sequence(pulses, sequencePulseWidth, sequencePauseBetweenPulses, sequenceDirectionChangeDelay);
     }
-
     cJSON_Delete(json);
 }
 
@@ -114,7 +107,8 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
      * Führt eine interpolierte Motorsequenz basierend auf den gegebenen Pulsen und Timing-Parametern aus.
      */
     gpioWaveClear();
-    for (int i = 0; i < MOTOR_COUNT; ++i) {
+    for (int i = 0; i < MOTOR_COUNT; ++i)
+    {
         gpioWrite(enb_gpios[i], 1); // Motoren Aktivieren
     }
     int maxPulses = 0;
@@ -173,24 +167,16 @@ void execute_interpolated_sequence(int pulses[MOTOR_COUNT], int pulseWidthUs, in
     gpioWaveAddGeneric(pulseIndex, combinedPulses);
     int wave_id = gpioWaveCreate();
     if (wave_id >= 0) {
-        pthread_mutex_lock(&waveMutex);
-        waveTransmissionActive = 1;
         gpioWaveTxSend(wave_id, PI_WAVE_MODE_ONE_SHOT);
-
-        // Warte auf die Beendigung der Wellenform-Übertragung
-        while (waveTransmissionActive && gpioWaveTxBusy()) {
-            pthread_cond_wait(&waveCond, &waveMutex);
-        }
-        waveTransmissionActive = 0;
-        pthread_mutex_unlock(&waveMutex);
-
+        while (gpioWaveTxBusy()) usleep(10);
         gpioWaveDelete(wave_id);
     } else {
         fprintf(stderr, "Fehler beim Erzeugen der Waveform\n");
     }
 }
 
-void initialize_mqtt() {
+void initialize_mqtt()
+{
     MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
     MQTTAsync_setCallbacks(client, NULL, connectionLost, onMessage, NULL);
 
@@ -204,33 +190,45 @@ void initialize_mqtt() {
     MQTTAsync_connect(client, &conn_opts);
 }
 
-void onConnect(void* context, MQTTAsync_successData* response) {
+void onConnect(void *context, MQTTAsync_successData *response)
+{
     printf("Connected\n");
-    MQTTAsync_subscribe(client, TOPIC, QOS, NULL);
-    MQTTAsync_subscribe(client, STOP_TOPIC, QOS, NULL);
+    int subscribed = MQTTAsync_subscribe(client, TOPIC, QOS, NULL);
+    if (subscribed != MQTTASYNC_SUCCESS)
+    {
+        fprintf(stderr, "Failed to subscribe to topic\n");
+    }
 }
 
-void onConnectFailure(void* context, MQTTAsync_failureData* response) {
+void onConnectFailure(void *context, MQTTAsync_failureData *response)
+{
     fprintf(stderr, "Connect failed, rc %d\n", response ? response->code : 0);
 }
 
-int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
-    char* payloadStr = strndup(message->payload, message->payloadlen);
-
-    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0) {
+int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message)
+{
+    char *payloadStr = strndup(message->payload, message->payloadlen);
+    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+    if (strcmp(topicName, STOP_TOPIC) == 0 && strcmp(payloadStr, "true") == 0)
+    {
         // Notstop-Nachricht empfangen
         fprintf(stderr, "Emergency stop triggered!\n");
         emergency_stop_triggered = 1;
         free(payloadStr);
         trigger_emergency_stop(); // Führe Notstop aus ohne einen neuen Thread zu starten
-    } else {
+    }
+    else
+    {
         // Starte einen neuen Thread für die Verarbeitung anderer Nachrichten
         pthread_t thread;
-        if (pthread_create(&thread, NULL, message_processing_thread, payloadStr) != 0) {
+        if (pthread_create(&thread, NULL, message_processing_thread, payloadStr) != 0)
+        {
             fprintf(stderr, "Failed to create thread\n");
-            free(payloadStr);  // Freigabe von Speicher, falls Thread-Erstellung fehlschlägt
-        } else {
-            pthread_detach(thread);  // Detach the thread to prevent memory leaks
+            free(payloadStr); // Freigabe von Speicher, falls Thread-Erstellung fehlschlägt
+        }
+        else
+        {
+            pthread_detach(thread); // Detach the thread to prevent memory leaks
         }
     }
 
@@ -239,24 +237,25 @@ int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *m
     return 1;
 }
 
-void connectionLost(void *context, char *cause) {
+void connectionLost(void *context, char *cause)
+{
     fprintf(stderr, "Connection lost, cause: %s\n", cause);
     initialize_mqtt();
 }
-void trigger_emergency_stop() {
+void trigger_emergency_stop()
+{
     gpioWaveTxStop();
     emergency_stop_triggered = 0;
 }
 
-int main() {
-    pthread_t watchdog;
-    pthread_create(&watchdog, NULL, waveWatchdog, NULL);
-    pthread_detach(watchdog);
+int main()
+{
     initialize_motors();
     initialize_mqtt();
 
-    while (!emergency_stop_triggered) {
-        sleep(1);  // Main thread doing minimal work
+    while (!emergency_stop_triggered)
+    {
+        sleep(1); // Main thread doing minimal work
     }
 
     MQTTAsync_disconnect(client, NULL);

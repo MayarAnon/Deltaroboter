@@ -1,18 +1,12 @@
 #ifndef MQTT_CLIENT_H
 #define MQTT_CLIENT_H
 
+#include "config.h"
 #include "MQTTAsync.h"
 #include "cJSON.h"
-#define PULSE_WIDTH_DEFAULT 5
-#define PAUSE_BETWEEN_PULSES_DEFAULT 5
-#define DIRECTION_CHANGE_DELAY_DEFAULT 5
-#define ADDRESS "tcp://localhost:1883"
-#define CLIENTID "MotorControllerClient"
-#define TOPIC "motors/sequence"
-#define STOP_TOPIC "motors/emergencyStop"
-#define QOS 1
 extern MQTTAsync client;
-void initialize_mqtt();
+extern Config globalConfig;
+void initialize_mqtt(); 
 void onConnect(void* context, MQTTAsync_successData* response);
 void onConnectFailure(void* context, MQTTAsync_failureData* response);
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message);
