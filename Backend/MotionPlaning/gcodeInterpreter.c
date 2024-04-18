@@ -369,9 +369,23 @@ void removeNonPrintable(char *str) {
 
 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
+    
+
+    /*     
+    for(int i=0;i<InterpolationSteps;i++){
+            char jsonString[40];  // Ensure the buffer is large enough
+            snprintf(jsonString, sizeof(jsonString),
+                     "(%f,%f,%f),",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
+            publishMessage("current/coordinates",jsonString);
+    }
+    */ 
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
     
     cJSON* jsonRoot = cJSON_CreateArray();
+
+    delta_calcInverse(currentPosition.x, currentPosition.y, currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); 
+
+    float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0;
 
     for (int i = 0; i < InterpolationSteps; i++) {
         float theta1, theta2, theta3;
@@ -379,11 +393,20 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         currentPosition.x = coordinates[i].x;
         currentPosition.y = coordinates[i].y;
         currentPosition.z = coordinates[i].z;
-
+        
         if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-            steps[i].Motor1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO;
-            steps[i].Motor2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO;
-            steps[i].Motor3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO;
+            float stepCalc1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator1;
+            float stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
+            float stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
+
+            steps[i].Motor1 = (int)stepCalc1;
+            steps[i].Motor2 = (int)stepCalc2;
+            steps[i].Motor3 = (int)stepCalc3;
+
+            // Update error accumulators with the fractional part that was cut off
+            errorAccumulator1 = stepCalc1 - steps[i].Motor1;
+            errorAccumulator2 = stepCalc2 - steps[i].Motor2;
+            errorAccumulator3 = stepCalc3 - steps[i].Motor3;
 
             if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) {
                 cJSON* stepObj = cJSON_CreateObject();
@@ -397,15 +420,24 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         } else {
             printf("Punkt existiert nicht\n");
         }
-    }   
+    }
 
     char* jsonString = cJSON_Print(jsonRoot);
     
     removeNonPrintable(jsonString);
     printf("%s\n", jsonString);
+    //Publish Motor Seqence 
     publishMessage("motors/sequence",jsonString);
-
-    
+    //Publish current Coordinates
+    char coordinateString[40];  // Ensure the buffer is large enough
+            snprintf(coordinateString, sizeof(coordinateString),
+                     "[%f,%f,%f],",currentPosition.x, currentPosition.y, currentPosition.z);
+            publishMessage("current/coordinates",coordinateString);
+    //Publish current Angles
+    char anglesString[40];  // Ensure the buffer is large enough
+            snprintf(anglesString, sizeof(anglesString),
+                     "(%f,%f,%f),",currentAngles.theta1,currentAngles.theta2, currentAngles.theta3);
+            publishMessage("current/angles",anglesString);
     free(jsonString);
     cJSON_Delete(jsonRoot);
     free(steps);

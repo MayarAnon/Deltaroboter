@@ -1,10 +1,18 @@
-G2 X200 Y0 I100 J0 F100
-G4 P500
-G2 X200 Y0 I100 J0 F90
-G4 P500
-G2 X200 Y0 I100 J0 F80
-G4 P500
-G2 X200 Y0 I100 J0 F70
-
-
-mosquitto_pub -t motors/sequence -m "[{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] },{ \"motorpulses\": [500, 500, 500], \"timing\":[100,100,5] },{ \"motorpulses\": [-500, -500, -500], \"timing\":[100,100,5] }]"
+G2 X0 Y0 I50 J0 F50
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F200
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F50
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F200
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F50
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F200
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F50
+G0 X0 Y0 Z-280
+G2 X0 Y0 I50 J0 F200
+G0 X0 Y0 Z-280
+G1 X200 Y0 Z-280 F35
+G1 X0 Y0 Z-280 F35
