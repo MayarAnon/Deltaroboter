@@ -3,7 +3,7 @@
       "address": "tcp://localhost:1883",
       "clientId": "MotorControllerClient",
       "topic": "motors/sequence",
-      "stopTopic": "motors/emergencyStop",
+      "stopTopic": "motors/stop",
       "qos": 1
     },
     "defaults": {
@@ -12,10 +12,10 @@
       "directionChangeDelay": 5
     },
     "gpio": {
-      "motor_gpios": [17, 27, 22],
-      "dir_gpios": [2, 3, 4],
-      "enb_gpios": [14, 15, 18]
+      "motor_gpios": [17, 27, 22, 10],
+      "dir_gpios": [2, 3, 4, 9],
+      "enb_gpios": [14, 15, 18, 11]
     },
-    "motor_count": 3
+    "motor_count": 4
 }
   
