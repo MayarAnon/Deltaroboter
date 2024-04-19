@@ -1,4 +1,4 @@
-//compile code gcc -o program main.c -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c pathInterpolation.c -lpaho-mqtt3c inverseKinematic.c -lm -lcjson
+//compile code gcc -o program main.c -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c  pathInterpolation.c -lpaho-mqtt3c inverseKinematic.c -lm -lcjson
 //execute ./program
 
 #include <string.h>
@@ -12,8 +12,8 @@
 #include "cJSON.h"
 
 
-#define SPEEDTOPIC "speedcontroll"
-#define LOADPROGRAMMTOPIC "loadProgramm"
+#define ROBOTSTATETOPIC "robot/state"
+#define LOADPROGRAMMTOPIC "pickandplace/program"
 #define GRIPPERSTATETOPIC "GripperState"
 #define GRIPPERFEEDBACKTOPIC "GripperFeedback"
 #define MANUELCONTROLTOPIC "manual/control"
@@ -117,6 +117,8 @@ void onMessage(char *topicName, char *payloadStr) {
     if (strcmp(topicName, MANUELCONTROLTOPIC) == 0) {
         onManualControl(payloadStr);
     }
+      
+
 }
 
 

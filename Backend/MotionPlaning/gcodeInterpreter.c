@@ -12,37 +12,75 @@
 #include "cJSON.h"
 #include "mqttClient.h"
 #include <ctype.h>
+#include <stdbool.h>
 
 typedef struct {
     float theta1, theta2, theta3;
 } Angles;
 
 typedef struct {
-    int Motor1, Motor2, Motor3;
+    int Motor1, Motor2, Motor3,Motor4;
 } Steps;
 
-Coordinate currentPosition = {0.0, 0.0,-280.0};  // Startposition
+typedef enum {
+    parallel,
+    complient,
+    magnet,
+    vaccum
+} Gripper;
+
+Coordinate currentPosition = {0.0, 0.0,-280.0,0.0};  // Startposition
 Angles currentAngles = {-41.489,-41.489,-41.489}; //Startangle
 Plane currentPlane = XY_PLANE;
+Gripper currentGripper = parallel;
+
+bool stopFlag = false;
 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
 #define PI 3.14159265358979323846
+
+//subscribe Topics
+#define ROBOTSTATETOPIC "robot/state"
+#define LOADPROGRAMMTOPIC "pickandplace/program"
+#define MANUELCONTROLTOPIC "manual/control"
+#define STOPTOPIC "motors/stop"
+//publish Topics
+#define MOTORCONTROLLTOPIC "motors/sequence"
+#define GRIPPERCONTROLLTOPIC "gripper/control"
+#define COORDINATESTOPIC "current/coordinates"
+#define ANGLESTOPIC "current/angles"
 
 void readFile(const char* filename);
 void processLine(const char* line);
 double calculateAngle(double xs, double ys, double xm, double ym, double xe, double ye, int direction);
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
 void removeNonPrintable(char *str);
+
+
 void onMessage(char *topicName, char *payloadStr) {
-    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+    if (strcmp(topicName, MANUELCONTROLTOPIC) == 0) {
+        
+    }
+    else if (strcmp(topicName, STOPTOPIC) == 0) {
+        if(strcmp("true",payloadStr ) == 0){
+            stopFlag = true;
+        }
+    }
+    else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0) {
+        stopFlag = false;
+        readFile(payloadStr);
+    }
+    else if (strcmp(topicName, ROBOTSTATETOPIC) == 0) {
+        
+    }
 }
 
 
 
 int main() {
     // Topics, zu denen wir subscriben möchten.
-    const char* topics[] = {"Topic1", "Topic2"};
+    const char* topics[] = {MANUELCONTROLTOPIC, LOADPROGRAMMTOPIC,ROBOTSTATETOPIC,STOPTOPIC};
     int topicCount = sizeof(topics) / sizeof(topics[0]);
 
     
@@ -50,15 +88,10 @@ int main() {
     initializeMqtt(topics, topicCount, onMessage);
 
     // Veröffentlicht eine Nachricht auf "Topic1".
-    
-    
-    readFile("test.gcode");
-
     while (1) {
         usleep(100000);
     }
     destroyMqtt();
-    
     return 0;
 }
 
@@ -73,6 +106,9 @@ void readFile(const char* filename) {
     }
 
     while ((read = getline(&line, &len, file)) != -1) {
+        if(stopFlag){
+            break;
+        }
         processLine(line);
     }
 
@@ -80,15 +116,13 @@ void readFile(const char* filename) {
     fclose(file);
 }
 
-
-
 void processLine(const char* line) {
     char command[4];
-    float x, y,z, i, j, f,t;
+    float x, y,z,phi, i, j, f,t;
     int numParams;
 
     // Initialize parameters
-    x = y  = i = j = t = 0.0;
+    x = y  = i = j = phi = t = 0.0;
     f = 100;
     z = -280.0;
     // Determine the type of command
@@ -102,12 +136,13 @@ void processLine(const char* line) {
         // Read G0/G1  Point to Point
         //Parameter aus string lesen 
         Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
-        numParams = sscanf(line, "%*s X%f Y%f Z%f F%f", &x, &y,&z,&f);
+        numParams = sscanf(line, "%*s X%f Y%f Z%f A%f F%f", &x, &y,&z,&phi,&f);
         if (numParams >= 1) {  // At least X, Y, Z must be present
             coordinates[0] = currentPosition;
             coordinates[1].x = x;
             coordinates[1].y = y;
             coordinates[1].z = z;
+            coordinates[1].phi = phi;
             
             printf("(%f, %f, %f)\n", x, y, z);
         } else {
@@ -119,7 +154,7 @@ void processLine(const char* line) {
     }
     else if (strcmp(command, "G1") == 0) {
         // Read G0/G1 command parameters
-        numParams = sscanf(line, "%*s X%f Y%f Z%f F%f", &x, &y,&z, &f);
+        numParams = sscanf(line, "%*s X%f Y%f Z%f A%f F%f", &x, &y,&z,&phi,&f);
         if (numParams < 2) {
             printf("Error reading parameters for %s command\n", command);
             return;
@@ -128,7 +163,7 @@ void processLine(const char* line) {
         float diffY = fabs(y - currentPosition.y);
         float diffZ = fabs(z - currentPosition.z);
 
-        Coordinate targetPosition = {x,y,z};
+        Coordinate targetPosition = {x,y,z,phi};
         
         float maxDiff = fmax(diffX, fmax(diffY, diffZ));
         int InterpolationSteps = (int)maxDiff;
@@ -162,23 +197,23 @@ void processLine(const char* line) {
         switch(currentPlane) {
         case XY_PLANE:
             
-            numParams = sscanf(line, "%*s X%f Y%f I%f J%f F%f", &x, &y, &i, &j, &f);
+            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
             angle = calculateAngle(currentPosition.x,currentPosition.y,currentPosition.x + i,currentPosition.y + j,x,y, direction);
             radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x + i, currentPosition.y + j, currentPosition.z};
+            center = (Coordinate){currentPosition.x + i, currentPosition.y + j, currentPosition.z,phi};
             break;
         case YZ_PLANE:
-            numParams = sscanf(line, "%*s Y%f Z%f I%f J%f F%f", &y, &z, &i, &j, &f);
+            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
             angle = calculateAngle(currentPosition.y,currentPosition.z,currentPosition.y + i,currentPosition.z + j,y,z, direction);
             radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x, currentPosition.y + i, currentPosition.z + j};
+            center = (Coordinate){currentPosition.x, currentPosition.y + i, currentPosition.z + j,phi};
             break;
         case ZX_PLANE:
             
-            numParams = sscanf(line, "%*s Z%f X%f I%f J%f F%f", &z, &x, &i, &j, &f);
+            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
             angle = calculateAngle(currentPosition.z,currentPosition.x,currentPosition.z + i,currentPosition.x + j,z,x, direction);
             radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x + j, currentPosition.y, currentPosition.z + i};
+            center = (Coordinate){currentPosition.x + j, currentPosition.y, currentPosition.z + i,phi};
             break;
         }
 
@@ -237,14 +272,14 @@ void processLine(const char* line) {
 
     }
     else if (strcmp(command, "G28") == 0) {
-        Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
+        Coordinate* targetPosition = (Coordinate*)malloc(2 * sizeof(Coordinate));
+    
+        targetPosition[0] = currentPosition;
         
-        coordinates[0] = currentPosition;
-        coordinates[1].x = 0.0;
-        coordinates[1].y = 0.0;
-        coordinates[1].z = -280.0;
+        // Korrigiere die Definition des zweiten Elements des Arrays
+        targetPosition[1] = (Coordinate){0.0, 0.0, -280, 0.0};
             
-        processInterpolationAndCreateJSON(coordinates,2,f);
+        processInterpolationAndCreateJSON(targetPosition, 2, f);
     
     }
     else if (strcmp(command, "M100") == 0) {
@@ -352,8 +387,6 @@ void processLine(const char* line) {
     }
 }
 
-
-
 void removeNonPrintable(char *str) {
     char *src = str, *dst = str;
     while(*src) {
@@ -365,8 +398,6 @@ void removeNonPrintable(char *str) {
     }
     *dst = '\0'; // Null-terminate the cleaned string
 }
-
-
 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
     
@@ -385,7 +416,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 
     delta_calcInverse(currentPosition.x, currentPosition.y, currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); 
 
-    float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0;
+    float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0 , errorAccumulator4 = 0.0;
 
     for (int i = 0; i < InterpolationSteps; i++) {
         float theta1, theta2, theta3;
@@ -394,29 +425,32 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         currentPosition.y = coordinates[i].y;
         currentPosition.z = coordinates[i].z;
         
+
         if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
             float stepCalc1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator1;
             float stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
             float stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
-
+            float stepCalc4 = ((coordinates[i].phi - currentPosition.phi)/360) * STEPSPERREVOLUTION + errorAccumulator4;
             steps[i].Motor1 = (int)stepCalc1;
             steps[i].Motor2 = (int)stepCalc2;
             steps[i].Motor3 = (int)stepCalc3;
+            steps[i].Motor4 = (int)stepCalc4;
 
             // Update error accumulators with the fractional part that was cut off
             errorAccumulator1 = stepCalc1 - steps[i].Motor1;
             errorAccumulator2 = stepCalc2 - steps[i].Motor2;
             errorAccumulator3 = stepCalc3 - steps[i].Motor3;
-
+            errorAccumulator4 = stepCalc4 - steps[i].Motor4;
             if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) {
                 cJSON* stepObj = cJSON_CreateObject();
-                cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3}, 3));
+                cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3,steps[i].Motor4}, 4));
                 cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
                 cJSON_AddItemToArray(jsonRoot, stepObj);
             }
             currentAngles.theta1 = theta1;
             currentAngles.theta2 = theta2;
             currentAngles.theta3 = theta3;
+            currentPosition.phi = coordinates[i].phi;
         } else {
             printf("Punkt existiert nicht\n");
         }
@@ -429,9 +463,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     //Publish Motor Seqence 
     publishMessage("motors/sequence",jsonString);
     //Publish current Coordinates
-    char coordinateString[40];  // Ensure the buffer is large enough
+    char coordinateString[50];  // Ensure the buffer is large enough
             snprintf(coordinateString, sizeof(coordinateString),
-                     "[%f,%f,%f],",currentPosition.x, currentPosition.y, currentPosition.z);
+                     "(%f,%f,%f,%f ),",currentPosition.x, currentPosition.y, currentPosition.z,currentPosition.phi);
             publishMessage("current/coordinates",coordinateString);
     //Publish current Angles
     char anglesString[40];  // Ensure the buffer is large enough
@@ -443,10 +477,6 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     free(steps);
     free(coordinates);
 }
-
-
-
-
 // Funktion zur Berechnung des Winkels in Grad
 double calculateAngle(double xs, double ys, double xm, double ym, double xe, double ye, int direction) {
     // Prüfen, ob Start- und Endpunkt identisch sind

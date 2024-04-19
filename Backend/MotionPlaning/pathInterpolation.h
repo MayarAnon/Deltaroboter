@@ -2,7 +2,7 @@
 #define PATHINTERPOLATION_H
 
 typedef struct {
-    float x, y, z;
+    float x,y,z,phi;
 } Coordinate;
 
 typedef enum {

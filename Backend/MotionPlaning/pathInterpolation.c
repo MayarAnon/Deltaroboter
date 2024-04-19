@@ -4,7 +4,7 @@
 #include <time.h>
 
 typedef struct {
-    float x, y, z;
+    float x,y,z,phi;
 } Coordinate;
 
 typedef enum {
@@ -40,23 +40,29 @@ Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane pla
     float angleRadians = angle * M_PI / 180;
     float angleIncrement = angleRadians / (steps - 1);
     float currentAngle = calculateInitialAngle(start, center, plane);
+    //Interpolation of PHI Motor
+    float incrementalPhi = (center.phi - start.phi)/steps;
 
     for (int i = 0; i < steps; i++) {
         switch (plane) {
             case XY_PLANE:
+                float t = (steps == 1) ? 0 : (float)i / (steps - 1);
                 points[i].x = center.x + radius * cos(currentAngle);
                 points[i].y = center.y + radius * sin(currentAngle);
                 points[i].z = start.z; // Z-coordinate remains constant
+                points[i].phi = start.phi + t * (center.phi - start.phi);
                 break;
             case YZ_PLANE:
                 points[i].y = center.y + radius * cos(currentAngle);
                 points[i].z = center.z + radius * sin(currentAngle);
                 points[i].x = start.x; // X-coordinate remains constant
+                points[i].phi = center.phi + i*incrementalPhi;
                 break;
             case ZX_PLANE:
                 points[i].z = center.z + radius * cos(currentAngle);
                 points[i].x = center.x + radius * sin(currentAngle);
                 points[i].y = start.y; // Y-coordinate remains constant
+                points[i].phi = center.phi + i*incrementalPhi;
                 break;
         }
         //printf("Step %d: (%f, %f, %f)\n", i, points[i].x, points[i].y, points[i].z);  // Debug output for each step
@@ -65,6 +71,7 @@ Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane pla
 
     return points;
 }
+
 // Implementierung der Funktion
 Coordinate* linearInterpolation(Coordinate start, Coordinate end, int steps) {
     if (steps < 2) {
@@ -79,12 +86,15 @@ Coordinate* linearInterpolation(Coordinate start, Coordinate end, int steps) {
         exit(EXIT_FAILURE);
     }
 
+
+
     for (int i = 0; i < steps; i++) {
         // Für Start- und Endpunkt werden t = 0 bzw. t = 1 direkt gesetzt
         float t = (steps == 1) ? 0 : (float)i / (steps - 1);
         points[i].x = start.x + t * (end.x - start.x);
         points[i].y = start.y + t * (end.y - start.y);
         points[i].z = start.z + t * (end.z - start.z);
+        points[i].phi = start.phi + t * (end.phi - start.phi);
     }
 
     return points;
