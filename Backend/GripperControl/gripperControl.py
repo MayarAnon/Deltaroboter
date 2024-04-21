@@ -4,9 +4,10 @@ import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import json
 import time
+import threading
 
 # Definiere GPIO-Pins
-ParallelGripperPin = 13  # PWM Output
+ParallelGripper = 12  # PWM Output
 MagnetRelais = 16
 PumpRelais = 25
 VacuumRelais = 8
@@ -16,8 +17,8 @@ VacuumValveRelais = 1
 # Setup der GPIO-Pins
 def setup_gpio():
     GPIO.setmode(GPIO.BCM)  # Verwende Broadcom Pin-Nummerierung
-    GPIO.setup(ParallelGripperPin, GPIO.OUT)
-    p = GPIO.PWM(ParallelGripperPin, 100)  # PWM mit 100Hz
+    GPIO.setup(ParallelGripper, GPIO.OUT)
+    p = GPIO.PWM(ParallelGripper, 100)  # PWM mit 100Hz
     p.start(0)
 
     for pin in [PumpRelais, VacuumRelais, MagnetRelais, PumpValveRelais, VacuumValveRelais]:
@@ -30,7 +31,7 @@ class GripperControl:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.connect(host, port, 60)
-        self.pwm = GPIO.PWM(ParallelGripperPin, 100)
+        self.pwm = GPIO.PWM(ParallelGripper, 100)
         self.pwm.start(0)
 
     def on_connect(self, client, userdata, flags, rc):
@@ -55,17 +56,16 @@ class GripperControl:
         elif "complientGripper" in data or "vacuumGripper" in data:
             value = int(data.get("complientGripper", 0))
             if value == 1:
-                GPIO.output([PumpRelais, PumpValveRelais], GPIO.LOW)
-                GPIO.output(VacuumRelais, GPIO.HIGH)
-                time.sleep(0.1)
-                GPIO.output(VacuumValveRelais, GPIO.HIGH)
-                self.send_feedback(5)
-            elif value == -1:
-                GPIO.output(VacuumRelais, GPIO.LOW)
-                GPIO.output(VacuumValveRelais, GPIO.LOW)
                 GPIO.output(PumpRelais, GPIO.HIGH)
+                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
                 time.sleep(0.1)
                 GPIO.output(PumpValveRelais, GPIO.HIGH)
+                self.send_feedback(5)
+            elif value == -1:
+                GPIO.output(VacuumRelais, GPIO.HIGH)
+                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)
+                time.sleep(0.1)
+                GPIO.output(VacuumValveRelais, GPIO.HIGH)
                 self.send_feedback(5)
             else:
                 GPIO.output([VacuumRelais, VacuumValveRelais, PumpRelais, PumpValveRelais], GPIO.LOW)
@@ -76,15 +76,20 @@ class GripperControl:
             GPIO.output([VacuumRelais, PumpRelais], GPIO.LOW)
             self.send_feedback(1)
 
+    
     def send_feedback(self, delay):
-        time.sleep(delay)
-        self.client.publish("gripper/feedback", "true")
+        def feedback_thread():
+            time.sleep(delay)
+            self.client.publish("gripper/feedback", "true")
+        threading.Thread(target=feedback_thread).start()
 
     def run(self):
+        self.client.loop_start()  # Startet den Client in einem eigenen Thread
         try:
             while True:
-                self.client.loop()
+                time.sleep(1)  # Reduziere CPU-Last im Hauptthread
         except KeyboardInterrupt:
+            self.client.loop_stop()  # Stoppt den MQTT Client sauber
             self.pwm.stop()
             GPIO.cleanup()
 
