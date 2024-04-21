@@ -14,63 +14,73 @@ typedef enum {
 } Plane;
 
 
+Coordinate* circularInterpolation(Coordinate start, Coordinate end, Coordinate center, float radius, Plane plane, int direction, int *numSteps) {
+    float angleStart, angleEnd, angle, phiStart, phiEnd, phi, stepSize = 0.1;
+    int i;
+    Coordinate *points;
 
-// Funktion zur Berechnung des Startwinkels basierend auf der aktuellen Flugebene
-float calculateInitialAngle(Coordinate start, Coordinate center, Plane plane) {
-    switch (plane) {
-        case XY_PLANE:
-            return atan2(start.y - center.y, start.x - center.x);
-        case YZ_PLANE:
-            return atan2(start.z - center.z, start.y - center.y);
-        case ZX_PLANE:
-            return atan2(start.x - center.x, start.z - center.z);
-    }
-    return 0;  // Standard-Rückgabewert, falls keine passende Ebene gefunden wird (Sicherheitsmaßnahme)
-}
-
-// Hauptfunktion zur Erzeugung der Kreisinterpolation
-Coordinate* circularInterpolation(Coordinate start, Coordinate center, Plane plane, float angle, int steps) {
-    Coordinate* points = (Coordinate*)malloc(steps * sizeof(Coordinate));
-    if (points == NULL) {
-        perror("Failed to allocate memory");
-        exit(EXIT_FAILURE);
+    // Berechnen des Radius, falls nicht angegeben
+    if (radius <= 0) {
+        radius = sqrt(pow(start.x - center.x, 2) + pow(start.y - center.y, 2) + pow(start.z - center.z, 2));
     }
 
-    float radius = sqrt(pow(start.x - center.x, 2) + pow(start.y - center.y, 2) + pow(start.z - center.z, 2));
-    float angleRadians = angle * M_PI / 180;
-    float angleIncrement = angleRadians / (steps - 1);
-    float currentAngle = calculateInitialAngle(start, center, plane);
-    //Interpolation of PHI Motor
-    float incrementalPhi = (center.phi - start.phi)/steps;
+    // Winkelberechnung abhängig von der Ebene
+    if (plane == XY_PLANE) {
+        angleStart = atan2(start.y - center.y, start.x - center.x);
+        angleEnd = atan2(end.y - center.y, end.x - center.x);
+    } else if (plane == YZ_PLANE) {
+        angleStart = atan2(start.z - center.z, start.y - center.y);
+        angleEnd = atan2(end.z - center.z, end.y - center.y);
+    } else { // ZX_PLANE
+        angleStart = atan2(start.z - center.z, start.x - center.x);
+        angleEnd = atan2(end.z - center.z, end.x - center.x);
+    }
 
-    for (int i = 0; i < steps; i++) {
-        switch (plane) {
-            case XY_PLANE:
-                float t = (steps == 1) ? 0 : (float)i / (steps - 1);
-                points[i].x = center.x + radius * cos(currentAngle);
-                points[i].y = center.y + radius * sin(currentAngle);
-                points[i].z = start.z; // Z-coordinate remains constant
-                points[i].phi = start.phi + t * (center.phi - start.phi);
-                break;
-            case YZ_PLANE:
-                points[i].y = center.y + radius * cos(currentAngle);
-                points[i].z = center.z + radius * sin(currentAngle);
-                points[i].x = start.x; // X-coordinate remains constant
-                points[i].phi = center.phi + i*incrementalPhi;
-                break;
-            case ZX_PLANE:
-                points[i].z = center.z + radius * cos(currentAngle);
-                points[i].x = center.x + radius * sin(currentAngle);
-                points[i].y = start.y; // Y-coordinate remains constant
-                points[i].phi = center.phi + i*incrementalPhi;
-                break;
+    if ((direction == 1 && angleEnd < angleStart) || (direction == -1 && angleEnd > angleStart)) {
+        angleEnd += 2 * M_PI * direction;
+    }
+
+    float totalAngle = angleEnd - angleStart;
+    phiStart = start.phi;
+    phiEnd = end.phi;
+
+    *numSteps = (int)(fabs(totalAngle) / stepSize) + 1;  // +1 to include the end point exactly
+    points = malloc(*numSteps * sizeof(Coordinate));
+    if (!points) {
+        perror("Not enough memory to allocate points");
+        exit(1);
+    }
+
+    // Generierung der Punkte
+    for (i = 0; i < *numSteps; i++) {
+        angle = angleStart + i * (totalAngle / (*numSteps - 1));  // evenly spaced
+        phi = phiStart + i * ((phiEnd - phiStart) / (*numSteps - 1)); // linear interpolation of phi
+        if (plane == XY_PLANE) {
+            points[i].x = center.x + radius * cos(angle);
+            points[i].y = center.y + radius * sin(angle);
+            points[i].z = center.z;
+            points[i].phi = phi;
+        } else if (plane == YZ_PLANE) {
+            points[i].y = center.y + radius * cos(angle);
+            points[i].z = center.z + radius * sin(angle);
+            points[i].x = center.x;
+            points[i].phi = phi;
+        } else {  // ZX_PLANE
+            points[i].x = center.x + radius * cos(angle);
+            points[i].z = center.z + radius * sin(angle);
+            points[i].y = center.y;
+            points[i].phi = phi;
         }
-        //printf("Step %d: (%f, %f, %f)\n", i, points[i].x, points[i].y, points[i].z);  // Debug output for each step
-        currentAngle += angleIncrement;
     }
+
+    // Sicherstellen, dass Start- und Endpunkte exakt sind
+    points[0] = start;          // Set the first point exactly to 'start'
+    points[*numSteps - 1] = end;  // Set the last point exactly to 'end'
 
     return points;
 }
+
+
 
 // Implementierung der Funktion
 Coordinate* linearInterpolation(Coordinate start, Coordinate end, int steps) {

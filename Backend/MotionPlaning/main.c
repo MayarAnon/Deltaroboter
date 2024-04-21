@@ -31,10 +31,12 @@ typedef enum {
 
 Coordinate currentPosition = {0.0, 0.0,-280.0,0.0};  // Startposition
 Angles currentAngles = {-41.489,-41.489,-41.489}; //Startangle
+Steps currentSteps = {0};
 Plane currentPlane = XY_PLANE;
 Gripper currentGripper = parallel;
 int speedSetting = 50;
 bool stopFlag = false;
+float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0 , errorAccumulator4 = 0.0;
 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
@@ -53,7 +55,6 @@ bool stopFlag = false;
 
 void readFile(const char* filename);
 void processLine(const char* line);
-double calculateAngle(double xs, double ys, double xm, double ym, double xe, double ye, int direction);
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
 void removeNonPrintable(char *str);
 void manualMode(char *payloadStr);
@@ -293,11 +294,11 @@ void readFile(const char* filename) {
 
 void processLine(const char* line) {
     char command[4];
-    float x, y,z,phi, i, j, f,t;
+    float x, y,z,phi, i, j, f,t,r;
     int numParams;
 
     // Initialize parameters
-    x = y  = i = j = phi = t = 0.0;
+    x = y  = i = j = phi = t = r = 0.0;
     f = 100;
     z = -280.0;
     // Determine the type of command
@@ -308,29 +309,24 @@ void processLine(const char* line) {
     }
 
     if (strcmp(command, "G0") == 0) {
-        // Read G0/G1  Point to Point
         //Parameter aus string lesen 
         Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
-        numParams = sscanf(line, "%*s X%f Y%f Z%f A%f F%f", &x, &y,&z,&phi,&f);
-        if (numParams >= 1) {  // At least X, Y, Z must be present
-            coordinates[0] = currentPosition;
-            coordinates[1] = (Coordinate){x,y,z,phi};
-            
-            printf("(%f, %f, %f)\n", x, y, z);
-        } else {
-            printf("Error reading parameters for command in line");
+        for(const char *p = line; *p; ++p) {
+        sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
+
+        coordinates[0] = currentPosition;
+        coordinates[1] = (Coordinate){x,y,z,phi};
 
         processInterpolationAndCreateJSON(coordinates,2, f);
     
     }
     else if (strcmp(command, "G1") == 0) {
-        // Read G0/G1 command parameters
-        numParams = sscanf(line, "%*s X%f Y%f Z%f A%f F%f", &x, &y,&z,&phi,&f);
-        if (numParams < 2) {
-            printf("Error reading parameters for %s command\n", command);
-            return;
+        //Parameter aus string lesen 
+        for(const char *p = line; *p; ++p) {
+        sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
+
         float diffX = fabs(x - currentPosition.x);
         float diffY = fabs(y - currentPosition.y);
         float diffZ = fabs(z - currentPosition.z);
@@ -367,55 +363,38 @@ void processLine(const char* line) {
         //auf ein Achse zurückführen die X-Y Achse. wird nachher wieder auf Ursprüngliche Achese angewendet
         double angle, radius = 0;
         Coordinate center;
+        Coordinate end;
         switch(currentPlane) {
         case XY_PLANE:
             
-            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
-            angle = calculateAngle(currentPosition.x,currentPosition.y,currentPosition.x + i,currentPosition.y + j,x,y, direction);
-            radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x + i, currentPosition.y + j, currentPosition.z,phi};
+            for(const char *p = line; *p; ++p) {
+            sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            }
+            center = (Coordinate){currentPosition.x + i,currentPosition.y + j,currentPosition.z,currentPosition.phi};
+            end = (Coordinate){x,y,currentPosition.z,currentPosition.phi};
+            int numSteps = 0;
+            
+
             break;
         case YZ_PLANE:
-            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
-            angle = calculateAngle(currentPosition.y,currentPosition.z,currentPosition.y + i,currentPosition.z + j,y,z, direction);
-            radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x, currentPosition.y + i, currentPosition.z + j,phi};
+            for(const char *p = line; *p; ++p) {
+            sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            }
+            center = (Coordinate){currentPosition.x ,currentPosition.y + i,currentPosition.z + j,currentPosition.phi};
+            end = (Coordinate){currentPosition.x,y,z,currentPosition.phi};
             break;
         case ZX_PLANE:
             
-            numParams = sscanf(line, "%*s X%f Y%f I%f J%f A%f F%f", &x, &y, &i, &j, &phi, &f);
-            angle = calculateAngle(currentPosition.z,currentPosition.x,currentPosition.z + i,currentPosition.x + j,z,x, direction);
-            radius = hypot(i, j);
-            center = (Coordinate){currentPosition.x + j, currentPosition.y, currentPosition.z + i,phi};
+            for(const char *p = line; *p; ++p) {
+            sscanf(p, "Z%f", &z) || sscanf(p, "X%f", &x) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            }
+            center = (Coordinate){currentPosition.x + j,currentPosition.y ,currentPosition.z + i,currentPosition.phi};
+            end = (Coordinate){x,currentPosition.y,z,currentPosition.phi};
             break;
         }
-
-        //Prüfen ob Parameter vollständig
-        if (numParams < 2) {
-            printf("Error reading parameters for %s command\n", command);
-            return;
-        }
-        
-        //Berechnen des zurückzulegenden winkels
-        if (angle != 0) {
-        //("Winkel: %f Grad Radius %f \n", angle,radius);
-        }
-        // Berechnen der Interpolationsschritte über die Distanz welche zurückgelegt wird 
-        double angleRadient = (angle * PI)/180;
-        double distance = fabs(angleRadient * radius); //distance in mm
-        int InterpolationSteps = (int)(distance);
-        
-        
-        Coordinate* coordinates =  circularInterpolation(currentPosition,center,currentPlane,(float)(angle),InterpolationSteps);
-        /*
-        for(int i=0;i<InterpolationSteps;i++){
-            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
-            currentPosition.x = coordinates[i].x;
-            currentPosition.y = coordinates[i].y;
-            currentPosition.z = coordinates[i].z;
-        }
-        */
-        processInterpolationAndCreateJSON(coordinates,InterpolationSteps,f);
+        int numSteps = 0;
+        Coordinate* coordinates = circularInterpolation(currentPosition, end, center,r, currentPlane,direction, &numSteps);
+        processInterpolationAndCreateJSON(coordinates,numSteps,f);
     }
     else if (strcmp(command, "G4") == 0) {
         int numParams = sscanf(line, "%*s P%f", &t);
@@ -478,10 +457,6 @@ void processLine(const char* line) {
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }   
 
-        
-            
-        
-    
     }
     else if (strcmp(command, "M200") == 0) {
         int sValue = 0;
@@ -505,10 +480,7 @@ void processLine(const char* line) {
             printf("%s\n", jsonString);
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }
-
-        
-            
-        
+   
     }
     else if (strcmp(command, "M300") == 0) {
         int sValue = 0;
@@ -578,26 +550,18 @@ void removeNonPrintable(char *str) {
 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
     
-
-    /*     
-    for(int i=0;i<InterpolationSteps;i++){
-            char jsonString[40];  // Ensure the buffer is large enough
-            snprintf(jsonString, sizeof(jsonString),
-                     "(%f,%f,%f),",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
-            publishMessage("current/coordinates",jsonString);
-    }
-    */ 
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
     
     cJSON* jsonRoot = cJSON_CreateArray();
 
+    long long totalDuration = 0;  // Gesamtdauer der Bewegung in Mikrosekunden
+
     delta_calcInverse(currentPosition.x, currentPosition.y, currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); 
 
-    float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0 , errorAccumulator4 = 0.0;
 
     for (int i = 0; i < InterpolationSteps; i++) {
         float theta1, theta2, theta3;
-
+        
         currentPosition.x = coordinates[i].x;
         currentPosition.y = coordinates[i].y;
         currentPosition.z = coordinates[i].z;
@@ -608,10 +572,27 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             float stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
             float stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
             float stepCalc4 = ((coordinates[i].phi - currentPosition.phi)/360) * STEPSPERREVOLUTION + errorAccumulator4;
+
             steps[i].Motor1 = (int)stepCalc1;
             steps[i].Motor2 = (int)stepCalc2;
             steps[i].Motor3 = (int)stepCalc3;
             steps[i].Motor4 = (int)stepCalc4;
+
+            // Update der globalen Schrittanzahl
+            currentSteps.Motor1 += steps[i].Motor1;
+            currentSteps.Motor2 += steps[i].Motor2;
+            currentSteps.Motor3 += steps[i].Motor3;
+            currentSteps.Motor4 += steps[i].Motor4;
+
+            // Berechnung der maximalen Schritte in diesem Zyklus
+            int maxSteps = abs(steps[i].Motor1);
+            maxSteps = fmax(maxSteps, abs(steps[i].Motor2));
+            maxSteps = fmax(maxSteps, abs(steps[i].Motor3));
+            maxSteps = fmax(maxSteps, abs(steps[i].Motor4));
+
+            // Zeitdauer für diesen Zyklus
+            long long stepDuration = (long long)(maxSteps * 2 * f);
+            totalDuration += stepDuration;
 
             // Update error accumulators with the fractional part that was cut off
             errorAccumulator1 = stepCalc1 - steps[i].Motor1;
@@ -621,7 +602,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) {
                 cJSON* stepObj = cJSON_CreateObject();
                 cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3,steps[i].Motor4}, 4));
-                cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
+                cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f,5}, 3));
                 cJSON_AddItemToArray(jsonRoot, stepObj);
             }
             currentAngles.theta1 = theta1;
@@ -639,6 +620,12 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     printf("%s\n", jsonString);
     //Publish Motor Seqence 
     publishMessage("motors/sequence",jsonString);
+    //printf("Gesamtdauer der Bewegung: %lld µs\n", totalDuration);
+    usleep(totalDuration);
+    // Ausgabe der aktuellen Gesamtschritte
+    //printf("Current Steps: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n",
+    //       currentSteps.Motor1, currentSteps.Motor2, currentSteps.Motor3, currentSteps.Motor4);
+
     //Publish current Coordinates
     char coordinateString[50];  // Ensure the buffer is large enough
             snprintf(coordinateString, sizeof(coordinateString),
@@ -653,42 +640,4 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     cJSON_Delete(jsonRoot);
     free(steps);
     free(coordinates);
-}
-// Funktion zur Berechnung des Winkels in Grad
-double calculateAngle(double xs, double ys, double xm, double ym, double xe, double ye, int direction) {
-    // Prüfen, ob Start- und Endpunkt identisch sind
-    if (xs == xe && ys == ye) {
-        if (xm != xs || ym != ys) {
-            // Komplette Kreisbewegung, wenn Mittelpunkt nicht gleich Start/Endpunkt
-            return direction * 360.0;
-        }
-    }
-
-    double sm_x = xs - xm;
-    double sm_y = ys - ym;
-    double em_x = xe - xm;
-    double em_y = ye - ym;
-    
-    double sm_mag = sqrt(sm_x * sm_x + sm_y * sm_y);
-    double em_mag = sqrt(em_x * em_x + em_y * em_y);
-
-    // Überprüfen, ob beide Punkte den gleichen Abstand zum Mittelpunkt haben
-    if (fabs(sm_mag - em_mag) > 1e-6) {  // Verwenden einer kleinen Toleranz für Gleitkomma-Vergleiche
-        printf("Die Punkte liegen nicht auf demselben Kreis.\n");
-        return 0;  // Kein gültiger Winkel kann berechnet werden, wenn es kein Kreis ist
-    }
-
-    double dot = sm_x * em_x + sm_y * em_y;
-    double cos_angle = dot / (sm_mag * em_mag);
-    double raw_angle = acos(cos_angle) * 180 / PI;  // Rohwinkel in Grad
-
-    // Überprüfung der Drehrichtung anhand des Kreuzprodukts
-    double cross_product = sm_x * em_y - sm_y * em_x;
-    if ((direction == 1 && cross_product < 0) || (direction == -1 && cross_product > 0)) {
-        // Winkel korrigieren, falls die Bewegung entgegen der gewünschten Richtung ist
-        raw_angle = 360 - raw_angle;
-    }
-    
-    // Richtungskorrektur: -1 für im Uhrzeigersinn, 1 für gegen den Uhrzeigersinn
-    return direction * raw_angle;
 }
