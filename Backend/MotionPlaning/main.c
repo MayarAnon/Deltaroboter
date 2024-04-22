@@ -13,6 +13,7 @@
 #include "mqttClient.h"
 #include <ctype.h>
 #include <stdbool.h>
+#include <pthread.h>
 
 typedef struct {
     float theta1, theta2, theta3;
@@ -59,6 +60,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 void removeNonPrintable(char *str);
 void manualMode(char *payloadStr);
 void parseRobotState(const char *payloadStr);
+void publishCurrentState(Coordinate pos, Angles ang);
 
 
 Gripper parseGripperMode(const char* mode) {
@@ -229,18 +231,29 @@ void manualMode(char *payloadStr){
         cJSON_Delete(json);
 }
 
+void* readFileThread(void* filename) {
+    readFile((const char*)filename);
+    free(filename);  // Geben Sie den duplizierten String frei
+    return NULL;
+}
+
+
 void onMessage(char *topicName, char *payloadStr) {
+    pthread_t thread_id;
+    
     if (strcmp(topicName, MANUELCONTROLTOPIC) == 0) {
         manualMode(payloadStr);
     }
     else if (strcmp(topicName, STOPTOPIC) == 0) {
-        if(strcmp("true",payloadStr ) == 0){
+        if(strcmp("true", payloadStr) == 0){
             stopFlag = true;
         }
     }
     else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0) {
         stopFlag = false;
-        readFile(payloadStr);
+        char* safePayload = strdup(payloadStr);  // Dupliziere den String, um sicherzustellen, dass er nicht überschrieben wird
+        pthread_create(&thread_id, NULL, readFileThread, safePayload);
+        pthread_detach(thread_id);  // Optional: Detach the thread
     }
     else if (strcmp(topicName, ROBOTSTATETOPIC) == 0) {
         parseRobotState(payloadStr);
@@ -274,15 +287,17 @@ void readFile(const char* filename) {
     // Pfad zusammenbauen: Gehe einen Ordner hoch und dann in den Ordner GCodeFiles
     char path[1024];  // Pfadgröße anpassen, falls nötig
     snprintf(path, sizeof(path), "../GCodeFiles/%s", filename);
-
+    
     FILE* file = fopen(path, "r");
     if (!file) {
-        perror("Failed to open file");
+        
+        perror(path);
         return;
     }
 
     while ((read = getline(&line, &len, file)) != -1) {
         if (stopFlag) {
+            printf("load Program wurde Abgebrochen");
             break;
         }
         processLine(line);
@@ -537,110 +552,113 @@ void processLine(const char* line) {
     }
 }
 
-void removeNonPrintable(char *str) {
-    char *src = str, *dst = str;
-    while(*src) {
-        // Erlaube nur druckbare Zeichen ohne Zeilenumbrüche und Tabs
-        if (*src >= 32 && *src <= 126) {
-            *dst++ = *src;
-        }
-        src++;
-    }
-    *dst = '\0'; // Null-terminate the cleaned string
-}
 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
-    
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
+    Coordinate localPosition = currentPosition;  // Lokale Kopie der aktuellen Position
+    Angles localAngles = currentAngles;       // Lokale Kopie der aktuellen Winkel
+    Steps localSteps = currentSteps;          // Lokale Kopie der Schrittzahlen
+    double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
     
     cJSON* jsonRoot = cJSON_CreateArray();
-
-    long long totalDuration = 0;  // Gesamtdauer der Bewegung in Mikrosekunden
-
-    delta_calcInverse(currentPosition.x, currentPosition.y, currentPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); 
-
+    long long totalDuration = 0;
+    bool errorOccurred = false;
 
     for (int i = 0; i < InterpolationSteps; i++) {
         float theta1, theta2, theta3;
-        
-        currentPosition.x = coordinates[i].x;
-        currentPosition.y = coordinates[i].y;
-        currentPosition.z = coordinates[i].z;
-        
 
-        if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-            double stepCalc1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator1;
-            double stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
-            double stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
-            double stepCalc4 = ((coordinates[i].phi - currentPosition.phi)/360) * STEPSPERREVOLUTION + errorAccumulator4;
+        localPosition.x = coordinates[i].x;
+        localPosition.y = coordinates[i].y;
+        localPosition.z = coordinates[i].z;
+
+        if (delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &theta1, &theta2, &theta3) == 0) {
+            double stepCalc1 = ((theta1 - localAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[0];
+            double stepCalc2 = ((theta2 - localAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[1];
+            double stepCalc3 = ((theta3 - localAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[2];
+            double stepCalc4 = ((coordinates[i].phi - localPosition.phi)/360) * STEPSPERREVOLUTION + localErrorAccumulators[3];
 
             steps[i].Motor1 = round(stepCalc1);
             steps[i].Motor2 = round(stepCalc2);
             steps[i].Motor3 = round(stepCalc3);
             steps[i].Motor4 = round(stepCalc4);
 
+            localSteps.Motor1 += steps[i].Motor1;
+            localSteps.Motor2 += steps[i].Motor2;
+            localSteps.Motor3 += steps[i].Motor3;
+            localSteps.Motor4 += steps[i].Motor4;
 
-            // Update der globalen Schrittanzahl
-            currentSteps.Motor1 += steps[i].Motor1;
-            currentSteps.Motor2 += steps[i].Motor2;
-            currentSteps.Motor3 += steps[i].Motor3;
-            currentSteps.Motor4 += steps[i].Motor4;
-
-            // Berechnung der maximalen Schritte in diesem Zyklus
             int maxSteps = abs(steps[i].Motor1);
             maxSteps = fmax(maxSteps, abs(steps[i].Motor2));
             maxSteps = fmax(maxSteps, abs(steps[i].Motor3));
             maxSteps = fmax(maxSteps, abs(steps[i].Motor4));
 
-            // Zeitdauer für diesen Zyklus
             long long stepDuration = (long long)(maxSteps * 2 * f);
             totalDuration += stepDuration;
 
-            // Update error accumulators with the fractional part that was cut off
-            errorAccumulator1 = stepCalc1 - steps[i].Motor1;
-            errorAccumulator2 = stepCalc2 - steps[i].Motor2;
-            errorAccumulator3 = stepCalc3 - steps[i].Motor3;
-            errorAccumulator4 = stepCalc4 - steps[i].Motor4;
-            if (steps[i].Motor1 != 0 || steps[i].Motor2 != 0 || steps[i].Motor3 != 0) {
-                cJSON* stepObj = cJSON_CreateObject();
-                cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray((int[]){steps[i].Motor1, steps[i].Motor2, steps[i].Motor3,steps[i].Motor4}, 4));
-                cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f,5}, 3));
-                cJSON_AddItemToArray(jsonRoot, stepObj);
-            }
-            currentAngles.theta1 = theta1;
-            currentAngles.theta2 = theta2;
-            currentAngles.theta3 = theta3;
-            currentPosition.phi = coordinates[i].phi;
-        } else {
-            printf("Punkt existiert nicht (%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z);
+            localErrorAccumulators[0] = stepCalc1 - steps[i].Motor1;
+            localErrorAccumulators[1] = stepCalc2 - steps[i].Motor2;
+            localErrorAccumulators[2] = stepCalc3 - steps[i].Motor3;
+            localErrorAccumulators[3] = stepCalc4 - steps[i].Motor4;
+            localAngles.theta1 = theta1;
+            localAngles.theta2 = theta2;
+            localAngles.theta3 = theta3;
+            localPosition.phi = coordinates[i].phi;
 
+            // Überprüfung, ob eine Nachricht aufgeteilt werden muss
+            int splitCount[4];
+            int pulses[4] = {steps[i].Motor1, steps[i].Motor2, steps[i].Motor3, steps[i].Motor4};
+            for (int j = 0; j < 4; j++) {
+                splitCount[j] = (abs(pulses[j]) + 4999) / 5000; // Berechnet, wie viele Nachrichten nötig sind Maximale Anzahl an Pulsen pro Nachricht 5000
+            }
+            int maxSplit = fmax(fmax(splitCount[0], splitCount[1]), fmax(splitCount[2], splitCount[3]));
+
+            for (int k = 0; k < maxSplit; k++) {
+                int currentPulses[4];
+                for (int j = 0; j < 4; j++) {
+                    currentPulses[j] = pulses[j] / splitCount[j];
+                    pulses[j] -= currentPulses[j];
+                    splitCount[j]--;
+                }
+                if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
+                    cJSON* stepObj = cJSON_CreateObject();
+                    cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
+                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
+                    cJSON_AddItemToArray(jsonRoot, stepObj);
+                }
+            }
+        } else {
+            errorOccurred = true;
+            printf("Punkt existiert nicht (%f,%f,%f),\n", coordinates[i].x, coordinates[i].y, coordinates[i].z);
+            break;
         }
     }
 
-    char* jsonString = cJSON_Print(jsonRoot);
-    
-    removeNonPrintable(jsonString);
-    //printf("%s\n", jsonString);
-    //Publish Motor Seqence 
-    publishMessage("motors/sequence",jsonString);
-    printf("Gesamtdauer der Bewegung: %lld µs\n", totalDuration);
-    usleep(totalDuration);
-    // Ausgabe der aktuellen Gesamtschritte
-    printf("Current Steps: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n",
-           currentSteps.Motor1, currentSteps.Motor2, currentSteps.Motor3, currentSteps.Motor4);
+    if (!errorOccurred) {
+        currentPosition = localPosition;
+        currentAngles = localAngles;
+        currentSteps = localSteps;
+        errorAccumulator1 = localErrorAccumulators[0];
+        errorAccumulator2 = localErrorAccumulators[1];
+        errorAccumulator3 = localErrorAccumulators[2];
+        errorAccumulator4 = localErrorAccumulators[3];
 
-    //Publish current Coordinates
-    char coordinateString[50];  // Ensure the buffer is large enough
-            snprintf(coordinateString, sizeof(coordinateString),
-                     "(%f,%f,%f ),",currentPosition.x, currentPosition.y, currentPosition.z + 280);
-            publishMessage("current/coordinates",coordinateString);
-    //Publish current Angles
-    char anglesString[40];  // Ensure the buffer is large enough
-            snprintf(anglesString, sizeof(anglesString),
-                     "(%f,%f,%f),",currentAngles.theta1,currentAngles.theta2, currentAngles.theta3);
-            publishMessage("current/angles",anglesString);
-    free(jsonString);
+        char* jsonString = cJSON_Print(jsonRoot);
+        publishMessage("motors/sequence", jsonString);
+        publishCurrentState(currentPosition, currentAngles);
+        usleep(totalDuration);
+        free(jsonString);
+    }
+
     cJSON_Delete(jsonRoot);
     free(steps);
     free(coordinates);
 }
+
+void publishCurrentState(Coordinate pos, Angles ang) {
+    char coordString[50], anglesString[40];
+    snprintf(coordString, sizeof(coordString), "(%f, %f, %f),", pos.x, pos.y, pos.z);
+    snprintf(anglesString, sizeof(anglesString), "(%f, %f, %f),", ang.theta1, ang.theta2, ang.theta3);
+    publishMessage("current/coordinates", coordString);
+    publishMessage("current/angles", anglesString);
+}
+
