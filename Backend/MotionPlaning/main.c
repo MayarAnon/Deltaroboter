@@ -36,7 +36,7 @@ Plane currentPlane = XY_PLANE;
 Gripper currentGripper = parallel;
 int speedSetting = 50;
 bool stopFlag = false;
-float errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0 , errorAccumulator4 = 0.0;
+double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0 , errorAccumulator4 = 0.0;
 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
@@ -299,7 +299,7 @@ void processLine(const char* line) {
 
     // Initialize parameters
     x = y  = i = j = phi = t = r = 0.0;
-    f = 100;
+    f = speedSetting;
     z = -280.0;
     // Determine the type of command
     numParams = sscanf(line, "%s", command);
@@ -314,7 +314,7 @@ void processLine(const char* line) {
         for(const char *p = line; *p; ++p) {
         sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
-
+        speedSetting = f;
         coordinates[0] = currentPosition;
         coordinates[1] = (Coordinate){x,y,z,phi};
 
@@ -326,7 +326,7 @@ void processLine(const char* line) {
         for(const char *p = line; *p; ++p) {
         sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
-
+        speedSetting = f;
         float diffX = fabs(x - currentPosition.x);
         float diffY = fabs(y - currentPosition.y);
         float diffZ = fabs(z - currentPosition.z);
@@ -350,7 +350,7 @@ void processLine(const char* line) {
         
         
     }
-    else if (strcmp(command, "G2") == 0 || strcmp(command, "G3") == 0) {
+    else if (strcmp(command, "G2") == 0 ||  strcmp(command, "G3" ) == 0) {
 
         int direction = 0;
         if(strcmp(command, "G2") == 0){
@@ -392,6 +392,7 @@ void processLine(const char* line) {
             end = (Coordinate){x,currentPosition.y,z,currentPosition.phi};
             break;
         }
+        speedSetting = f;
         int numSteps = 0;
         Coordinate* coordinates = circularInterpolation(currentPosition, end, center,r, currentPlane,direction, &numSteps);
         processInterpolationAndCreateJSON(coordinates,numSteps,f);
@@ -568,15 +569,16 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         
 
         if (delta_calcInverse(coordinates[i].x, coordinates[i].y, coordinates[i].z, &theta1, &theta2, &theta3) == 0) {
-            float stepCalc1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator1;
-            float stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
-            float stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
-            float stepCalc4 = ((coordinates[i].phi - currentPosition.phi)/360) * STEPSPERREVOLUTION + errorAccumulator4;
+            double stepCalc1 = ((theta1 - currentAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator1;
+            double stepCalc2 = ((theta2 - currentAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator2;
+            double stepCalc3 = ((theta3 - currentAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + errorAccumulator3;
+            double stepCalc4 = ((coordinates[i].phi - currentPosition.phi)/360) * STEPSPERREVOLUTION + errorAccumulator4;
 
-            steps[i].Motor1 = (int)stepCalc1;
-            steps[i].Motor2 = (int)stepCalc2;
-            steps[i].Motor3 = (int)stepCalc3;
-            steps[i].Motor4 = (int)stepCalc4;
+            steps[i].Motor1 = round(stepCalc1);
+            steps[i].Motor2 = round(stepCalc2);
+            steps[i].Motor3 = round(stepCalc3);
+            steps[i].Motor4 = round(stepCalc4);
+
 
             // Update der globalen Schrittanzahl
             currentSteps.Motor1 += steps[i].Motor1;
@@ -610,26 +612,27 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             currentAngles.theta3 = theta3;
             currentPosition.phi = coordinates[i].phi;
         } else {
-            printf("Punkt existiert nicht\n");
+            printf("Punkt existiert nicht (%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z);
+
         }
     }
 
     char* jsonString = cJSON_Print(jsonRoot);
     
     removeNonPrintable(jsonString);
-    printf("%s\n", jsonString);
+    //printf("%s\n", jsonString);
     //Publish Motor Seqence 
     publishMessage("motors/sequence",jsonString);
-    //printf("Gesamtdauer der Bewegung: %lld µs\n", totalDuration);
+    printf("Gesamtdauer der Bewegung: %lld µs\n", totalDuration);
     usleep(totalDuration);
     // Ausgabe der aktuellen Gesamtschritte
-    //printf("Current Steps: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n",
-    //       currentSteps.Motor1, currentSteps.Motor2, currentSteps.Motor3, currentSteps.Motor4);
+    printf("Current Steps: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n",
+           currentSteps.Motor1, currentSteps.Motor2, currentSteps.Motor3, currentSteps.Motor4);
 
     //Publish current Coordinates
     char coordinateString[50];  // Ensure the buffer is large enough
             snprintf(coordinateString, sizeof(coordinateString),
-                     "(%f,%f,%f,%f ),",currentPosition.x, currentPosition.y, currentPosition.z,currentPosition.phi);
+                     "(%f,%f,%f ),",currentPosition.x, currentPosition.y, currentPosition.z + 280);
             publishMessage("current/coordinates",coordinateString);
     //Publish current Angles
     char anglesString[40];  // Ensure the buffer is large enough
