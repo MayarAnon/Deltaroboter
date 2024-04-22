@@ -1,1 +1,1 @@
-<img src="Ablage/Softwarearchitektur.png" width="200" height="200" alt="Beispielbild">
+<img src="Ablage/Softwarearchitektur.png" width="411" height="643" alt="Beispielbild">
