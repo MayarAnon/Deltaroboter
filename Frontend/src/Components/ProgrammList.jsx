@@ -13,7 +13,7 @@ const LoadProgrammList = (props) => {
     useEffect(() => {
       // Hier rufen wir den Express-Endpunkt auf, wenn die Komponente montiert wird
       axios
-        .get('http://192.168.0.87:3010/loadGCodeFiles')
+        .get('http://deltarobot:3010/loadGCodeFiles')
         .then((response) => {
           // Die erhaltenen Daten in den Zustand der Komponente speichern
           console.log(response.data);

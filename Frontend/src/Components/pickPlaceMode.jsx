@@ -25,7 +25,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
       };
   
     const handleDelete = () => {
-      const address = `http://192.168.0.87:3010/delete?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
+      const address = `http://192.168.137.2:3010/delete?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
     
       axios.delete(address)
         .then(response => {
@@ -125,7 +125,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
     useEffect(() => {
       // Hier rufen wir den Express-Endpunkt auf, wenn die Komponente montiert wird
       axios
-        .get('http://192.168.0.87:3010/loadFiles')
+        .get('http://192.168.137.2:3010/loadFiles')
         .then((response) => {
           // Die erhaltenen Daten in den Zustand der Komponente speichern
           console.log(response.data);

@@ -24,7 +24,7 @@ const GCode = (props) =>{
     };
 
     const saveGCode = () =>{
-        const address = "http://192.168.0.87:3010/gcode";
+        const address = "http://192.168.137.2:3010/gcode";
     
       // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
       const programData = {
