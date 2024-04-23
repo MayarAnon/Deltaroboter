@@ -4,6 +4,7 @@
 
 // Typdefinition für den Funktionszeiger
 typedef void (*MessageCallback)(char *topicName, char *payloadStr);
+extern MQTTClient client;
 // Prototypen
 void destroyMqtt();
 void initializeMqtt(const char* topics[], int topicCount, MessageCallback onMessageCallback);

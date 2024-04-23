@@ -2,16 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
-
-typedef struct {
-    float x,y,z,phi;
-} Coordinate;
-
-typedef enum {
-    XY_PLANE,
-    YZ_PLANE,
-    ZX_PLANE
-} Plane;
+#include "global.h"
 
 
 Coordinate* circularInterpolation(Coordinate start, Coordinate end, Coordinate center, float radius, Plane plane, int direction, int *numSteps) {
