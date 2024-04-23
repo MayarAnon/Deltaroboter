@@ -1,57 +1,96 @@
-# mosquitto_pub -t "homing/control" -m "true"
-
-import paho.mqtt.client as mqtt
 import RPi.GPIO as GPIO
-import json
+import paho.mqtt.client as mqtt
 import time
-# Konfiguration der GPIO-Pins für die Endschalter
+import json
+import logging
+import threading
+
+logging.basicConfig(level=logging.DEBUG)
+
+# Konstanten für die GPIO-Pins der Endschalter, ersetze diese mit deinen spezifischen Pin-Nummern
+ENDSCHALTER_PINS = [0, 5, 6]
+
+# MQTT-Konfiguration
+MQTT_BROKER = 'localhost'
+MQTT_PORT = 1883
+MQTT_TOPIC_CONTROL = 'homing/control'
+MQTT_TOPIC_FEEDBACK = 'homing/feedback'
+MQTT_TOPIC_MOTORS_SEQUENCE = 'motors/sequence'
+MQTT_TOPIC_MOTORS_STOP = 'motors/stop'
+
+# Globale Variable, um den Homing-Status zu tracken
+is_homing_active = False
+
+# Initialisierung der GPIO-Pins
 GPIO.setmode(GPIO.BCM)
-GPIO.setup([0, 5, 6], GPIO.IN, pull_up_down=GPIO.PUD_UP)
-
-# MQTT-Client-Setup
-client = mqtt.Client("HomingClient1", clean_session=True)
-client.max_inflight_messages_set(10)  # Begrenzt die Anzahl "in-flight" Nachrichten
-client.max_queued_messages_set(0)  # 0 bedeutet keine Begrenzung der Warteschlange
-client.message_retry_set(5)  # Zeit in Sekunden, bevor ein unbestätigter Befehl erneut gesendet wird
-
-def on_disconnect(client, userdata, rc):
-    print(f"Disconnected with result code {rc}")
-
+for pin in ENDSCHALTER_PINS:
+    GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
-    client.subscribe("homing/control")
-    client.publish("motors/sequence", json.dumps([{"motorpulses": [100, 100, 100], "timing":[40,40,5]}]))
+    client.subscribe(MQTT_TOPIC_CONTROL)
+
+def send_motor_commands(pulses, timing):
+    message = json.dumps({"motorpulses": pulses, "timing": timing})
+    client.publish(MQTT_TOPIC_MOTORS_SEQUENCE, message)
+    print(f"Motor commands sent: {message}")
+
+def start_homing_process():
+    global is_homing_active
+    is_homing_active = True
+    try:
+        pulses = [100, 100, 100]  # Standardpulswerte für die Motoren
+        timing = [30, 30, 5]      # Standard-Timing für die Motoren
+        while True:
+            all_homed = True
+            for index, pin in enumerate(ENDSCHALTER_PINS):
+                if not GPIO.input(pin):
+                    print(f"Motor {index + 1} erreicht noch nicht die Home-Position.")
+                    all_homed = False
+                    pulses[index] = 100  # Beispiel: Pulsanpassung für Motorbewegung
+                else:
+                    pulses[index] = 0
+                    print(f"Motor {index + 1} ist homed.")
+
+            send_motor_commands(pulses, timing)
+
+            if all_homed:
+                break
+            time.sleep(1)  # Wartezeit zwischen den Überprüfungen
+        client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process completed successfully.')
+        print("Homing-Prozess erfolgreich abgeschlossen.")
+    finally:
+        is_homing_active = False
+
+def check_end_switches():
+    while True:
+        if not is_homing_active:
+            for index, pin in enumerate(ENDSCHALTER_PINS):
+                if GPIO.input(pin):
+                    print(f"Endschalter {index + 1} betätigt! Sende Stop-Signal.")
+                    client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
+                    break
+        time.sleep(0.1)  # Kurze Verzögerung, um das Polling zu begrenzen
+
+def setup_end_switch_monitoring():
+    threading.Thread(target=check_end_switches, daemon=True).start()
+
 def on_message(client, userdata, msg):
-    message = msg.payload.decode()
-    if msg.topic == "homing/control" and message == "true":
-        print(message)
-        start_homing()
+    if msg.topic == MQTT_TOPIC_CONTROL and msg.payload.decode() == 'true':
+        print("Start homing")
+        threading.Thread(target=start_homing_process).start()
 
-def start_homing():
-    homing_complete = [False, False, False]
-    steps_per_revolution = 800
-    motor_pulses = [steps_per_revolution // 10] * 3
-    
-    while not all(homing_complete):
-        print("test")
-        info = client.publish("motors/sequence", json.dumps([{"motorpulses": [5, 5, 5], "timing":[40,40,5]}]))
-        if not info.wait_for_publish(timeout=10):  # Timeout in Sekunden
-            print("Publish-Timeout erreicht, versuche erneut zu verbinden...")
-            client.disconnect()
-            client.reconnect()  # Zeige den Status des Publish-Aufrufs
-
-
+# MQTT-Client-Setup
+client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
-client.on_disconnect = on_disconnect
-client.connect("localhost", 1883, 60)
-client.loop_start()  # Start the network loop in a separate thread
+client.connect(MQTT_BROKER, MQTT_PORT, 60)
+
+# Starte die Endschalter-Überwachung beim Start des Skripts
+setup_end_switch_monitoring()
 
 try:
-    while True:
-        time.sleep(1)  # Warte und halte das Hauptprogramm am Laufen
-except KeyboardInterrupt:
-    print("Programm durch Benutzereingriff beendet.")
-    client.loop_stop()  # Beendet den Netzwerk-Thread sauber
-    client.disconnect()  # Trenne die Verbindung sauber
+    client.loop_forever()  # Dieser Aufruf blockiert, bis eine Ausnahme auftritt oder der Client manuell gestoppt wird.
+finally:
+    client.loop_stop()  # Stoppt den Loop, wenn der Prozess beendet oder unterbrochen wird
+    GPIO.cleanup()      # Räumt die GPIO-Einstellungen auf
