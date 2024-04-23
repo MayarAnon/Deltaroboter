@@ -9,6 +9,11 @@
 #include <stdbool.h>
 #include "global.h"
 
+// Die Funktion `parseGripperMode` konvertiert einen String in einen entsprechenden Enum-Wert für Greifermodi.
+// Parameter:
+//   - const char* mode: Zeichenkette, die den Modus beschreibt (z.B. "parallelGripper")
+// Rückgabewert:
+//   - Gripper: Enum-Wert des Greifers, z.B. parallel, complient, magnet, vaccum. Bei unbekanntem Modus wird -1 zurückgegeben.
 Gripper parseGripperMode(const char* mode) {
     if (strcmp(mode, "parallelGripper") == 0) return parallel;
     else if (strcmp(mode, "complientGripper") == 0) return complient;
@@ -21,6 +26,10 @@ Gripper parseGripperMode(const char* mode) {
 }
 
 
+// Die Funktion `parseRobotState` parst den Zustand eines Roboters aus einem JSON-String.
+// Parameter:
+//   - const char *payloadStr: JSON-String, der den Zustand des Roboters beschreibt
+// Diese Funktion setzt globale Variablen basierend auf den geparsten Daten.
 void parseRobotState(const char *payloadStr) {
     cJSON *json = cJSON_Parse(payloadStr);
     if (json == NULL) {
@@ -28,13 +37,13 @@ void parseRobotState(const char *payloadStr) {
         return;
     }
 
-    // Parsing boolean using stdbool.h
+    // Parsing eines Booleschen Werts für Homing-Status
     cJSON *homing = cJSON_GetObjectItemCaseSensitive(json, "homing");
     bool homingValue = cJSON_IsTrue(homing);
 
-    // Parsing array of doubles
+    // Parsing eines Arrays von Double-Werten für aktuelle Koordinaten
     cJSON *currentCoordinates = cJSON_GetObjectItemCaseSensitive(json, "currentCoordinates");
-    double coordinates[3];  // Assuming there are always three coordinates
+    double coordinates[3];  // Annahme: Es gibt immer drei Koordinaten
     if (cJSON_IsArray(currentCoordinates)) {
         for (int i = 0; i < 3; i++) {
             cJSON *coord = cJSON_GetArrayItem(currentCoordinates, i);
@@ -42,9 +51,9 @@ void parseRobotState(const char *payloadStr) {
         }
     }
 
-    // Parsing array of doubles
+    // Parsing eines Arrays von Double-Werten für aktuelle Winkel
     cJSON *currentAngles = cJSON_GetObjectItemCaseSensitive(json, "currentAngles");
-    double angles[3];  // Assuming there are always three angles
+    double angles[3];  // Annahme: Es gibt immer drei Winkel
     if (cJSON_IsArray(currentAngles)) {
         for (int i = 0; i < 3; i++) {
             cJSON *angle = cJSON_GetArrayItem(currentAngles, i);
@@ -52,21 +61,21 @@ void parseRobotState(const char *payloadStr) {
         }
     }
 
-    // Parsing boolean using stdbool.h
+    // Parsing eines Booleschen Werts für Greifer-Feedback
     cJSON *gripperFeedback = cJSON_GetObjectItemCaseSensitive(json, "gripperFeedback");
     bool gripperFeedbackValue = cJSON_IsTrue(gripperFeedback);
 
-    // Parse gripper mode and convert to enum
+    // Parsing des Greifermodus und Konvertierung zu Enum
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
     Gripper gripperModeValue = parseGripperMode(gripperModeStr);
 
-    // Parsing integer
+    // Parsing eines Integer-Werts für die Geschwindigkeit der Motoren
     cJSON *motorsSpeed = cJSON_GetObjectItemCaseSensitive(json, "motorsSpeed");
     int motorsSpeedValue = motorsSpeed->valueint;
 
-    // Parsing array of integers
+    // Parsing eines Arrays von Integer-Werten für den Arbeitsbereich des Roboters
     cJSON *robotWorkspace = cJSON_GetObjectItemCaseSensitive(json, "robotWorkspace");
-    int workspace[2];  // Assuming there are always two elements
+    int workspace[2];  // Annahme: Es gibt immer zwei Elemente
     if (cJSON_IsArray(robotWorkspace)) {
         for (int i = 0; i < 2; i++) {
             cJSON *space = cJSON_GetArrayItem(robotWorkspace, i);
@@ -74,21 +83,13 @@ void parseRobotState(const char *payloadStr) {
         }
     }
 
+    // Anwendung des Homing-Werts, wenn wahr
     if(homingValue){
         currentPosition = (Coordinate){0.0, 0.0,-280.0,0.0};
         
     }
-    speedSetting = motorsSpeedValue;
-    currentGripper = gripperModeValue;
-    /*
-    // Optional: Print values for debugging
-    printf("Homing: %s\n", homingValue ? "true" : "false");
-    printf("Coordinates: [%.1f, %.1f, %.1f]\n", coordinates[0], coordinates[1], coordinates[2]);
-    printf("Angles: [%.1f, %.1f, %.1f]\n", angles[0], angles[1], angles[2]);
-    printf("Gripper Feedback: %s\n", gripperFeedbackValue ? "true" : "false");
-    printf("Gripper Mode: %d\n", gripperModeValue);
-    printf("Motor Speed: %d\n", motorsSpeedValue);
-    printf("Workspace: [%d, %d]\n", workspace[0], workspace[1]);
-    */
-    cJSON_Delete(json);
+    speedSetting = motorsSpeedValue;   // Setzt die globale Geschwindigkeitseinstellung
+    currentGripper = gripperModeValue; // Setzt den aktuellen Greifermodus
+    
+    cJSON_Delete(json); // Bereinigung des JSON-Objekts
 }
