@@ -28,6 +28,7 @@ typedef enum {
     ZX_PLANE
 } Plane;
 
+// Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 extern Coordinate currentPosition;
 extern Angles currentAngles;
 extern Steps currentSteps;
@@ -51,5 +52,10 @@ extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccu
 #define GRIPPERCONTROLLTOPIC "gripper/control"
 #define COORDINATESTOPIC "current/coordinates"
 #define ANGLESTOPIC "current/angles"
+
+//Mqtt defines
+#define ADDRESS     "tcp://localhost:1883"
+#define CLIENTID    "MotionPlaning"
+#define QOS         0  // Set Quality of Service Level to 0 (At most once)
 
 #endif

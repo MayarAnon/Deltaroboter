@@ -18,19 +18,23 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 
 void publishCurrentState(Coordinate pos, Angles ang); 
 
+
+// Verarbeitet eine einzelne Zeile des G-Code-Befehls.
+// Parameter:
+//   - const char* line: Die Zeile des G-Codes, die verarbeitet werden soll.
 void processLine(const char* line) {
     char command[4];
     float x, y,z,phi, i, j, f,t,r;
     int numParams;
 
-    // Initialize parameters
+    // Initialisiere Parameter mit Standardwerten
     x = y  = i = j = phi = t = r = 0.0;
     f = speedSetting;
     z = -280.0;
-    // Determine the type of command
+    // Extrahiere den Befehlstyp aus der Zeile
     numParams = sscanf(line, "%s", command);
 
-    if (numParams < 1) {  // No command read
+    if (numParams < 1) {  //Kein Command erkannt
         return;
     }
 
@@ -76,20 +80,22 @@ void processLine(const char* line) {
         
         
     }
+    // Verarbeitet Kreisbewegungen gemäß den G-Code-Befehlen G2 (Kreis im Uhrzeigersinn) und G3 (Kreis gegen den Uhrzeigersinn).
     else if (strcmp(command, "G2") == 0 ||  strcmp(command, "G3" ) == 0) {
-
+        // Bestimme die Drehrichtung basierend auf dem G-Code-Befehl
         int direction = 0;
         if(strcmp(command, "G2") == 0){
-            direction = 1;
+            direction = 1; // Uhrzeigersinn
         }
         else if(strcmp(command, "G3") == 0){
-            direction = -1;
+            direction = -1; // Gegen den Uhrzeigersinn
         }
         
-        //auf ein Achse zurückführen die X-Y Achse. wird nachher wieder auf Ursprüngliche Achese angewendet
+
         double angle, radius = 0;
-        Coordinate center;
+        Coordinate center; 
         Coordinate end;
+        //Parameter X: X-Achse Y: Y-Achse Z: Z-Achese A: Rotationsachse Endeffektor F: Speed
         switch(currentPlane) {
         case XY_PLANE:
             
@@ -169,8 +175,8 @@ void processLine(const char* line) {
             fprintf(stderr, "Failed to read sleep time for M100 command\n");
             return;
         } else {
-            // Prepare the JSON string
-            char jsonString[100];  // Ensure the buffer is large enough
+            // JSON-String vorbereiten 
+            char jsonString[100];  // Buffer für String
             snprintf(jsonString, sizeof(jsonString),
                      "{\n"
                      "\"parallelGripper\": %d,\n"
@@ -179,8 +185,8 @@ void processLine(const char* line) {
                      "\"vacuumGripper\": 0\n"
                      "}", sValue);
 
-            // Print the JSON string
-            printf("%s\n", jsonString);
+            // Print den JSON string
+            //printf("%s\n", jsonString);
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }   
 
@@ -193,8 +199,8 @@ void processLine(const char* line) {
             fprintf(stderr, "Failed to read sleep time for M100 command\n");
             return;
         } else {
-            // Prepare the JSON string
-            char jsonString[100];  // Ensure the buffer is large enough
+            // JSON-String vorbereiten
+            char jsonString[100];  // Buffer für String
             snprintf(jsonString, sizeof(jsonString),
                      "{\n"
                      "\"parallelGripper\": 0,\n"
@@ -203,7 +209,7 @@ void processLine(const char* line) {
                      "\"vacuumGripper\": 0\n"
                      "}", sValue);
 
-            // Print the JSON string
+            // Print den JSON string
             printf("%s\n", jsonString);
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }
@@ -217,8 +223,8 @@ void processLine(const char* line) {
             fprintf(stderr, "Failed to read sleep time for M100 command\n");
             return;
         } else {
-            // Prepare the JSON string
-            char jsonString[100];  // Ensure the buffer is large enough
+            // JSON-String vorbereiten
+            char jsonString[100];   // Buffer für String
             snprintf(jsonString, sizeof(jsonString),
                      "{\n"
                      "\"parallelGripper\": 0,\n"
@@ -227,7 +233,7 @@ void processLine(const char* line) {
                      "\"vacuumGripper\": 0\n"
                      "}", sValue);
 
-            // Print the JSON string
+            // Print den JSON string
             printf("%s\n", jsonString);
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }
@@ -240,8 +246,8 @@ void processLine(const char* line) {
             fprintf(stderr, "Failed to read sleep time for M100 command\n");
             return;
         } else {
-            // Prepare the JSON string
-            char jsonString[100];  // Ensure the buffer is large enough
+            // JSON-String vorbereiten
+            char jsonString[100];  // Buffer für String
             snprintf(jsonString, sizeof(jsonString),
                      "{\n"
                      "\"parallelGripper\": 0,\n"
@@ -250,7 +256,7 @@ void processLine(const char* line) {
                      "\"vacuumGripper\": %d\n"
                      "}", sValue);
 
-            // Print the JSON string
+            // Print den JSON string
             printf("%s\n", jsonString);
             publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
         }
@@ -263,7 +269,11 @@ void processLine(const char* line) {
     }
 }
 
-
+// Verarbeitet die Interpolation erzeugt eine entsprechende JSON-Nachricht und publisht diese an MotorControll.
+// Parameter:
+//   - Coordinate* coordinates: Array von Koordinaten für die Interpolation.
+//   - int InterpolationSteps: Anzahl der Schritte in einer Interpolation.
+//   - float f: Geschwindigkeitsfaktor
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
     Coordinate localPosition = currentPosition;  // Lokale Kopie der aktuellen Position
@@ -365,6 +375,10 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     free(coordinates);
 }
 
+// Veröffentlicht den aktuellen Zustand der Koordinaten und Winkel des Roboters.
+// Parameter:
+//   - Coordinate pos: Die aktuellen Koordinaten.
+//   - Angles ang: Die aktuellen Winkel.
 void publishCurrentState(Coordinate pos, Angles ang) {
     char coordString[50], anglesString[40];
     snprintf(coordString, sizeof(coordString), "(%f, %f, %f),", pos.x, pos.y, pos.z);
