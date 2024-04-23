@@ -24,7 +24,7 @@ const GCode = (props) =>{
     };
 
     const saveGCode = () =>{
-        const address = "http://192.168.137.2:3010/gcode";
+        const address = "http://deltarobot:3010/gcode";
     
       // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
       const programData = {
@@ -48,6 +48,11 @@ const GCode = (props) =>{
         setName(e.target.value)
     }
 
+    const LoadProgramm = (e) =>{
+      console.log(name);
+  }
+
+
     
 
 
@@ -68,7 +73,7 @@ const GCode = (props) =>{
               >
               {GCodemode === 4 ?
                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="Loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
+               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
             </button>
             <button
               className="px-4 py-2 border-2 border-white rounded hover:bg-black"
@@ -157,7 +162,7 @@ const GCode = (props) =>{
         )}
         {GCodemode === 1 &&(
             <div style={{ backgroundColor: props.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
-            <button
+            <button onClick={LoadProgramm}
               className="flex w-full justify-center items-center px-4 py-2 border-2 border-white text-white bg-red-700 font-bold rounded hover:bg-black"
             >
               Laden

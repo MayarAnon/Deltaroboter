@@ -61,7 +61,7 @@ const LoadProgrammList = (props) => {
     }
 
     const handleDelete = () => {
-        const address = `http://192.168.0.87:3010/deleteGCode?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
+        const address = `http://deltarobot:3010/deleteGCode?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
       
         axios.delete(address)
           .then(response => {

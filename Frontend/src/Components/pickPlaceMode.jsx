@@ -25,7 +25,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
       };
   
     const handleDelete = () => {
-      const address = `http://192.168.137.2:3010/delete?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
+      const address = `http://deltarobot:3010/delete?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
     
       axios.delete(address)
         .then(response => {
@@ -125,7 +125,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
     useEffect(() => {
       // Hier rufen wir den Express-Endpunkt auf, wenn die Komponente montiert wird
       axios
-        .get('http://192.168.137.2:3010/loadFiles')
+        .get('http://deltarobot:3010/loadFiles')
         .then((response) => {
           // Die erhaltenen Daten in den Zustand der Komponente speichern
           console.log(response.data);
@@ -306,7 +306,7 @@ const isTouchDevice = () => {
     
   
     const saveProgramm = () => {
-      const address = "http://192.168.0.87:3010/programs";
+      const address = "http://deltarobot:3010/programs";
     
       // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
       const programData = {
@@ -355,7 +355,7 @@ const isTouchDevice = () => {
               >
               {pickplacemode === 4 ?
                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="Loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
+               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
             </button>
             <button
               className="px-4 py-2 border-2 border-white rounded hover:bg-black"
