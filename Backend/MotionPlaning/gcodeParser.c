@@ -381,8 +381,8 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 //   - Angles ang: Die aktuellen Winkel.
 void publishCurrentState(Coordinate pos, Angles ang) {
     char coordString[50], anglesString[40];
-    snprintf(coordString, sizeof(coordString), "(%f, %f, %f),", pos.x, pos.y, pos.z);
-    snprintf(anglesString, sizeof(anglesString), "(%f, %f, %f),", ang.theta1, ang.theta2, ang.theta3);
+    snprintf(coordString, sizeof(coordString), "[%f, %f, %f, %f]", pos.x, pos.y, pos.z,pos.phi);
+    snprintf(anglesString, sizeof(anglesString), "[%f, %f, %f]", ang.theta1, ang.theta2, ang.theta3);
     publishMessage("current/coordinates", coordString);
     publishMessage("current/angles", anglesString);
 }
