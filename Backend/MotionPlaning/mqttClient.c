@@ -68,7 +68,7 @@ void initializeMqtt(const char* topics[], int topicCount, void(*onMessageCallbac
     for (int i = 0; i < topicCount; i++) {
         MQTTClient_subscribe(client, topics[i], QOS);  // Subscriben zu den angegebenen Topics
     }
-    }
+    
 }
 
 

@@ -7,8 +7,8 @@ import threading
 
 logging.basicConfig(level=logging.DEBUG)
 
-# Konstanten für die GPIO-Pins der Endschalter, ersetze diese mit deinen spezifischen Pin-Nummern
-ENDSCHALTER_PINS = [0, 5, 6]
+# Konstanten für die GPIO-Pins der Endschalter
+ENDSCHALTER_PINS = [0, 5, 6, 13]
 
 # MQTT-Konfiguration
 MQTT_BROKER = 'localhost'
@@ -36,18 +36,29 @@ def send_motor_commands(pulses, timing):
     print(f"Motor commands sent: {message}")
 
 def start_homing_process():
+    """
+    Startet den Homing-Prozess für die Motoren. Dieser Prozess prüft kontinuierlich, ob jeder Motor seine Home-Position
+    erreicht hat, und passt die Motorpulsung entsprechend an. Der Prozess läuft in einer Schleife, bis alle Motoren
+    ihre Home-Position erreicht haben.
+
+    Verwendet die globalen Variablen `is_homing_active`, um den Prozessstatus zu verwalten und verwendet die 
+    MQTT-Topics, um Befehle zu senden und Feedback zu erhalten.
+
+    Globale Variablen:
+    - is_homing_active: Eine Boolesche Variable, die angibt, ob der Homing-Prozess aktiv ist.
+    """
     global is_homing_active
     is_homing_active = True
     try:
-        pulses = [100, 100, 100]  # Standardpulswerte für die Motoren
-        timing = [30, 30, 5]      # Standard-Timing für die Motoren
+        pulses = [80, 80, 80,80]  # Standardpulswerte für die Motoren
+        timing = [100, 100, 5]      # Standard-Timing für die Motoren
         while True:
             all_homed = True
             for index, pin in enumerate(ENDSCHALTER_PINS):
                 if not GPIO.input(pin):
                     print(f"Motor {index + 1} erreicht noch nicht die Home-Position.")
                     all_homed = False
-                    pulses[index] = 100  # Beispiel: Pulsanpassung für Motorbewegung
+                    pulses[index] = 80 #pulse-anpassung wenn nötig
                 else:
                     pulses[index] = 0
                     print(f"Motor {index + 1} ist homed.")
