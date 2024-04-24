@@ -29,7 +29,7 @@ void processLine(const char* line) {
 
     // Initialisiere Parameter mit Standardwerten
     x = y  = i = j = phi = t = r = 0.0;
-    f = speedSetting;
+    f = 100;
     z = -280.0;
     // Extrahiere den Befehlstyp aus der Zeile
     numParams = sscanf(line, "%s", command);
@@ -44,7 +44,7 @@ void processLine(const char* line) {
         for(const char *p = line; *p; ++p) {
         sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
-        speedSetting = f;
+        
         coordinates[0] = currentPosition;
         coordinates[1] = (Coordinate){x,y,z,phi};
 
@@ -56,7 +56,7 @@ void processLine(const char* line) {
         for(const char *p = line; *p; ++p) {
         sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
         }
-        speedSetting = f;
+        
         float diffX = fabs(x - currentPosition.x);
         float diffY = fabs(y - currentPosition.y);
         float diffZ = fabs(z - currentPosition.z);
@@ -103,7 +103,7 @@ void processLine(const char* line) {
             sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
             }
             center = (Coordinate){currentPosition.x + i,currentPosition.y + j,currentPosition.z,currentPosition.phi};
-            end = (Coordinate){x,y,currentPosition.z,currentPosition.phi};
+            end = (Coordinate){x,y,currentPosition.z,phi};
             int numSteps = 0;
             
 
@@ -113,7 +113,7 @@ void processLine(const char* line) {
             sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
             }
             center = (Coordinate){currentPosition.x ,currentPosition.y + i,currentPosition.z + j,currentPosition.phi};
-            end = (Coordinate){currentPosition.x,y,z,currentPosition.phi};
+            end = (Coordinate){currentPosition.x,y,z,phi};
             break;
         case ZX_PLANE:
             
@@ -121,11 +121,12 @@ void processLine(const char* line) {
             sscanf(p, "Z%f", &z) || sscanf(p, "X%f", &x) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
             }
             center = (Coordinate){currentPosition.x + j,currentPosition.y ,currentPosition.z + i,currentPosition.phi};
-            end = (Coordinate){x,currentPosition.y,z,currentPosition.phi};
+            end = (Coordinate){x,currentPosition.y,z,phi};
             break;
         }
-        speedSetting = f;
+        
         int numSteps = 0;
+        
         Coordinate* coordinates = circularInterpolation(currentPosition, end, center,r, currentPlane,direction, &numSteps);
         processInterpolationAndCreateJSON(coordinates,numSteps,f);
     }
@@ -168,97 +169,139 @@ void processLine(const char* line) {
     
     }
     else if (strcmp(command, "M100") == 0) {
-        int sValue = 0;
-        int numParams = sscanf(line, "%*s S%d", &sValue);
+        if(currentGripper == parallel){
+            int sValue = 0;
+            int numParams = sscanf(line, "%*s S%d", &sValue);
 
-        if (numParams < 1) {
-            fprintf(stderr, "Failed to read sleep time for M100 command\n");
-            return;
-        } else {
-            // JSON-String vorbereiten 
-            char jsonString[100];  // Buffer für String
-            snprintf(jsonString, sizeof(jsonString),
-                     "{\n"
-                     "\"parallelGripper\": %d,\n"
-                     "\"compliantGripper\": 0,\n"
-                     "\"magnetGripper\": 0,\n"
-                     "\"vacuumGripper\": 0\n"
-                     "}", sValue);
+            if (numParams < 1) {
+                fprintf(stderr, "Failed to read sleep time for M100 command\n");
+                return;
+            } else {
+                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
+                // JSON-String vorbereiten 
+                char jsonString[100];  // Buffer für String
+                snprintf(jsonString, sizeof(jsonString),
+                        "{\n"
+                        "\"parallelGripper\": %d,\n"
+                        "\"compliantGripper\": 0,\n"
+                        "\"magnetGripper\": 0,\n"
+                        "\"vacuumGripper\": 0\n"
+                        "}", sValue);
 
-            // Print den JSON string
-            //printf("%s\n", jsonString);
-            publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
-        }   
-
+                // Print den JSON string
+                //printf("%s\n", jsonString);
+                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                
+                int releseTimer = 0;
+                while(!timeFlagGripper && releseTimer<10){
+                    usleep(1000000);
+                    releseTimer = releseTimer + 1;
+                }
+                
+                //currentGripperValue updaten
+                currentGripperValue = sValue;
+            }   
+        }
     }
     else if (strcmp(command, "M200") == 0) {
-        int sValue = 0;
-        int numParams = sscanf(line, "%*s S%d", &sValue);
+        //Prüfen ob der Aktuelle Gripper der compliantGripper ist 
+        if(currentGripper == complient){
+            int sValue = 0;
+            int numParams = sscanf(line, "%*s S%d", &sValue);
 
-        if (numParams < 1) {
-            fprintf(stderr, "Failed to read sleep time for M100 command\n");
-            return;
-        } else {
-            // JSON-String vorbereiten
-            char jsonString[100];  // Buffer für String
-            snprintf(jsonString, sizeof(jsonString),
-                     "{\n"
-                     "\"parallelGripper\": 0,\n"
-                     "\"compliantGripper\": %d,\n"
-                     "\"magnetGripper\": 0,\n"
-                     "\"vacuumGripper\": 0\n"
-                     "}", sValue);
+            if (numParams < 1) {
+                fprintf(stderr, "Failed to read sleep time for M100 command\n");
+                return;
+            } else {
+                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
+                // JSON-String vorbereiten
+                char jsonString[100];  // Buffer für String
+                snprintf(jsonString, sizeof(jsonString),
+                        "{\n"
+                        "\"parallelGripper\": 0,\n"
+                        "\"compliantGripper\": %d,\n"
+                        "\"magnetGripper\": 0,\n"
+                        "\"vacuumGripper\": 0\n"
+                        "}", sValue);
 
-            // Print den JSON string
-            printf("%s\n", jsonString);
-            publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                // Print den JSON string
+                printf("%s\n", jsonString);
+                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                int releseTimer = 0;
+                while(!timeFlagGripper && releseTimer<10){
+                    usleep(1000000);
+                    releseTimer = releseTimer + 1;
+                }
+                
+                //currentGripperValue updaten
+                currentGripperValue = sValue;
+            }
         }
-   
     }
     else if (strcmp(command, "M300") == 0) {
-        int sValue = 0;
-        int numParams = sscanf(line, "%*s S%d", &sValue);
+        if(currentGripper == magnet){
+            int sValue = 0;
+            int numParams = sscanf(line, "%*s S%d", &sValue);
 
-        if (numParams < 1) {
-            fprintf(stderr, "Failed to read sleep time for M100 command\n");
-            return;
-        } else {
-            // JSON-String vorbereiten
-            char jsonString[100];   // Buffer für String
-            snprintf(jsonString, sizeof(jsonString),
-                     "{\n"
-                     "\"parallelGripper\": 0,\n"
-                     "\"compliantGripper\": 0,\n"
-                     "\"magnetGripper\": %d,\n"
-                     "\"vacuumGripper\": 0\n"
-                     "}", sValue);
+            if (numParams < 1) {
+                fprintf(stderr, "Failed to read sleep time for M100 command\n");
+                return;
+            } else {
+                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
+                // JSON-String vorbereiten
+                char jsonString[100];   // Buffer für String
+                snprintf(jsonString, sizeof(jsonString),
+                        "{\n"
+                        "\"parallelGripper\": 0,\n"
+                        "\"compliantGripper\": 0,\n"
+                        "\"magnetGripper\": %d,\n"
+                        "\"vacuumGripper\": 0\n"
+                        "}", sValue);
 
-            // Print den JSON string
-            printf("%s\n", jsonString);
-            publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                // Print den JSON string
+                printf("%s\n", jsonString);
+                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                int releseTimer = 0;
+                while(!timeFlagGripper && releseTimer<10){
+                    usleep(1000000);
+                    releseTimer = releseTimer + 1;
+                }
+                //currentGripperValue updaten
+                currentGripperValue = sValue;
+            }
         }
     }
     else if (strcmp(command, "M400") == 0) {
-        int sValue = 0;
-        int numParams = sscanf(line, "%*s S%d", &sValue);
+        if(currentGripper == vaccum){
+            int sValue = 0;
+            int numParams = sscanf(line, "%*s S%d", &sValue);
 
-        if (numParams < 1) {
-            fprintf(stderr, "Failed to read sleep time for M100 command\n");
-            return;
-        } else {
-            // JSON-String vorbereiten
-            char jsonString[100];  // Buffer für String
-            snprintf(jsonString, sizeof(jsonString),
-                     "{\n"
-                     "\"parallelGripper\": 0,\n"
-                     "\"compliantGripper\": 0,\n"
-                     "\"magnetGripper\": 0,\n"
-                     "\"vacuumGripper\": %d\n"
-                     "}", sValue);
+            if (numParams < 1) {
+                fprintf(stderr, "Failed to read sleep time for M100 command\n");
+                return;
+            } else {
+                // JSON-String vorbereiten
+                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
+                char jsonString[100];  // Buffer für String
+                snprintf(jsonString, sizeof(jsonString),
+                        "{\n"
+                        "\"parallelGripper\": 0,\n"
+                        "\"compliantGripper\": 0,\n"
+                        "\"magnetGripper\": 0,\n"
+                        "\"vacuumGripper\": %d\n"
+                        "}", sValue);
 
-            // Print den JSON string
-            printf("%s\n", jsonString);
-            publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                // Print den JSON string
+                printf("%s\n", jsonString);
+                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
+                int releseTimer = 0;
+                while(!timeFlagGripper && releseTimer<10){
+                    usleep(1000000);
+                    releseTimer = releseTimer + 1;
+                }
+                //currentGripperValue updaten
+                currentGripperValue = sValue;
+            }
         }
     }
     else if (strcmp(command, ";") == 0) {
@@ -362,8 +405,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         errorAccumulator2 = localErrorAccumulators[1];
         errorAccumulator3 = localErrorAccumulators[2];
         errorAccumulator4 = localErrorAccumulators[3];
-
+        
         char* jsonString = cJSON_Print(jsonRoot);
+        //printf(jsonString);
         publishMessage("motors/sequence", jsonString);
         publishCurrentState(currentPosition, currentAngles);
         usleep(totalDuration);

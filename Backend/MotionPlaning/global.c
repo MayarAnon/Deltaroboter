@@ -16,11 +16,17 @@ Plane currentPlane = XY_PLANE;
 // `currentGripper` gibt den aktuellen Greifertyp
 Gripper currentGripper = parallel;
 
+// `currentGripperValue` beschreibt den aktuellen Wert von Gripper
+int currentGripperValue = 0;
+
 // `speedSetting` definiert die Geschwindigkeitseinstellung
 int speedSetting = 50;
 
-// `stopFlag` ist eine Boolesche Variable, die verwendet wird, um Operationen sicher anzuhalten.
+// `stopFlag` ist eine Boolesche Variable, die verwendet wird, um den Roboter zu stoppen
 bool stopFlag = false;
+
+// `timeFlagGripper` ist eine Boolesche Variable, die verwendet wird, um auf GripperControl in der Ausführung zu warten.
+bool timeFlagGripper = true;
 
 // `errorAccumulator1` bis `errorAccumulator4` dienen der Fehlerakkumulation für Regelungszwecke.
 double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0, errorAccumulator4 = 0.0;

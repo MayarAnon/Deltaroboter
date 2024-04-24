@@ -52,22 +52,34 @@ void* readFileThread(void* filename) {
 void onMessage(char *topicName, char *payloadStr) {
     pthread_t thread_id; // Thread-Identifikator für Hintergrundoperationen.
     
-    if (strcmp(topicName, MANUELCONTROLTOPIC) == 0) {
-        manualMode(payloadStr);
+    if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0) {
+        manualModeCoordinates(payloadStr);
+    }
+    else if (strcmp(topicName, MANUELCONTROLGRIPPERTOPIC) == 0) {
+
+        manualModeGripper(payloadStr);
     }
     else if (strcmp(topicName, STOPTOPIC) == 0) {
         if(strcmp("true", payloadStr) == 0){
+            printf("Stop Program \n");
+            fflush(stdout); 
             stopFlag = true; // Setzt das stopFlag, wenn die Nachricht "true" ist.
         }
     }
     else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0) {
+        
         stopFlag = false;
         char* safePayload = strdup(payloadStr);  // Dupliziere den String, um sicherzustellen, dass er nicht überschrieben wird
+        printf("Lade Program: %s",payloadStr);
+        fflush(stdout); // Sorgt dafür, dass "Hallo" sofort ausgegeben wird
         pthread_create(&thread_id, NULL, readFileThread, safePayload); // Startet einen Thread zum Dateilesen.
         pthread_detach(thread_id);  // Löst den Thread vom Hauptthread.
     }
     else if (strcmp(topicName, ROBOTSTATETOPIC) == 0) {
+        
+        fflush(stdout);
         parseRobotState(payloadStr);
+
     }
 }
 
@@ -76,16 +88,17 @@ void onMessage(char *topicName, char *payloadStr) {
 // und tritt in eine Endlosschleife ein, um das Programm am Laufen zu halten.
 int main() {
     // Topics, zu denen wir subscriben möchten.
-    const char* topics[] = {MANUELCONTROLTOPIC, LOADPROGRAMMTOPIC,ROBOTSTATETOPIC,STOPTOPIC};
+    const char* topics[] = {LOADPROGRAMMTOPIC,ROBOTSTATETOPIC,STOPTOPIC,MANUELCONTROLCOORDINATESTOPIC,MANUELCONTROLGRIPPERTOPIC};
     int topicCount = sizeof(topics) / sizeof(topics[0]);
-
+    printf("MotionPlaning online\n");
+    fflush(stdout); // Sorgt dafür, dass "Hallo" sofort ausgegeben wird
     
     // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.
     initializeMqtt(topics, topicCount, onMessage);
 
     // Veröffentlicht eine Nachricht auf "Topic1".
     while (1) {
-        usleep(100000); // Verzögert die Schleife, um CPU-Ressourcen zu sparen.
+        usleep(1000); // Verzögert die Schleife, um CPU-Ressourcen zu sparen.
     } 
     destroyMqtt();
     return 0;
@@ -109,12 +122,13 @@ void readFile(const char* filename) {
         perror(path);
         return;
     }
-
+    printf("Programm wird ausgeführt. \n");
     while ((read = getline(&line, &len, file)) != -1) {
         if (stopFlag) {
             printf("load Program wurde Abgebrochen");
             break;
         }
+        
         processLine(line);
     }
 
