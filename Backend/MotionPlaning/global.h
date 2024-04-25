@@ -36,7 +36,9 @@ extern Plane currentPlane;
 extern Gripper currentGripper;
 extern int speedSetting;
 extern bool stopFlag;
+extern bool timeFlagGripper;
 extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4;
+extern int currentGripperValue;
 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
@@ -45,8 +47,10 @@ extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccu
 //subscribe Topics
 #define ROBOTSTATETOPIC "robot/state"
 #define LOADPROGRAMMTOPIC "pickandplace/program"
-#define MANUELCONTROLTOPIC "manual/control"
+#define MANUELCONTROLCOORDINATESTOPIC "manual/control/coordinates"
+#define MANUELCONTROLGRIPPERTOPIC "manual/control/gripper"
 #define STOPTOPIC "motors/stop"
+
 //publish Topics
 #define MOTORCONTROLLTOPIC "motors/sequence"
 #define GRIPPERCONTROLLTOPIC "gripper/control"

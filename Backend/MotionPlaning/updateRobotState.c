@@ -63,8 +63,9 @@ void parseRobotState(const char *payloadStr) {
 
     // Parsing eines Booleschen Werts für Greifer-Feedback
     cJSON *gripperFeedback = cJSON_GetObjectItemCaseSensitive(json, "gripperFeedback");
-    bool gripperFeedbackValue = cJSON_IsTrue(gripperFeedback);
-
+    
+    timeFlagGripper = cJSON_IsTrue(gripperFeedback); //wird global gepublisht
+    
     // Parsing des Greifermodus und Konvertierung zu Enum
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
     Gripper gripperModeValue = parseGripperMode(gripperModeStr);
@@ -85,8 +86,15 @@ void parseRobotState(const char *payloadStr) {
 
     // Anwendung des Homing-Werts, wenn wahr
     if(homingValue){
+        printf("Robot wird gehomed! \n");
+        fflush(stdout); 
         currentPosition = (Coordinate){0.0, 0.0,-280.0,0.0};
-        
+        currentSteps = (Steps){0};
+        errorAccumulator1 = 0;
+        errorAccumulator2 = 0;
+        errorAccumulator3 = 0;
+        errorAccumulator4 = 0;
+
     }
     speedSetting = motorsSpeedValue;   // Setzt die globale Geschwindigkeitseinstellung
     currentGripper = gripperModeValue; // Setzt den aktuellen Greifermodus
