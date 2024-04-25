@@ -2,6 +2,7 @@
 
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 
+
 // `currentPosition` speichert die aktuelle Position
 Coordinate currentPosition = {0.0, 0.0, -280.0, 0.0};
 
@@ -27,6 +28,8 @@ bool stopFlag = false;
 
 // `timeFlagGripper` ist eine Boolesche Variable, die verwendet wird, um auf GripperControl in der Ausführung zu warten.
 bool timeFlagGripper = true;
+// 'homingFlag' ist eine Boolesche Variable, die für die Flankenerkennung von Homingsignalen in robot/state zuständig ist verwendet in updateRobotState
+bool homingFlag = false;
 
 // `errorAccumulator1` bis `errorAccumulator4` dienen der Fehlerakkumulation für Regelungszwecke.
 double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0, errorAccumulator4 = 0.0;

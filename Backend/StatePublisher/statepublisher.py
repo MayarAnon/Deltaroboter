@@ -43,7 +43,7 @@ def on_message(client, userdata, msg):
     elif msg.topic == 'gripper/feedback':
         robot_state['gripperFeedback'] = data
     elif msg.topic == 'gripper/mode':
-        if data in ["parallelGripper", "compliantGripper", "magnetGripper", "vacuumGripper"]:
+        if data in ["parallelGripper", "complientGripper", "magnetGripper", "vacuumGripper"]:
             robot_state['gripperMode'] = data
         else:
             print(f"Received invalid gripper mode: {data}")

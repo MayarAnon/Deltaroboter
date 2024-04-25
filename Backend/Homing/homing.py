@@ -31,7 +31,7 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_CONTROL)
 
 def send_motor_commands(pulses, timing):
-    message = json.dumps({"motorpulses": pulses, "timing": timing})
+    message = json.dumps([{"motorpulses": pulses, "timing": timing}])
     client.publish(MQTT_TOPIC_MOTORS_SEQUENCE, message)
     print(f"Motor commands sent: {message}")
 

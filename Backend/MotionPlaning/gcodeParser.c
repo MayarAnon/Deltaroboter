@@ -66,7 +66,7 @@ void processLine(const char* line) {
         float maxDiff = fmax(diffX, fmax(diffY, diffZ));
 
         int InterpolationSteps = (int)maxDiff < 2 ? 2 : (int)maxDiff;
-
+    
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
         /*
         for(int i=0;i<InterpolationSteps;i++){
@@ -320,10 +320,13 @@ void processLine(const char* line) {
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
     Coordinate localPosition = currentPosition;  // Lokale Kopie der aktuellen Position
+    
+    delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); //Winkel aktualisieren
+
     Angles localAngles = currentAngles;       // Lokale Kopie der aktuellen Winkel
     Steps localSteps = currentSteps;          // Lokale Kopie der Schrittzahlen
     double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
-    
+
     cJSON* jsonRoot = cJSON_CreateArray();
     long long totalDuration = 0;
     bool errorOccurred = false;

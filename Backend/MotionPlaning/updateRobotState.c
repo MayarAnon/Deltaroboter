@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include "global.h"
 
+
 // Die Funktion `parseGripperMode` konvertiert einen String in einen entsprechenden Enum-Wert für Greifermodi.
 // Parameter:
 //   - const char* mode: Zeichenkette, die den Modus beschreibt (z.B. "parallelGripper")
@@ -74,28 +75,22 @@ void parseRobotState(const char *payloadStr) {
     cJSON *motorsSpeed = cJSON_GetObjectItemCaseSensitive(json, "motorsSpeed");
     int motorsSpeedValue = motorsSpeed->valueint;
 
-    // Parsing eines Arrays von Integer-Werten für den Arbeitsbereich des Roboters
-    cJSON *robotWorkspace = cJSON_GetObjectItemCaseSensitive(json, "robotWorkspace");
-    int workspace[2];  // Annahme: Es gibt immer zwei Elemente
-    if (cJSON_IsArray(robotWorkspace)) {
-        for (int i = 0; i < 2; i++) {
-            cJSON *space = cJSON_GetArrayItem(robotWorkspace, i);
-            workspace[i] = space->valueint;
-        }
-    }
 
     // Anwendung des Homing-Werts, wenn wahr
-    if(homingValue){
-        printf("Robot wird gehomed! \n");
+    if(homingValue && homingFlag != homingValue ){
+        printf("DeltaRoboter wird Referenziert! \n");
         fflush(stdout); 
-        currentPosition = (Coordinate){0.0, 0.0,-280.0,0.0};
+        currentPosition = (Coordinate){0.0, 0.0, -280.0, 0.0};
         currentSteps = (Steps){0};
-        errorAccumulator1 = 0;
-        errorAccumulator2 = 0;
-        errorAccumulator3 = 0;
-        errorAccumulator4 = 0;
+        errorAccumulator1 = 0.0;
+        errorAccumulator2 = 0.0;
+        errorAccumulator3 = 0.0;
+        errorAccumulator4 = 0.0;
 
     }
+
+    homingFlag = homingValue;
+
     speedSetting = motorsSpeedValue;   // Setzt die globale Geschwindigkeitseinstellung
     currentGripper = gripperModeValue; // Setzt den aktuellen Greifermodus
     

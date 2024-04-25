@@ -28,6 +28,7 @@ typedef enum {
     ZX_PLANE
 } Plane;
 
+
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 extern Coordinate currentPosition;
 extern Angles currentAngles;
@@ -37,6 +38,7 @@ extern Gripper currentGripper;
 extern int speedSetting;
 extern bool stopFlag;
 extern bool timeFlagGripper;
+extern bool homingFlag;
 extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4;
 extern int currentGripperValue;
 
