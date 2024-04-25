@@ -98,11 +98,11 @@ const App = (props) => {
         koordinateSystem = {Settings.koordinateSystem}
         />}
       {menuState === 4 &&
-        <GCodeEditor />
-        // <GCode
-        // color ={Settings.color}
-        // menuState={menuState}
-        // />
+        // <GCodeEditor />
+        <GCode
+        color ={Settings.color}
+        menuState={menuState}
+        />
       
       
       }
