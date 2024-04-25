@@ -8,7 +8,7 @@ import Header from './Components/Header';
 import ManuellMode from './Components/manualMode';
 import PickPlaceMode from './Components/pickPlaceMode'
 import GCode from './Components/GCode'
-
+import GCodeEditor from './Components/GCodeEditor';
 
 
 const App = (props) => {
@@ -98,11 +98,11 @@ const App = (props) => {
         koordinateSystem = {Settings.koordinateSystem}
         />}
       {menuState === 4 &&
-      
-        <GCode
-        color ={Settings.color}
-        menuState={menuState}
-        />
+        <GCodeEditor />
+        // <GCode
+        // color ={Settings.color}
+        // menuState={menuState}
+        // />
       
       
       }

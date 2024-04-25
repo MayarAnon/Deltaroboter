@@ -1,0 +1,83 @@
+.gcode-editor {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    margin: auto;
+  }
+  
+  .gcode-editor .ace_editor {
+    width: 100%;
+    max-width: 800px; 
+    height: 500px; 
+    border: 1px solid #d4d4d4;
+    margin-bottom: 20px;
+  }
+  
+  .save-section button {
+  
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  
+  .save-section input[type="text"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-left: 10px;
+    margin-top: 10px;
+  }
+  
+  .gcode-editor .save-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 100%; 
+    flex-wrap: wrap;
+  }
+  
+  
+  @media (max-width: 600px) {
+    .gcode-editor .ace_editor {
+      height: 300px; 
+      max-width: 350px
+    }
+    
+    .gcode-editor button {
+      font-size: 14px;
+    }
+  
+    .gcode-editor input[type="text"] {
+      font-size: 14px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+  
+  }
+  
+  /* Zusätzliche Stile für die Syntaxhervorhebung, falls nötig */
+  .gcode-editor .ace_command {
+    color: blue;
+    font-weight: bold;
+  }
+  
+  .gcode-editor .ace_parameter {
+    color: orange;
+    font-weight: bold;
+  }
+  
+  .gcode-editor .ace_error {
+    background-color: yellow;
+    color: red;
+    font-weight: bold;
+  }
+  .gcode-editor .ace_comment {
+    color: green;
+    font-style: italic; /* Optional: Italicize comments for further distinction */
+  }
+  
