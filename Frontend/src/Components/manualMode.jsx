@@ -1,58 +1,85 @@
 import React,{ useState,useEffect,useRef} from 'react';
 import Slider from './Slider'
+import axios from 'axios';
 
 const ManuellMode = (props) => {
 
 
 
-    const [xValue,setXValue] = useState(0)
-    const [yValue,setYValue] = useState(0)
-    const [zValue,setZValue] = useState(0)
-    const [phiValue,setPhiValue] = useState(0)
-    const [actuator,setActuator] = useState('')
+  const [xValue, setXValue] = useState(props.initialCoordinates.x);
+  const [yValue, setYValue] = useState(props.initialCoordinates.y);
+  const [zValue, setZValue] = useState(props.initialCoordinates.z);
+  const [phiValue, setPhiValue] = useState(props.initialCoordinates.phi);
+  const [actuator, setActuator] = useState(props.initialCoordinates.actuator);
+
+  const countIntervalRef = useRef(null);
+
+  const handleMouseDown = (axis, direction) => {
+    if (countIntervalRef.current) {
+      clearInterval(countIntervalRef.current);
+    }
+    
+    let setter;
+    let valueChecker = (value) => value; // Standard-Checker, der den Wert unverändert lässt
   
-    useEffect(() =>{
-      props.onCoordinateChange({xPosition: xValue,yPosition: yValue,zPosition: zValue,phi:phiValue,actuator:actuator,ton:0,toff:0,Id:0})
-    },[props.menuState])
+    switch (axis) {
+      case 'x':
+        setter = setXValue;
+        valueChecker = (value) => {
+          const newY = yValue;
+          const newX = value + direction;
+          return newX * newX + newY * newY <= 40000 ? newX : value; // Begrenzung des Kreisradius
+        };
+        break;
+      case 'y':
+        setter = setYValue;
+        valueChecker = (value) => {
+          const newX = xValue;
+          const newY = value + direction;
+          return newX * newX + newY * newY <= 40000 ? newY : value; // Begrenzung des Kreisradius
+        };
+        break;
+      case 'z':
+        setter = setZValue;
+        valueChecker = (value) => {
+          const newZ = value + direction;
+          return newZ >= -480 && newZ <= -280 ? newZ : value; // Begrenzung der Z-Werte
+        };
+        break;
+      case 'phi':
+        setter = setPhiValue;
+        valueChecker = (value) => value + direction; // Für phi könnte eine andere Art von Begrenzung notwendig sein
+        break;
+      default:
+        return;
+    }
   
-    const countIntervalRef = useRef(null);
+    countIntervalRef.current = setInterval(() => {
+      setter(prevValue => valueChecker(prevValue));
+    }, Math.max(0, 100 - props.speed)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
+  };
+
+  const handleMouseUpOrLeave = () => {
+    clearInterval(countIntervalRef.current);
+    sendCoordinates();  // Aufruf der sendCoordinates Funktion, wenn die Maus losgelassen wird
+  };
+
+  const sendCoordinates = async () => {
+    const coordinates = [
+      parseFloat(xValue), 
+      parseFloat(yValue), 
+      parseFloat(zValue), 
+      parseFloat(phiValue)
+    ];
+    try {
+      const response = await axios.post('/manual/control/coordinates', { coordinates });
+      console.log('Koordinaten gesendet:', coordinates);
+    } catch (error) {
+      console.error('Fehler beim Senden der Koordinaten:', error.response ? error.response.data : error.message);
+    }
+  };
   
-    const handleMouseDown = (axis, direction) => {
-      // Stellen Sie sicher, dass keine Intervalle überschneiden
-      if (countIntervalRef.current) {
-        clearInterval(countIntervalRef.current);
-      }
       
-      let setter;
-      switch (axis) {
-        case 'x':
-          setter = setXValue;
-          break;
-        case 'y':
-          setter = setYValue;
-          break;
-        case 'z':
-          setter = setZValue;
-          break;
-        case 'phi':
-          setter = setPhiValue;
-          break;
-        default:
-          // Handhaben Sie ungültige Achsen
-          return;
-      }
-  
-      countIntervalRef.current = setInterval(() => {
-        // Diese Funktion wird abhängig von der Geschwindigkeit aufgerufen und ändert den Wert der Variable
-        setter((prevValue) => prevValue + direction);
-      }, Math.max(0, 100 - props.speed)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
-    };
-  
-      const handleMouseUpOrLeave = () => {
-        // Intervall stoppen, wenn der Knopf losgelassen wird oder der Cursor den Knopf verlässt
-        clearInterval(countIntervalRef.current);
-      };
-  
       
     return (
       <>
@@ -69,7 +96,7 @@ const ManuellMode = (props) => {
             <div className=" w-full sm:w-2/3 flex flex-col items-center justify-center gap-4 "> {/* Adjust this class to control the width */}
               <Slider color={props.color} label="+X / -X" min={-props.workSpaceRadius*0.70} max={props.workSpaceRadius*0.70} externalValue={xValue} onChange={(value) =>setXValue(value)} />
               <Slider color={props.color} label="+Y / -Y" min={-props.workSpaceRadius*0.70} max={props.workSpaceRadius*0.70} externalValue={yValue} onChange={(value) => setYValue(value)} />
-              <Slider color={props.color} label="+Z / -Z" min={-props.workSpaceHeight/2} max={props.workSpaceHeight/2} externalValue={zValue} onChange={(value) => setZValue(value)} />
+              <Slider color={props.color} label="+Z / -Z" min={(-props.workSpaceHeight/2) -380} max={(props.workSpaceHeight/2)-380} externalValue={zValue} onChange={(value) => setZValue(value)} />
               <Slider color={props.color} label="+Phi / -Phi" min={-180} max={180} externalValue={phiValue}  onChange={(value) =>setPhiValue(value) } />
             </div>
           )}

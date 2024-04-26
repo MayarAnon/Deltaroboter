@@ -36,16 +36,16 @@ const App = (props) => {
   const [coordinates,setCoordinates] = useState({
     x: 0,
     y: 0,
-    z: 0,
+    z: -280,
     phi: 0,
     actuator: '',
     ton: 0,
     toff: 0
   })
 
-  const handleCoordinateChange = (newCoordinates) =>{
-    setCoordinates(newCoordinates)
-  }
+  const handleCoordinateChange = (newCoordinates) => {
+    setCoordinates(newCoordinates);
+  };
 
   //hier ist das aktuell Geladene Programm gespeichert
   const [items, setItems] = useState([]);
@@ -75,6 +75,7 @@ const App = (props) => {
           modi={Settings.manualMode} 
           gripper={Settings.gripper} 
           speed={Settings.speed} 
+          initialCoordinates={coordinates}
           onCoordinateChange={handleCoordinateChange} 
           menuState={menuState}
           koordinateSystem={Settings.koordinateSystem} 
