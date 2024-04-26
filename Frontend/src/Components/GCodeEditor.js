@@ -8,13 +8,14 @@ import {
   convertSequencesToGCode,
 } from "../utils/parseGCode";
 import "ace-builds/src-noconflict/theme-github";
+import RobotStateDisplay from "./robotstate";
 require("../utils/gcode_mode");
 
 const GCodeEditor = () => {
   const [gCode, setGCode] = useState("");
   const [sequenceName, setSequenceName] = useState("");
   const [originalName, setOriginalName] = useState("");
-  
+
   const sequenceToEdit = 0;
 
   useEffect(() => {
@@ -68,7 +69,6 @@ const GCodeEditor = () => {
     <>
       <div className="gcode-editor">
         <h2>G-Code Editor</h2>
-
         <AceEditor
           mode="gcode"
           theme="github"
@@ -92,6 +92,7 @@ const GCodeEditor = () => {
           style={{ marginBottom: "10px" }}
         />
       </div>
+      <RobotStateDisplay  />
     </>
   );
 };

@@ -214,11 +214,6 @@ wss.on('connection', function connection(ws) {
 // Statische Dateien bedienen
 app.use(express.static(path.join(__dirname, 'build')));
 
-//Anhören nur auf dem HTTP
-// app.listen(port, '0.0.0.0', () => {
-//   console.log(`Server läuft und hört auf Port ${port}`);
-// });
-
 // Anhören sowohl auf dem HTTP- als auch auf dem WebSocket-Server
 server.listen(port, () => {
   console.log(`Server und WebSocket laufen auf Port ${port}`);
