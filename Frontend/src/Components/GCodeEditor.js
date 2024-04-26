@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import AceEditor from "react-ace";
+import {GCodeViewer} from "react-gcode-viewer";
 import { v4 as uuidv4 } from "uuid";
 import "../styles/aceEditorStyles.css";
 import * as sequenceStorage from "../utils/sequenceStorage";
@@ -10,7 +11,14 @@ import {
 import "ace-builds/src-noconflict/theme-github";
 import RobotStateDisplay from "./robotstate";
 require("../utils/gcode_mode");
+const url = "https://github.com/MayarAnon/Deltaroboter/blob/main/Backend/GCodeFiles/6127a7f9aa32f718b8c1ab4f.gcode"
 
+const style = {
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+}
 const GCodeEditor = () => {
   const [gCode, setGCode] = useState("");
   const [sequenceName, setSequenceName] = useState("");
@@ -63,10 +71,18 @@ const GCodeEditor = () => {
         error.stack
       );
     }
-  };
+  }
 
   return (
     <>
+      <div className="gcode-viewer">
+          <GCodeViewer 
+            gcode={gCode} 
+            orbitControls
+            showAxes
+            style={style}
+            url={url}/>
+      </div>
       <div className="gcode-editor">
         <h2>G-Code Editor</h2>
         <AceEditor

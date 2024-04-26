@@ -2,29 +2,40 @@ import React, { useState, useEffect } from 'react';
 
 const RobotStateDisplay = () => {
   const [robotState, setRobotState] = useState({});
+  const [ws, setWs] = useState(null);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://deltarobot.local:3010');
+    function connect() {
+      const websocket = new WebSocket('ws://deltarobot.local:3010');
 
-    ws.onopen = () => {
-      console.log('WebSocket connected');
-    };
+      websocket.onopen = () => {
+        console.log('WebSocket connected');
+      };
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      setRobotState(data);
-    };
+      websocket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        setRobotState(data);
+      };
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
+      websocket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
 
-    ws.onclose = () => {
-      console.log('WebSocket disconnected');
-    };
+      websocket.onclose = (event) => {
+        console.log('WebSocket disconnected', event.reason);
+        // Attempt to reconnect every 5 seconds
+        setTimeout(connect, 5000);
+      };
+
+      setWs(websocket);
+    }
+
+    connect();
 
     return () => {
-      ws.close();
+      if (ws) {
+        ws.close();
+      }
     };
   }, []);
 

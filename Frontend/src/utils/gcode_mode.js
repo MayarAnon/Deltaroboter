@@ -13,20 +13,70 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                 },
                 {
                     token: "command",
-                    // This combines G, M, and T commands into one regex.
-                    regex: "\\b([GM]\\d+|T\\d+)\\b"
+                    regex: "\\b(G0|G1|G2|G3|G17|G18|G19|G28|M100|M200|M300|M400)\\b"
                 },
-                
                 {
-                    token: "error",
-                    regex: "\\b([XYZ])\\s+(-?\\d+\\.?\\d*)\\b"
+                    token: "error", // Fehlende Werte erkennen
+                    regex: "\\b([XYZ])\\b(?![\\s-]*\\d)"
                 },
                 {
                     token: "parameter",
                     regex: "\\b([XYZ])\\s*-?\\d+\\.?\\d*\\b"
+                },
+                {
+                    token: "interpolation", // oder "parameter", wenn du denselben Stil verwenden möchtest
+                    regex: "\\b([IJ])\\s*-?\\d+\\.?\\d*\\b"
+                },
+                {
+                    token: "radius", // Für den R Parameter
+                    regex: "\\bR\\s*-?\\d+\\.?\\d*\\b"
+                },
+                {
+                    token: "feedrate", // Für den F Parameter
+                    regex: "\\bF\\s*-?\\d+\\.?\\d*\\b"
+                },
+                {
+                    token: "speed", // Für den S Parameter
+                    regex: "\\bS\\s*-?\\d+\\b"
+                },
+                {
+                    token: "axis_a", // Für den A Parameter
+                    regex: "\\bA\\s*-?\\d+\\.?\\d*\\b"
+                },
+                {
+                    token: "home",
+                    regex: "\\b(G28)\\b",
+                    next: "home_position"
+                },
+                {
+                    token: "greifer",
+                    regex: "\\b(M100|M200|M300|M400)\\b",
+                    next: "greifer_mode"
                 }
-                
-                // Add more rules as necessary
+            ],
+            "home_position": [
+                {
+                    token: "parameter",
+                    regex: "\\bF\\s*-?\\d*\\.?\\d*\\b",
+                    next: "start"
+                },
+                {
+                    token: "invalid",
+                    regex: "$",
+                    next: "start"
+                }
+            ],
+            "greifer_mode": [
+                {
+                    token: "parameter",
+                    regex: "\\bS\\s*-?\\d+\\b",
+                    next: "start"
+                },
+                {
+                    token: "invalid",
+                    regex: "$",
+                    next: "start"
+                }
             ]
         };
         this.normalizeRules();

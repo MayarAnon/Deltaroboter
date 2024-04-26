@@ -64,20 +64,54 @@
   .gcode-editor .ace_command {
     color: blue;
     font-weight: bold;
-  }
-  
-  .gcode-editor .ace_parameter {
+}
+
+.gcode-editor .ace_parameter {
     color: orange;
     font-weight: bold;
-  }
-  
-  .gcode-editor .ace_error {
+}
+
+.gcode-editor .ace_error {
     background-color: yellow;
     color: red;
     font-weight: bold;
-  }
-  .gcode-editor .ace_comment {
+    padding: 0 4px; /* Hinzufügen von Padding, um den Fehler besser hervorzuheben */
+    border-radius: 4px; /* Abgerundete Ecken für die Fehlermarkierung */
+}
+
+.gcode-editor .ace_comment {
     color: green;
-    font-style: italic; /* Optional: Italicize comments for further distinction */
-  }
-  
+    font-style: italic;
+}
+
+.gcode-editor .ace_interpolation {
+  color: orange;
+  font-weight: bold;
+}
+
+.gcode-editor .ace_radius, .gcode-editor .ace_feedrate,
+.gcode-editor .ace_speed, .gcode-editor .ace_axis_a {
+  color: green;
+  font-weight: bold;
+}
+
+
+.gcode-editor .ace_radius {
+    color: darkred;
+    font-style: oblique; /* Leicht geneigte Schriftart für Radiuswerte */
+}
+
+.gcode-editor .ace_home {
+    color: darkblue;
+    background-color: lightblue;
+    font-weight: bold;
+    border-left: 3px solid darkblue; /* Linke Grenze zur Markierung der Home-Befehle */
+    padding-left: 5px; /* Zusätzliches Padding für bessere Lesbarkeit */
+}
+
+.gcode-editor .ace_greifer {
+    color: chocolate;
+    background-color: beige;
+    font-weight: bold;
+    text-decoration: overline; /* Überstrich zur Hervorhebung von Greiferbefehlen */
+}
