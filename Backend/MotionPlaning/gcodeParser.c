@@ -29,7 +29,7 @@ void processLine(const char* line) {
 
     // Initialisiere Parameter mit Standardwerten
     x = y  = i = j = phi = t = r = 0.0;
-    f = 100;
+    f = 75;
     z = -280.0;
     // Extrahiere den Befehlstyp aus der Zeile
     numParams = sscanf(line, "%s", command);
@@ -327,6 +327,13 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     Steps localSteps = currentSteps;          // Lokale Kopie der Schrittzahlen
     double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
 
+    //pulsweite von den Motorpulsen auf 100% Skalieren 330 maximale minimale bei 105% 15µs
+    //int pulsewith = f;
+    int pulsewith = 220 - 2 * f;
+    if (pulsewith < 15) {
+        pulsewith = 15;
+    }
+
     cJSON* jsonRoot = cJSON_CreateArray();
     long long totalDuration = 0;
     bool errorOccurred = false;
@@ -359,7 +366,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             maxSteps = fmax(maxSteps, abs(steps[i].Motor3));
             maxSteps = fmax(maxSteps, abs(steps[i].Motor4));
 
-            long long stepDuration = (long long)(maxSteps * 2 * f);
+            long long stepDuration = (long long)(maxSteps * 2 * pulsewith);
             totalDuration += stepDuration;
 
             localErrorAccumulators[0] = stepCalc1 - steps[i].Motor1;
@@ -389,7 +396,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                     cJSON* stepObj = cJSON_CreateObject();
                     cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)f, (int)f, 5}, 3));
+                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewith, (int)pulsewith, 5}, 3));
                     cJSON_AddItemToArray(jsonRoot, stepObj);
                 }
             }
