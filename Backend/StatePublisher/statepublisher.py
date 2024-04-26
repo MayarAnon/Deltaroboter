@@ -32,27 +32,33 @@ def on_connect(client, userdata, flags, rc):
 
 # MQTT Callback für das Empfangen von Nachrichten
 def on_message(client, userdata, msg):
-    data = json.loads(msg.payload.decode('utf-8'))
-    # Aktualisiere den Roboterzustand basierend auf dem empfangenen Topic
-    if msg.topic == 'homing/feedback':
-        robot_state['homing'] = data
-    elif msg.topic == 'current/coordinates':
-        robot_state['currentCoordinates'] = data
-    elif msg.topic == 'current/angles':
-        robot_state['currentAngles'] = data
-    elif msg.topic == 'gripper/feedback':
-        robot_state['gripperFeedback'] = data
-    elif msg.topic == 'gripper/mode':
-        if data in ["parallelGripper", "complientGripper", "magnetGripper", "vacuumGripper"]:
-            robot_state['gripperMode'] = data
-        else:
-            print(f"Received invalid gripper mode: {data}")
-    elif msg.topic == 'motors/speed':
-        robot_state['motorsSpeed'] = data
-    
-    # Veröffentliche den aktuellen Robotstate
-    client.publish("robot/state", json.dumps(robot_state))
-
+    try:
+        data = json.loads(msg.payload.decode('utf-8'))
+        # Aktualisiere den Roboterzustand basierend auf dem empfangenen Topic
+        if msg.topic == 'homing/feedback':
+            robot_state['homing'] = data
+        elif msg.topic == 'current/coordinates':
+            robot_state['currentCoordinates'] = data
+        elif msg.topic == 'current/angles':
+            robot_state['currentAngles'] = data
+        elif msg.topic == 'gripper/feedback':
+            robot_state['gripperFeedback'] = data
+        elif msg.topic == 'gripper/mode':
+            if data in ["parallelGripper", "complientGripper", "magnetGripper", "vacuumGripper"]:
+                robot_state['gripperMode'] = data
+            else:
+                raise ValueError(f"Received invalid gripper mode: {data}")
+        elif msg.topic == 'motors/speed':
+            robot_state['motorsSpeed'] = data
+        
+        # Veröffentliche den aktuellen Robotstate
+        client.publish("robot/state", json.dumps(robot_state))
+    except json.JSONDecodeError:
+        print("Error decoding JSON")
+    except ValueError as e:
+        print(e)
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
 # Initialisiere und starte den MQTT-Client
 client = mqtt.Client()
 client.on_connect = on_connect
