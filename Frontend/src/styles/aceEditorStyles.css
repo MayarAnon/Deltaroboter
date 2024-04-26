@@ -85,14 +85,14 @@
 }
 
 .gcode-editor .ace_interpolation {
-  color: orange;
-  font-weight: bold;
+    color: orange;
+    font-weight: bold;
 }
 
 .gcode-editor .ace_radius, .gcode-editor .ace_feedrate,
 .gcode-editor .ace_speed, .gcode-editor .ace_axis_a {
-  color: green;
-  font-weight: bold;
+    color: green;
+    font-weight: bold;
 }
 
 

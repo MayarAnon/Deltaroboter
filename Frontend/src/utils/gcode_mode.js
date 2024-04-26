@@ -1,4 +1,3 @@
-// Ensure ace is imported in your project to have ace.define available
 import ace from 'ace-builds/src-noconflict/ace';
 ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/mode/text_highlight_rules'], function(require, exports, module) {
     var oop = require("ace/lib/oop");
@@ -18,6 +17,17 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                 {
                     token: "error", // Fehlende Werte erkennen
                     regex: "\\b([XYZ])\\b(?![\\s-]*\\d)"
+                },
+                {
+                    token: "warning", // Feedrate F darf 105 nicht überschreiten
+                    regex: "\\bF(\\d+\\.?\\d*)\\b",
+                    onMatch: function(value, currentState, stack, line) {
+                        var speed = parseFloat(value.substring(1)); // Extrahiere die Zahl nach 'F'
+                        if(speed > 105) {
+                            return "error"; // Setze die Klasse auf 'error', wenn das Limit überschritten ist
+                        }
+                        return "parameter"; // Ansonsten normales Parameter-Highlighting
+                    }
                 },
                 {
                     token: "parameter",
@@ -52,7 +62,8 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                     token: "greifer",
                     regex: "\\b(M100|M200|M300|M400)\\b",
                     next: "greifer_mode"
-                }
+                },
+                
             ],
             "home_position": [
                 {
