@@ -30,6 +30,39 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                     }
                 },
                 {
+                    token: "text", // Standard-Token
+                    regex: "\\b([XYZ])\\s*(-?\\d+\\.?\\d*)\\b",
+                    onMatch: function(value, currentState, stack, line) {
+                        const match = value.match(/([XYZ])\s*(-?[\d.]+)/);
+                        const axis = match[1];
+                        const position = parseFloat(match[2]);
+                
+                        // Grenzwerte für die Z-Achse
+                        const zLimits = {min: -480, max: -280};
+                        // Radius des Zylinders
+                        const cylinderRadius = 200;
+                
+                        // Überprüfung für die Z-Achse
+                        if (axis === 'Z' && (position < zLimits.min || position > zLimits.max)) {
+                            return "error"; // Außerhalb der Z-Achsen-Grenzen
+                        }
+                
+                        // Überprüfung für X und Y Achsen, wenn sie in der gleichen Zeile sind
+                        const xyMatch = line.match(/X\s*(-?\d+\.?\d*)\s*Y\s*(-?\d+\.?\d*)/);
+                        if (xyMatch) {
+                            const x = parseFloat(xyMatch[1]);
+                            const y = parseFloat(xyMatch[2]);
+                            if (x*x + y*y > cylinderRadius*cylinderRadius) {
+                                return "error"; // Außerhalb des Zylinderradius
+                            }
+                        }
+                
+                        // Wenn keine Fehler gefunden wurden
+                        return "parameter";
+                    }
+                },
+                
+                {
                     token: "parameter",
                     regex: "\\b([XYZ])\\s*-?\\d+\\.?\\d*\\b"
                 },
