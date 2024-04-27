@@ -39,7 +39,11 @@ const LoadProgrammList = () => {
           />
         ))
       ) : (
-        <p>Keine Programme verfügbar.</p>
+        <>
+         <div className="flex justify-center items-center h-screen">
+        <img src="loading.gif" className="object-contain object-center w-24 h-24" alt="Load Icon"/>
+        </div>
+        </>
       )}
     </>
     );
@@ -52,7 +56,7 @@ const LoadProgrammList = () => {
     const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
     const [expand,SetExpand] = useState(false)
     const [isMenuHidden,setMenuHidden] = useState(false)
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    
   
     const handleExpandChange =()=>{
       SetExpand(!expand)
@@ -102,30 +106,33 @@ const LoadProgrammList = () => {
           console.error('Fehler beim Publizieren des Programms:', error);
         });
       };
-      
+
+      const [isModalOpenRun, setIsModalOpenRun] = useState(false);
+      const [isModalOpenDelete, setIsModalOpenDelete] = useState(false);
+
       const RunhandleOpenModal = () => {
-        setIsModalOpen(true);
+        setIsModalOpenRun(true);
       };
     
       const RunhandleCloseModal = () => {
-        setIsModalOpen(false);
+        setIsModalOpenRun(false);
       };
     
       const RunhandleConfirm = () => {
         handleRun()
-        setIsModalOpen(false);
+        setIsModalOpenRun(false);
       };
       const DeletehandleOpenModal = () => {
-        setIsModalOpen(true);
+        setIsModalOpenDelete(true);
       };
     
       const DeletehandleCloseModal = () => {
-        setIsModalOpen(false);
+        setIsModalOpenDelete(false);
       };
     
       const DeletehandleConfirm = () => {
         handleDelete()
-        setIsModalOpen(false);
+        setIsModalOpenDelete(false);
       };
   
     return(
@@ -134,14 +141,14 @@ const LoadProgrammList = () => {
           <>
           <ConfirmationModal
           color={color}
-          isOpen={isModalOpen}
+          isOpen={isModalOpenRun}
           onClose={RunhandleCloseModal}
           onConfirm={RunhandleConfirm}
           text={"Run Program"}
           />
           <ConfirmationModal
           color={color}
-          isOpen={isModalOpen}
+          isOpen={isModalOpenDelete}
           onClose={DeletehandleCloseModal}
           onConfirm={DeletehandleConfirm}
           text={"Delete Program"}
