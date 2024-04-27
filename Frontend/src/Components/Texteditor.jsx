@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import hljs from 'highlight.js';
 import 'highlight.js/styles/monokai.css';
-import { useString } from './StringContext';
+
+import { useRecoilState } from "recoil";
+import { settingAtom,gCodeStringAtom } from "../utils/atoms";
 
 // Unterfunktion zur Highlighting des G-Codes
 const highlightCode = (code) => {
@@ -34,14 +36,14 @@ const HighlightedCode = ({ text }) => {
 };
 
 const TextEditor = (props) => {
-  const { sharedString, setSharedString } = useString();
-
+  const { sharedString, setSharedString } = useRecoilState(gCodeStringAtom);
+  const [settings, setSettings] = useRecoilState(settingAtom);
   const handleChange = (e) => {
     setSharedString(e.target.value);
   };
 
   return (
-    <div style={{ backgroundColor: props.color }} className="p-4 text-white rounded-xl mx-5 border-4 border-black">
+    <div style={{ backgroundColor: settings.color }} className="p-4 text-white rounded-xl mx-5 border-4 border-black">
       <textarea
         value={sharedString}
         onChange={handleChange}

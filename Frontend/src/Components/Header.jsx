@@ -1,25 +1,27 @@
 import React,{ useState} from 'react';
 import ConfirmationModal from './ConfirmationModal';
-
-
+import { useRecoilState } from "recoil";
+import {settingAtom} from "../utils/atoms";
+import { useNavigate } from 'react-router-dom';
 
 // Header-Komponente
-const Header = (props) => {
+const Header = () => {
     // State-Hook, um den Anzeigezustand des Menüs zu verwalten
+    const [settings,setSettings] = useRecoilState(settingAtom);
     const [isMenuHidden, setMenuHidden] = React.useState(true);
     const [darkMode, setDarkMode] = React.useState(0); // Zustand für Dark Mode
-  
+    const navigate = useNavigate();
     const ManualMode = () => {
-      props.callback(1)
+      navigate('/');
     }
     const PickPlaceMode = () => {
-      props.callback(2)
+      navigate('/pick-and-place')
     }
     const SettingsMode = () => {
-      props.callback(3)
+      navigate('/settings')
     }
     const GCode = () =>{
-      props.callback(4)
+      navigate('/gcode-editor')
     }
 
 
@@ -58,7 +60,7 @@ const Header = (props) => {
   
     return (
     <>
-      <div style={{ backgroundColor: props.color }} className={`p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black`}>
+      <div style={{ backgroundColor: settings.color}} className={`p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black`}>
         <div className="text-3xl sm:text-l flex item-center">Deltaroboter
         <button
               className=" inline-block ml-4 "
@@ -93,7 +95,7 @@ const Header = (props) => {
         </div>
       </div>
       {isMenuHidden === true && (
-      <div style={{ backgroundColor: props.color }} className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
+      <div style={{ backgroundColor: settings.color }} className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
             <div className="flex justify-between items-center w-full">
               <button onClick={GCode} className="px-2 smm:px-4 py-2 ml-2 border-2 border-white rounded hover:bg-black">
                 <img src="GCode.png" className=" object-contain object-center w-10 h-10"></img>

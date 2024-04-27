@@ -1,12 +1,14 @@
 import React, { useState,useEffect} from 'react';
 import axios from 'axios';
 import {HighlightedCode} from './Texteditor'
-import { useString } from './StringContext';
+import { useRecoilState } from "recoil";
+import { settingAtom,gCodeStringAtom } from "../utils/atoms";
 
-const LoadProgrammList = (props) => {
+const LoadProgrammList = () => {
     
     const [programmlist, SetProgrammList] = useState([]);
-
+    const [settings, setSettings] = useRecoilState(settingAtom);
+    
     
   
   
@@ -29,7 +31,7 @@ const LoadProgrammList = (props) => {
       {programmlist && programmlist.length > 0 ? (
         programmlist.map((programm) => (
           <LoadProgramm
-            color ={props.color}
+            color ={settings.color}
             name={programm.fileName}
             content = {programm.content}
           />
@@ -43,10 +45,9 @@ const LoadProgrammList = (props) => {
 
 
   const LoadProgramm = ({color,name,content}) =>{
+    const { sharedString, setSharedString } =  useRecoilState(gCodeStringAtom);
     const [expand,SetExpand] = useState(false)
     const [isMenuHidden,setMenuHidden] = useState(false)
-
-    const { sharedString, setSharedString } = useString();
 
   
     const handleExpandChange =()=>{

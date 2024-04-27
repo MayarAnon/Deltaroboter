@@ -1,15 +1,16 @@
 import React, { useState} from 'react';
-import { useString } from './StringContext';
 import axios from 'axios';
 import {TextEditor} from './Texteditor';
 import LoadProgrammList from './ProgrammList'
+import { useRecoilState } from "recoil";
+import { settingAtom,gCodeStringAtom } from "../utils/atoms";
+import GCodeEditor from "./GCodeEditor";
 
 
-
-const GCode = (props) =>{
-
+const GCode = (p) =>{
+    const [settings, setSettings] = useRecoilState(settingAtom);
     const [GCodemode, setGCodemode] = useState(0);
-    const { sharedString, setSharedString } = useString();
+    const { sharedString, setSharedString } =  useRecoilState(gCodeStringAtom);
     const [name,setName] = useState("")
 
     const updateModeGCode = (modi) => {
@@ -58,7 +59,7 @@ const GCode = (props) =>{
 
     return(
         <>
-            <div style={{ backgroundColor: props.color }} className="p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black">
+            <div style={{ backgroundColor: settings.color }} className="p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black">
           <div className="text-3xl sm:text-l ">G-Code</div>
           <div className='flex space-x-2 '>
             
@@ -101,7 +102,7 @@ const GCode = (props) =>{
           </div>
         </div>
         {isMenuHidden === true && (
-        <div style={{ backgroundColor: props.color }} className="sm:hidden mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
+        <div style={{ backgroundColor: settings.color }} className="sm:hidden mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
             <div className="flex flex-row justify-between items-center w-full">
                 <div className={"md:hidden"} id="menu">
                 
@@ -140,7 +141,7 @@ const GCode = (props) =>{
         </div>)}
 
         {GCodemode === 3 && (
-          <div style={{ backgroundColor: props.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
+          <div style={{ backgroundColor: settings.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
             <div className="flex flex-col sm:flex-row justify-between items-center w-full">
               <label className="text-white mb-2 mr-2 font-bold">Speichern Unter:</label>
               <input
@@ -158,10 +159,10 @@ const GCode = (props) =>{
           </div>
         )}
         {GCodemode === 2 &&(
-            <TextEditor color={props.color} menuState={props.menuState}/>
+            <GCodeEditor />
         )}
         {GCodemode === 1 &&(
-            <div style={{ backgroundColor: props.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
+            <div style={{ backgroundColor: settings.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
             <button onClick={LoadProgramm}
               className="flex w-full justify-center items-center px-4 py-2 border-2 border-white text-white bg-red-700 font-bold rounded hover:bg-black"
             >
@@ -171,7 +172,7 @@ const GCode = (props) =>{
           
         )}
         {GCodemode === 4 &&(
-           <LoadProgrammList color={props.color}/>
+           <LoadProgrammList/>
         )}
         </>
     )

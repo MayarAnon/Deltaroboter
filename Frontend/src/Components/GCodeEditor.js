@@ -92,7 +92,7 @@ const GCodeEditor = () => {
           style={{ marginBottom: "10px" }}
         />
       </div>
-      <RobotStateDisplay  />
+      {/* <RobotStateDisplay  /> */}
     </>
   );
 };
