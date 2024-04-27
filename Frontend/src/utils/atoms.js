@@ -22,7 +22,7 @@ export const yValueAtom = atom({
 
 export const zValueAtom = atom({
   key: 'zValueAtom',
-  default: 0,  // Adjust the default value as needed
+  default: -280,  // Adjust the default value as needed
 });
 
 export const phiValueAtom = atom({

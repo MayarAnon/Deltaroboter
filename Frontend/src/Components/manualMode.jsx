@@ -10,6 +10,7 @@ import {
   actuatorAtom,
   settingAtom,
 } from "../utils/atoms";
+
 const ManuellMode = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [xValue, setXValue] = useRecoilState(xValueAtom);
@@ -19,6 +20,11 @@ const ManuellMode = () => {
   const [actuator, setActuator] = useRecoilState(actuatorAtom);
 
   const countIntervalRef = useRef(null);
+
+  const calculateStep = () => {
+    // Berechnet Schritte von 0.1 bis 10 basierend auf settings.speed
+    return 0.1 + (settings.speed / 100) * 9.9;
+  };
 
   const handleMouseDown = (axis, direction) => {
     if (countIntervalRef.current) {
@@ -32,29 +38,35 @@ const ManuellMode = () => {
       case "x":
         setter = setXValue;
         valueChecker = (value) => {
+          const step = calculateStep() * direction; // Richtung und Schrittgröße einbeziehen
+          const newX = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
           const newY = yValue;
-          const newX = value + direction;
-          return newX * newX + newY * newY <= 40000 ? newX : value; // Begrenzung des Kreisradius
+          return newX * newX + newY * newY <= 40000 ? newX : value;
         };
         break;
       case "y":
         setter = setYValue;
         valueChecker = (value) => {
+          const step = calculateStep() * direction;
+          const newY = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
           const newX = xValue;
-          const newY = value + direction;
-          return newX * newX + newY * newY <= 40000 ? newY : value; // Begrenzung des Kreisradius
+          return newX * newX + newY * newY <= 40000 ? newY : value;
         };
         break;
       case "z":
         setter = setZValue;
         valueChecker = (value) => {
-          const newZ = value + direction;
-          return newZ >= -480 && newZ <= -280 ? newZ : value; // Begrenzung der Z-Werte
+          const step = calculateStep() * direction;
+          const newZ = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+          return newZ >= -480 && newZ <= -280 ? newZ : value;
         };
         break;
       case "phi":
         setter = setPhiValue;
-        valueChecker = (value) => value + direction; // Für phi könnte eine andere Art von Begrenzung notwendig sein
+        valueChecker = (value) => {
+          const step = calculateStep() * direction;
+          return parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+        };
         break;
       default:
         return;
@@ -62,13 +74,16 @@ const ManuellMode = () => {
 
     countIntervalRef.current = setInterval(() => {
       setter((prevValue) => valueChecker(prevValue));
-    }, Math.max(0, 100 - settings.speed)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
+    }, Math.max(0, 100 - settings.speed * 0.1)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
   };
 
   const handleMouseUpOrLeave = () => {
     clearInterval(countIntervalRef.current);
-    sendCoordinates(); // Aufruf der sendCoordinates Funktion, wenn die Maus losgelassen wird
   };
+
+  useEffect(() => {
+    sendCoordinates(); // Ruft sendCoordinates auf, wenn sich einer der Werte ändert
+  }, [xValue, yValue, zValue, phiValue]); // Abhängigkeiten des useEffect Hooks
 
   const sendCoordinates = async () => {
     const coordinates = [
@@ -151,7 +166,7 @@ const ManuellMode = () => {
             {/* Oben */}
             <button
               style={{ backgroundColor: settings.color }}
-              className=" text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-blackborder-4 border-black"
+              className="select-none text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-blackborder-4 border-black"
               onMouseDown={() => handleMouseDown("y", 1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -164,7 +179,7 @@ const ManuellMode = () => {
             <div className="flex">
               <button
                 style={{ backgroundColor: settings.color }}
-                className=" mr-10 sm:mr-16 style={{ backgroundColor: settings.color }} text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+                className="select-none mr-10 sm:mr-16 style={{ backgroundColor: settings.color }} text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
                 onMouseDown={() => handleMouseDown("x", -1)}
                 onMouseUp={handleMouseUpOrLeave}
                 onMouseLeave={handleMouseUpOrLeave}
@@ -175,7 +190,7 @@ const ManuellMode = () => {
               </button>
               <button
                 style={{ backgroundColor: settings.color }}
-                className="ml-10 sm:ml-16  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+                className="select-none ml-10 sm:ml-16  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
                 onMouseDown={() => handleMouseDown("x", 1)}
                 onMouseUp={handleMouseUpOrLeave}
                 onMouseLeave={handleMouseUpOrLeave}
@@ -188,7 +203,7 @@ const ManuellMode = () => {
             {/* Unten */}
             <button
               style={{ backgroundColor: settings.color }}
-              className=" text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl sm:mb-2 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
               onMouseDown={() => handleMouseDown("y", -1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -204,7 +219,7 @@ const ManuellMode = () => {
             {/* +z Button */}
             <button
               style={{ backgroundColor: settings.color }}
-              className=" text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-16 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-16 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
               onMouseDown={() => handleMouseDown("z", 1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -216,7 +231,7 @@ const ManuellMode = () => {
             {/* -z Button */}
             <button
               style={{ backgroundColor: settings.color }}
-              className="  text-white  w-20 h-20 sm:w-32 sm:h-32 rounded-xl text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none text-white  w-20 h-20 sm:w-32 sm:h-32 rounded-xl text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
               onMouseDown={() => handleMouseDown("z", -1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -234,7 +249,7 @@ const ManuellMode = () => {
             {/* Phi + Button */}
             <button
               style={{ backgroundColor: settings.color }}
-              className=" text-white w-20 h-20 sm:w-32 sm:h-32  rounded-xl text-3xl mr-2 flex items-center justify-center hover:bg-black  border-4 border-black"
+              className=" select-none text-white w-20 h-20 sm:w-32 sm:h-32  rounded-xl text-3xl mr-2 flex items-center justify-center hover:bg-black  border-4 border-black"
               onMouseDown={() => handleMouseDown("phi", 1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -246,7 +261,7 @@ const ManuellMode = () => {
             {/* Phi - Button */}
             <button
               style={{ backgroundColor: settings.color }}
-              className=" text-white w-20 h-20 sm:w-32 sm:h-32  rounded-xl text-3xl ml-2 flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none text-white w-20 h-20 sm:w-32 sm:h-32  rounded-xl text-3xl ml-2 flex items-center justify-center hover:bg-black border-4 border-black"
               onMouseDown={() => handleMouseDown("phi", -1)}
               onMouseUp={handleMouseUpOrLeave}
               onMouseLeave={handleMouseUpOrLeave}
@@ -262,7 +277,7 @@ const ManuellMode = () => {
             <button
               onClick={() => setActuator("On")}
               style={{ backgroundColor: settings.color }}
-              className="   text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mr-2 sm:mr-0 sm:mb-16 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mr-2 sm:mr-0 sm:mb-16 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
             >
               On
             </button>
@@ -270,7 +285,7 @@ const ManuellMode = () => {
             <button
               onClick={() => setActuator("Off")}
               style={{ backgroundColor: settings.color }}
-              className="  text-white  w-20 h-20 sm:w-32 sm:h-32 rounded-xl ml-2 sm:ml-0 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none text-white  w-20 h-20 sm:w-32 sm:h-32 rounded-xl ml-2 sm:ml-0 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
             >
               Off
             </button>
