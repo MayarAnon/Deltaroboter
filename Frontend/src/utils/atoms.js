@@ -37,5 +37,10 @@ export const actuatorAtom = atom({
 
 export const gCodeStringAtom = atom({
   key: 'gCodeStringAtom',
-  default: "Hier Ihren G-Code eingeben...",  // Adjust the default value as needed, assuming it's a string
+  default: { name: '', content: '' },  // Adjust the default value as needed, assuming it's a string
+});
+
+export const gCodeModeAtom = atom({
+  key: 'gCodeModeAtom',
+  default:0,  // Adjust the default value as needed, assuming it's a string
 });

@@ -86,7 +86,6 @@ const SettingsPage = () => {
           onConfirm={calibratehandleConfirm}
           text={"Deltaroboter Kalibrieren"}
         />
-        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <label>Geschwindigkeit: {settings.speed}%</label>
           <input

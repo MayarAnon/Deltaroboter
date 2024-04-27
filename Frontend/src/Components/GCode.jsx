@@ -3,23 +3,20 @@ import axios from 'axios';
 import {TextEditor} from './Texteditor';
 import LoadProgrammList from './ProgrammList'
 import { useRecoilState } from "recoil";
-import { settingAtom,gCodeStringAtom } from "../utils/atoms";
+import { settingAtom,gCodeStringAtom,gCodeModeAtom } from "../utils/atoms";
 import GCodeEditor from "./GCodeEditor";
 
 
 const GCode = (p) =>{
     const [settings, setSettings] = useRecoilState(settingAtom);
-    const [GCodemode, setGCodemode] = useState(0);
-    const { sharedString, setSharedString } =  useRecoilState(gCodeStringAtom);
-    const [name,setName] = useState("")
+    const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
+    const [sharedString, setSharedString ] =  useRecoilState(gCodeStringAtom);
 
     const updateModeGCode = (modi) => {
         setGCodemode(modi);
         console.log(modi)
       }
-
     const [isMenuHidden, setMenuHidden] = React.useState(true);
-
     const toggleMenu = () => {
     setMenuHidden(!isMenuHidden);
     };
@@ -28,14 +25,8 @@ const GCode = (p) =>{
         const address = "http://deltarobot:3010/gcode";
     
       // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
-      const programData = {
-        name: name, // Stellen Sie sicher, dass name in Ihrer Komponente verfügbar ist
-        content: sharedString // Stellen Sie sicher, dass items in Ihrer Komponente verfügbar ist
-      };
     
-      console.log(programData);
-    
-      axios.post(address, programData)
+      axios.post(address, sharedString)
         .then(response => {
           console.log('Daten erfolgreich gesendet:', response.data);
           // Fügen Sie hier den Code hinzu, um den gespeicherten Datensatz in Ihrer Komponente zu verarbeiten oder anzuzeigen, falls erforderlich.
@@ -46,16 +37,13 @@ const GCode = (p) =>{
     }
 
     const handleNameChange = (e) =>{
-        setName(e.target.value)
+      console.log(e.target.value)
+      setSharedString((prevSettings) => ({
+        ...prevSettings,
+        name: e.target.value,
+      }));
     }
-
-    const LoadProgramm = (e) =>{
-      console.log(name);
-  }
-
-
-    
-
+ 
 
     return(
         <>
@@ -70,33 +58,24 @@ const GCode = (p) =>{
             
             <button
               className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-              onClick={() => { GCodemode === 4 ? updateModeGCode(0) : updateModeGCode(4) }}
+              onClick={() => {  updateModeGCode(0) }}
               >
-              {GCodemode === 4 ?
-               <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
+            
+               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>
             </button>
             <button
               className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-              onClick={() => { GCodemode === 2 ? updateModeGCode(0) : updateModeGCode(2) }}
+              onClick={() => {  updateModeGCode(1) }}
             >
+              
+               <img src="GCode.png" className="object-contain object-center w-10 h-10"/>
+            </button>
+            <button
+              className="px-4 py-2  rounded hover:bg-black" onClick={() => { GCodemode === 2 ? updateModeGCode(1) : updateModeGCode(2) }}>
+              
               {GCodemode === 2 ?
                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="GCode.png" className="object-contain object-center w-10 h-10"/>}
-            </button>
-            <button
-              className="px-4 py-2 border-2 border-white rounded hover:bg-black" onClick={() => { GCodemode === 3 ? updateModeGCode(0) : updateModeGCode(3) }}>
-              {GCodemode === 3 ?
-               <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
                <img src="Saveicon.png" className="object-contain object-center w-10 h-10"/>}
-            </button>
-            <button
-            className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-            onClick={() => GCodemode === 1 ? updateModeGCode(0) : updateModeGCode(1)}
-                >
-            {GCodemode === 1 ?
-                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-                <img src="Deployicon.png" className='$ object-contain object-center w-10 h-10 '/>}
             </button>
             </div>
           </div>
@@ -108,48 +87,40 @@ const GCode = (p) =>{
                 
                 <button
                 className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-                onClick={() => { GCodemode === 4 ? updateModeGCode(0) : updateModeGCode(4) }}
+                onClick={() => {  updateModeGCode(0) }}
                 >
-                {GCodemode === 4 ?
-                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-                <img src="Loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>}
+                <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>
                 </button>
                 <button
                 className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-                onClick={() => { GCodemode === 2 ? updateModeGCode(0) : updateModeGCode(2) }}
+                onClick={() => {  updateModeGCode(1) }}
                 >
-                {GCodemode === 2 ?
-                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-                <img src="GCode.png" className="object-contain object-center w-10 h-10"/>}
+                <img src="GCode.png" className="object-contain object-center w-10 h-10"/>
                 </button>
                 <button
-                className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black" onClick={() => { GCodemode === 3 ? updateModeGCode(0) : updateModeGCode(3)}}>
-                {GCodemode === 3 ?
-                <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-                <img src="Saveicon.png" className="object-contain object-center w-10 h-10"/>}
-                </button>
-                <button
-                    className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-                    onClick={() => GCodemode === 1 ? updateModeGCode(0) : updateModeGCode(1)}
-                >
-                    {GCodemode === 1 ?
-                        <img src="Closeicon.png" className="object-contain object-center w-10 h-10" /> :
-                        <img src="Deployicon.png" className='$ object-contain object-center w-10 h-10 ' />}
-                </button>
+              className="px-4 py-2  rounded hover:bg-black" onClick={() => { GCodemode === 2 ? updateModeGCode(1) : updateModeGCode(2) }}>
+              
+              {GCodemode === 2 ?
+               <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
+               <img src="Saveicon.png" className="object-contain object-center w-10 h-10"/>}
+            </button>
+                
                 </div>
             </div>
         </div>)}
 
-        {GCodemode === 3 && (
-          <div style={{ backgroundColor: settings.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
+        {GCodemode === 2 && (
+          <>
+          <div style={{ backgroundColor: settings.color }} className="mx-5 p-2 border-4 border-black rounded-2xl flex items-center justify-between">
             <div className="flex flex-col sm:flex-row justify-between items-center w-full">
               <label className="text-white mb-2 mr-2 font-bold">Speichern Unter:</label>
               <input
+                value={sharedString.name}
                 onChange={handleNameChange}
-                className="text-black rounded p-2 flex-grow sm:mr-5 mt-4 mb-4 sm:mt-0 sm:mb-0" // Abstand zwischen Eingabefeld und Button
+                className="text-black rounded p-1 flex-grow sm:mr-5 mt-4 mb-4 sm:mt-0 sm:mb-0" // Abstand zwischen Eingabefeld und Button
               />
               <button
-                className="px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
+                className="px-4 py-1 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                 onClick={saveGCode}
               >
                 Speichern
@@ -157,21 +128,14 @@ const GCode = (p) =>{
             </div>
   
           </div>
+          
+          </>
         )}
-        {GCodemode === 2 &&(
+        {(GCodemode === 1 || GCodemode === 2) &&(
             <GCodeEditor />
         )}
-        {GCodemode === 1 &&(
-            <div style={{ backgroundColor: settings.color }} className="mx-5 p-4 border-4 border-black rounded-2xl flex flex-row items-center justify-between">
-            <button onClick={LoadProgramm}
-              className="flex w-full justify-center items-center px-4 py-2 border-2 border-white text-white bg-red-700 font-bold rounded hover:bg-black"
-            >
-              Laden
-            </button>
-          </div>
-          
-        )}
-        {GCodemode === 4 &&(
+        
+        {GCodemode === 0 &&(
            <LoadProgrammList/>
         )}
         </>

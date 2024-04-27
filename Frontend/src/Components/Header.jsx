@@ -89,7 +89,7 @@ const Header = () => {
           <button onClick={SettingsMode} className="px-4 py-2 border-2 border-white rounded hover:bg-black">
           <img src="Settingsicon.png" className=" object-contain object-center w-10 h-10"></img>
           </button>
-          <button onClick={toggleDarkMode} className="px-4 py-2 border-2 border-white rounded hover:bg-black"> 
+          <button onClick={toggleDarkMode} className="px-4 py-2 rounded hover:bg-black"> 
             <img src="Darkmodeicon.png" className="object-contain object-center w-10 h-10"></img>
           </button>
         </div>
@@ -110,7 +110,7 @@ const Header = () => {
               <button onClick={SettingsMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black">
                 <img src="Settingsicon.png" className=" object-contain object-center w-10 h-10"></img>
               </button>
-              <button onClick={toggleDarkMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"> 
+              <button onClick={toggleDarkMode} className="px-2 smm:px-4 py-2 rounded hover:bg-black"> 
                 <img src="Darkmodeicon.png" className="object-contain object-center w-10 h-10"></img>
               </button>
             </div>

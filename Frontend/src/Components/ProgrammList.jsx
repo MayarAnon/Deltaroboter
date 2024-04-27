@@ -2,16 +2,14 @@ import React, { useState,useEffect} from 'react';
 import axios from 'axios';
 import {HighlightedCode} from './Texteditor'
 import { useRecoilState } from "recoil";
-import { settingAtom,gCodeStringAtom } from "../utils/atoms";
+import { settingAtom,gCodeStringAtom,gCodeModeAtom } from "../utils/atoms";
+import ConfirmationModal from "./ConfirmationModal";
 
 const LoadProgrammList = () => {
     
     const [programmlist, SetProgrammList] = useState([]);
     const [settings, setSettings] = useRecoilState(settingAtom);
-    
-    
-  
-  
+    const [reloadTrigger, setReloadTrigger] = useState(0);
     useEffect(() => {
       // Hier rufen wir den Express-Endpunkt auf, wenn die Komponente montiert wird
       axios
@@ -24,16 +22,20 @@ const LoadProgrammList = () => {
         .catch((error) => {
           console.error('Fehler beim Abrufen der Daten:', error);
         });
-    }, []); // Das leere Array als zweites Argument stellt sicher, dass dieser Effekt nur einmal beim Montieren der Komponente ausgeführt wird
-  
+    }, [reloadTrigger]); // Das leere Array als zweites Argument stellt sicher, dass dieser Effekt nur einmal beim Montieren der Komponente ausgeführt wird
+    const triggerReload = () => {
+      setReloadTrigger(prev => prev + 1);  // Inkrement des Triggers
+    };
     return (
       <>
       {programmlist && programmlist.length > 0 ? (
         programmlist.map((programm) => (
           <LoadProgramm
+            key={programm.fileName} 
             color ={settings.color}
             name={programm.fileName}
             content = {programm.content}
+            onDelete ={triggerReload}
           />
         ))
       ) : (
@@ -44,11 +46,13 @@ const LoadProgrammList = () => {
   };
 
 
-  const LoadProgramm = ({color,name,content}) =>{
-    const { sharedString, setSharedString } =  useRecoilState(gCodeStringAtom);
+  const LoadProgramm = ({color,name,content,onDelete}) =>{
+    const [sharedString, setSharedString ] =  useRecoilState(gCodeStringAtom);
+    
+    const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
     const [expand,SetExpand] = useState(false)
     const [isMenuHidden,setMenuHidden] = useState(false)
-
+    const [isModalOpen, setIsModalOpen] = useState(false);
   
     const handleExpandChange =()=>{
       SetExpand(!expand)
@@ -58,7 +62,8 @@ const LoadProgrammList = () => {
       };
 
     const handleLoadProgramm =() =>{
-        setSharedString(content);
+      setSharedString({ name, content })
+      setGCodemode(1)
     }
 
     const handleDelete = () => {
@@ -67,20 +72,80 @@ const LoadProgrammList = () => {
         axios.delete(address)
           .then(response => {
             console.log('Datei erfolgreich gelöscht:', response.data);
-            // Hier können Sie Ihren Code hinzufügen, um die Antwort zu verarbeiten oder anzuzeigen, falls erforderlich.
+            onDelete();
           })
           .catch(error => {
             console.error('Fehler beim Löschen der Datei:', error);
           });
+
       }
-  
+      const handleRun = () => {
+        
+        const address = `http://deltarobot:3010/pickandplace/program`;
+      
+        // Erstellen des Datenobjekts, das gesendet werden soll
+        const programData = {
+          program: name // Hier content durch den tatsächlichen G-Code ersetzen
+        };
+      
+        // Senden einer POST-Anfrage mit axios
+        axios.post(address, programData, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => {
+          console.log('Programm erfolgreich übermittelt:', response.data);
+          // Hier können Sie Ihren Code hinzufügen, um die Antwort zu verarbeiten oder anzuzeigen, falls erforderlich.
+        })
+        .catch(error => {
+          console.error('Fehler beim Publizieren des Programms:', error);
+        });
+      };
+      
+      const RunhandleOpenModal = () => {
+        setIsModalOpen(true);
+      };
     
+      const RunhandleCloseModal = () => {
+        setIsModalOpen(false);
+      };
+    
+      const RunhandleConfirm = () => {
+        handleRun()
+        setIsModalOpen(false);
+      };
+      const DeletehandleOpenModal = () => {
+        setIsModalOpen(true);
+      };
+    
+      const DeletehandleCloseModal = () => {
+        setIsModalOpen(false);
+      };
+    
+      const DeletehandleConfirm = () => {
+        handleDelete()
+        setIsModalOpen(false);
+      };
   
     return(
       <div>
         
           <>
-          
+          <ConfirmationModal
+          color={color}
+          isOpen={isModalOpen}
+          onClose={RunhandleCloseModal}
+          onConfirm={RunhandleConfirm}
+          text={"Run Program"}
+          />
+          <ConfirmationModal
+          color={color}
+          isOpen={isModalOpen}
+          onClose={DeletehandleCloseModal}
+          onConfirm={DeletehandleConfirm}
+          text={"Delete Program"}
+          />
           <div style={{ backgroundColor: color }} className="ml-5 mr-5 p-4 mt-5 border-4 border-black rounded-2xl flex items-center justify-between">
                 <div className="flex justify-between items-center w-full">
                   <label className=" flex item-center text-xl text-white mb-2 mr-2 font-bold">{name.slice(0, -6)}</label>
@@ -90,12 +155,17 @@ const LoadProgrammList = () => {
                   <button className="sm:hidden" id="burgerheader" onClick={toggleMenu}>
                     <img src="Burgermenu.png" className="object-contain object-center w-10 h-10"></img>
                   </button>
-                  
+                  <button
+                    className="hidden sm:block px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
+                    onClick={RunhandleOpenModal}
+                  >
+                    Run
+                  </button>
                   <button
                     className="hidden sm:block mx-2 px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                     onClick={handleLoadProgramm}
                   >
-                    Load
+                    Edit
                   </button>
                   <button
                     className="hidden sm:block mr-2 px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
@@ -105,7 +175,7 @@ const LoadProgrammList = () => {
                   </button>
                   <button
                     className="hidden sm:block mr-2 px-4 py-2 border-2 bg-red-600 hover:bg-red-700 text-white rounded"
-                    onClick={handleDelete}
+                    onClick={DeletehandleOpenModal}
                   >
                     Delete
                   </button>
@@ -114,21 +184,27 @@ const LoadProgrammList = () => {
           {isMenuHidden === true && (
             <div  style={{ backgroundColor: color }} className="sm:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
                 <div className="flex justify-between items-center w-full">
+                <button
+                    className=" px-3 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
+                    onClick={RunhandleOpenModal}
+                  >
+                    Run
+                  </button>
                  <button
-                    className=" px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
+                    className=" px-3 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                     onClick={handleLoadProgramm}
                   >
-                    Load
+                    Edit
                   </button>
                   <button
-                    className=" px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
+                    className=" px-3 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                     onClick={handleExpandChange}
                   >
-                    {expand ? 'Schließen' : 'Expandieren'}
+                    {expand ? 'Close' : 'Expand'}
                   </button>
                   <button
-                    className=" px-4 py-2 border-2 bg-red-600 hover:bg-red-700 text-white rounded"
-                    onClick={handleDelete}
+                    className=" px-3 py-2 border-2 bg-red-600 hover:bg-red-700 text-white rounded"
+                    onClick={DeletehandleOpenModal}
                   >
                     Delete
                   </button>

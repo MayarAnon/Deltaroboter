@@ -28,7 +28,7 @@ setupMqttClient().then(() => {
 app.use(cors());
 app.use(express.json());
 
-const gcodeFolder = path.join(__dirname, '../../Frontend/gcode');
+const gcodeFolder = path.join(__dirname, '../../Backend/GCodeFiles');
 
 // Endpunkt zum Laden der GCode-Dateien im Ordner
 app.get('/loadGCodeFiles', (req, res) => {
@@ -85,7 +85,7 @@ app.post('/gcode', (req, res) => {
   }
 
   const programName = programData.name;
-  const programFilePath = path.join(__dirname, 'gcode', `${programName}.gcode`);
+  const programFilePath = path.join(gcodeFolder , `${programName}`);
 
   // Daten in eine JSON-Datei schreiben
   fs.writeFile(programFilePath,programData.content, (err) => {

@@ -37,7 +37,7 @@ const RobotStateDisplay = () => {
         ws.close();
       }
     };
-  }, [ws]);
+  }, []);
 
   return (
     <div className="p-4 max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
