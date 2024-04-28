@@ -12,6 +12,6 @@ nohup python ../StatePublisher/statepublisher.py > statepublisher.log 2>&1 &
 nohup python ../Homing/homing.py > homing.log 2>&1 &
 nohup python ../GripperControl/gripperControl.py > gripperControl.log 2>&1 &
 sudo nohup ../MotorControl/MotorControl > motorControl.log 2>&1 &
-nohup ../MotionPlaning/program > motionPlaning.log 2>&1 &
+nohup ../MotionPlaning/MotionPlaning > motionPlaning.log 2>&1 &
 
 echo "Alle Prozesse wurden gestartet."

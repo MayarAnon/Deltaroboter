@@ -19,7 +19,7 @@ Gripper parseGripperMode(const char* mode) {
     if (strcmp(mode, "parallelGripper") == 0) return parallel;
     else if (strcmp(mode, "complientGripper") == 0) return complient;
     else if (strcmp(mode, "magnetGripper") == 0) return magnet;
-    else if (strcmp(mode, "vakuumGripper") == 0) return vaccum;
+    else if (strcmp(mode, "vacuumGripper") == 0) return vaccum;
     else {
         fprintf(stderr, "Unknown gripper mode: %s\n", mode);
         return -1; // Undefined behavior, could define an 'unknown' in the enum
