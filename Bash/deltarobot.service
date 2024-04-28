@@ -1,0 +1,11 @@
+[Unit]
+Description= Skript welche alle Services startet
+
+[Service]
+Type=simple
+ExecStart=/bin/sh /home/pi/Deltarobot/Bash/start.sh
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
