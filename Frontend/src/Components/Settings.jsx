@@ -64,20 +64,20 @@ const SettingsPage = () => {
       });
   }, [settings]); // Abhängigkeit, sodass dieser Effekt nur ausgelöst wird, wenn sich `settings` ändert
 
+
+  const postHomingSignal = async () => {
+    try {
+      const response = await axios.post('http://deltarobot:3010/homing', {
+        active: true  // Hier senden wir immer `true` an den Server
+      });
+      console.log('Homing signalisiert: ' + response.data.message);
+    } catch (error) {
+      console.error('Fehler beim Senden des Homing-Signals:', error);
+      alert('Fehler beim Senden des Homing-Signals.');
+    }
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const DatabasehandleOpenModal = () => {
-    setIsModalOpen(true);
-  };
-
-  const DatabasehandleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const DatabasehandleConfirm = () => {
-    // Bestätigungslogik hier
-    setIsModalOpen(false);
-  };
 
   const calibratehandleOpenModal = () => {
     setIsModalOpen(true);
@@ -89,6 +89,7 @@ const SettingsPage = () => {
 
   const calibratehandleConfirm = () => {
     // Bestätigungslogik hier
+    postHomingSignal();
     setIsModalOpen(false);
   };
 
@@ -98,13 +99,7 @@ const SettingsPage = () => {
         style={{ backgroundColor: settings.color }}
         className="p-4 text-white rounded-xl font-bold  mt-10 mx-5 border-4 border-black"
       >
-        <ConfirmationModal
-          color={settings.color}
-          isOpen={isModalOpen}
-          onClose={DatabasehandleCloseModal}
-          onConfirm={DatabasehandleConfirm}
-          text={"Datenbank löschen"}
-        />
+        
         <ConfirmationModal
           color={settings.color}
           isOpen={isModalOpen}
@@ -151,15 +146,7 @@ const SettingsPage = () => {
             <option value="magnetGripper">Magnet Gripper</option>
           </select>
         </div>
-        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
-        <div className="mb-4">
-          <button
-            onClick={DatabasehandleOpenModal}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
-          >
-            Datenbank löschen
-          </button>
-        </div>
+
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <button

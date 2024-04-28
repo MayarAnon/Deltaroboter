@@ -146,6 +146,26 @@ app.post('/motors/stop', async (req, res) => {
     res.status(500).json({ error: 'Fehler beim Publizieren des Motorstopps' });
   }
 });
+
+
+// Endpunkt für die Homing-Funktion
+app.post('/homing', async (req, res) => {
+  const homingSignal = req.body.active;  // Erwarte einen Schlüssel `active` in der Anfrage
+
+  if (typeof homingSignal !== 'boolean') {
+    return res.status(400).json({ error: 'Ungültige Daten, erwartet einen Boolean' });
+  }
+
+  try {
+    // Sendet immer `true` zum MQTT-Topic, unabhängig vom empfangenen Wert
+    await mqttClient.publish('homing/control', JSON.stringify(true));
+    res.status(200).json({ message: 'Homing signalisiert.' });
+  } catch (error) {
+    console.error('Fehler beim Publizieren des Homing-Signals:', error);
+    res.status(500).json({ error: 'Fehler beim Publizieren des Homing-Signals' });
+  }
+});
+
 // Endpunkt für die Übermittelung von den koordinaten fürs manualmode
 app.post('/manual/control/coordinates', async (req, res) => {
   const coordinates = req.body.coordinates;
