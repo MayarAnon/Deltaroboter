@@ -19,7 +19,7 @@ const ManuellMode = () => {
   const [phiValue, setPhiValue] = useRecoilState(phiValueAtom);
   const [actuator, setActuator] = useRecoilState(actuatorAtom);
   const countIntervalRef = useRef(null);
-  
+  const isFirstRender = useRef(true);
   const calculateStep = () => {
     // Berechnet Schritte von 0.1 bis 10 basierend auf settings.speed
     return 0.1 + (settings.speed / 100) * 9.9;
@@ -74,16 +74,19 @@ const ManuellMode = () => {
     countIntervalRef.current = setInterval(() => {
       setter((prevValue) => valueChecker(prevValue));
     }, Math.max(0, 100 - settings.speed * 0.1)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
-    sendCoordinates();
   };
 
   const handleMouseUpOrLeave = () => {
     clearInterval(countIntervalRef.current);
   };
 
-  // useEffect(() => {
-  //   sendCoordinates(); // Ruft sendCoordinates auf, wenn sich einer der Werte ändert
-  // }, [xValue, yValue, zValue, phiValue]); // Abhängigkeiten des useEffect Hooks
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false; // Setze auf false nach dem ersten Render
+    } else {
+      sendCoordinates(); // Wird nur aufgerufen, wenn sich einer der Werte ändert, nicht beim ersten Render
+    }
+  }, [xValue, yValue, zValue, phiValue]); // Abhängigkeiten des useEffect Hooks
 
   const sendCoordinates = async () => {
     const coordinates = [
@@ -105,16 +108,15 @@ const ManuellMode = () => {
     }
   };
 
-  const sendGripperSignals = async (signal) => {
-    
+  const sendGripperSignals = async (gripperValue) => {
     try {
-      const response = await axios.post("/manual/control/gripper", {
-        signal,
+      const response = await axios.post("http://deltarobot:3010/manual/control/gripper", {
+        gripper: gripperValue, // Ändern Sie 'signal' zu 'gripper'
       });
-      console.log("Koordinaten gesendet:", signal);
+      console.log("Greiferstärke gesendet:", gripperValue);
     } catch (error) {
       console.error(
-        "Fehler beim Senden der Koordinaten:",
+        "Fehler beim Senden der Greiferstärke:",
         error.response ? error.response.data : error.message
       );
     }
@@ -122,9 +124,9 @@ const ManuellMode = () => {
   const updateActuator = (newMode, newValue) => {
     setActuator({
       mode: newMode,
-      value: newValue
+      value: Number(newValue)
     });
-    sendGripperSignals(newValue)
+    sendGripperSignals(Number(newValue))
   };
 
 
@@ -146,7 +148,7 @@ const ManuellMode = () => {
               min={0}
               max={100}
               externalValue={actuator.value}
-              onChange={(value) => updateActuator(settings.gripper, value)}
+              onChange={(value) => updateActuator(settings.gripper, Number(value))}
             />
           </div>
         )}
@@ -362,7 +364,7 @@ const ManuellMode = () => {
               min={0}
               max={100}
               externalValue={actuator.value}
-              onChange={(value) => updateActuator(settings.gripper,value)}
+              onChange={(value) => updateActuator(settings.gripper,Number(value))}
             />
           </div>
         )}
