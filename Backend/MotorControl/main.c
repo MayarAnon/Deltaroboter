@@ -1,4 +1,4 @@
-//gcc -o MotorController config.c main.c MotorControl.c mqttClient.c utils.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lpaho-mqtt3as -lcjson -lpthread
+//gcc -o MotorController config.c main.c queue.c MotorControl.c mqttClient.c utils.c -I/usr/local/include/cjson -L/usr/local/lib/cjson -lpigpio -lpaho-mqtt3as -lcjson -lpthread
 
 
 #include <stdio.h>

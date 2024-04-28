@@ -18,5 +18,5 @@ typedef struct {
 void initQueue(Queue* q);
 void enqueue(Queue* q, char* data);
 char* dequeue(Queue* q);
-
+void clearQueue(Queue* q);
 #endif

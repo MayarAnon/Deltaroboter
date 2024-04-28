@@ -48,3 +48,25 @@ char* dequeue(Queue* q) {
     free(temp);
     return data;
 }
+void clearQueue(Queue* q) {
+    pthread_mutex_lock(&q->lock);
+    Node* current = q->head;
+    Node* next;
+
+    while (current != NULL) {
+        next = current->next;
+        free(current->data); // Gehe sicher, dass der Speicher für data auch freigegeben wird
+        free(current);
+        current = next;
+    }
+
+    q->head = NULL;
+    q->tail = NULL;
+    pthread_mutex_unlock(&q->lock);
+
+    // Nach dem Leeren, setze das Semaphore zurück, um falsche Trigger zu vermeiden
+    int sval;
+    while (sem_getvalue(&queueSemaphore, &sval) == 0 && sval > 0) {
+        sem_wait(&queueSemaphore);
+    }
+}
