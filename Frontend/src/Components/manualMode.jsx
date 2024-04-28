@@ -8,7 +8,7 @@ import {
   zValueAtom,
   phiValueAtom,
   actuatorAtom,
-  settingAtom,
+  settingAtom
 } from "../utils/atoms";
 
 const ManuellMode = () => {
@@ -18,9 +18,8 @@ const ManuellMode = () => {
   const [zValue, setZValue] = useRecoilState(zValueAtom);
   const [phiValue, setPhiValue] = useRecoilState(phiValueAtom);
   const [actuator, setActuator] = useRecoilState(actuatorAtom);
-
   const countIntervalRef = useRef(null);
-
+  
   const calculateStep = () => {
     // Berechnet Schritte von 0.1 bis 10 basierend auf settings.speed
     return 0.1 + (settings.speed / 100) * 9.9;
@@ -107,16 +106,16 @@ const ManuellMode = () => {
 
   return (
     <>
-      <div className="flex flex-wrap justify-center mx-5 mt-10 sm:mt-32 gap-4">
-        {settings.gripper === "3option" && (
-          <div className=" w-2/3  flex-col items-center justify-center gap-4 hidden sm:block">
+      <div className="flex flex-wrap justify-center mx-2 mt-10 sm:mt-15 gap-4">
+        {settings.gripper === "parallelGripper" && (
+          <div className=" w-3/4 flex items-center justify-center gap-4 hidden sm:block">
             <Slider
               color={settings.color}
               label="parallel gripper"
               min={0}
               max={100}
-              externalValue={parseInt(actuator, 10)}
-              onChange={(value) => setActuator(value.toString())}
+              externalValue={actuator.value}
+              onChange={(value) => setActuator({mode:settings.gripper, value:value})}
             />
           </div>
         )}
@@ -242,8 +241,6 @@ const ManuellMode = () => {
             </button>
           </div>
         )}
-
-        {/* Neue Tasten für +phi und -phi */}
         {settings.manualMode === "buttons" && (
           <div className="flex flex-row items-center justify-center border-4 border-black rounded-2xl p-2">
             {/* Phi + Button */}
@@ -272,46 +269,94 @@ const ManuellMode = () => {
             </button>
           </div>
         )}
-        {(settings.gripper === "1option" || settings.gripper === "2option") && (
-          <div className="flex flex-row items-center   sm:flex-col justify-center border-4 border-black rounded-2xl p-2">
+        {(settings.gripper === "complientGripper" ||
+          settings.gripper === "vacuumGripper") && (
+            <div>
+              <span className="select-none text-black text-lg md:hidden">{settings.gripper}</span>
+          <div className="flex flex-row items-center sm:flex-col justify-center border-4 border-black rounded-2xl p-2">
+            <span className="hidden md:block select-none text-black text-lg">{settings.gripper}</span>
             <button
-              onClick={() => setActuator("On")}
+              onClick={() => setActuator({
+                mode: settings.gripper,
+                value: -1
+              })}
               style={{ backgroundColor: settings.color }}
-              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mr-2 sm:mr-0 sm:mb-16 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
+            >
+              Vacuum
+            </button>
+
+            <button
+              onClick={() => setActuator({
+                mode: settings.gripper,
+                value: 0
+              })}
+              style={{ backgroundColor: settings.color }}
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
+            >
+              Off
+            </button>
+            <button
+              onClick={() => setActuator({
+                mode: settings.gripper,
+                value: 1
+              })}
+              style={{ backgroundColor: settings.color }}
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
+            >
+              Pressure
+            </button>
+          </div>
+          </div>
+        )}
+        {settings.gripper === "magnetGripper"  && (
+           <div>
+           <span className="select-none text-black text-lg md:hidden">{settings.gripper}</span>
+          <div className="flex flex-row items-center   sm:flex-col justify-center border-4 border-black rounded-2xl p-2">
+            <span className="hidden md:block select-none text-black text-lg">{settings.gripper}</span>
+            <button
+              onClick={() => setActuator({
+                mode: settings.gripper,
+                value: 1
+              })}
+              style={{ backgroundColor: settings.color }}
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
               On
             </button>
 
             <button
-              onClick={() => setActuator("Off")}
+              onClick={() => setActuator({
+                mode: settings.gripper,
+                value: 0
+              })}
               style={{ backgroundColor: settings.color }}
-              className=" select-none text-white  w-20 h-20 sm:w-32 sm:h-32 rounded-xl ml-2 sm:ml-0 text-3xl flex items-center justify-center hover:bg-black border-4 border-black"
+              className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
               Off
             </button>
           </div>
+          </div>
         )}
-        {settings.gripper === "3option" && (
+        {settings.gripper === "parallelGripper" && (
           <div className=" w-full sm:w-2/3 flex flex-col items-center justify-center gap-4 sm:hidden">
             <Slider
               color={settings.color}
               label="parallel gripper"
               min={0}
               max={100}
-              externalValue={parseInt(actuator, 10)}
-              onChange={(value) => setActuator(value.toString())}
+              externalValue={actuator.value}
+              onChange={(value) => setActuator({mode:settings.gripper, value:value})}
             />
           </div>
         )}
 
         <div className="flex flex-col border-4 border-black rounded-2xl sm:p-4 ">
-          {/* Container für die Anzeige der Werte */}
           <div
             style={{ backgroundColor: settings.color }}
             className=" text-white w-64 h-16 rounded-xl mb-2 mt-5 mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 text-xl flex items-center px-4 hover:bg-black border-4 border-black"
           >
-            
-              <span>X Position:</span>
+            <span>X Position:</span>
             <input
               type="number"
               value={xValue}
@@ -324,8 +369,7 @@ const ManuellMode = () => {
             style={{ backgroundColor: settings.color }}
             className=" text-white w-64 h-16 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center px-4 hover:bg-black border-4 border-black"
           >
-            
-              <span>Y Position:</span>
+            <span>Y Position:</span>
             <input
               type="number"
               value={yValue}
@@ -338,9 +382,8 @@ const ManuellMode = () => {
             style={{ backgroundColor: settings.color }}
             className=" text-white w-64 h-16 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center px-4 hover:bg-black border-4 border-black"
           >
-            
-              <span>Z Position:</span>
-           
+            <span>Z Position:</span>
+
             <input
               type="number"
               value={zValue}
@@ -353,8 +396,7 @@ const ManuellMode = () => {
             style={{ backgroundColor: settings.color }}
             className=" text-white w-64 h-16 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center px-4 hover:bg-black border-4 border-black"
           >
-            
-              <span>Phi:</span>
+            <span>Phi:</span>
             <input
               type="number"
               value={phiValue}

@@ -32,7 +32,10 @@ export const phiValueAtom = atom({
 
 export const actuatorAtom = atom({
   key: 'actuatorAtom',
-  default: '',  // Adjust the default value as needed, assuming it's a string
+  default: {
+    mode: '',
+    value: 0
+  }
 });
 
 export const gCodeStringAtom = atom({
