@@ -100,11 +100,11 @@ app.post('/gcode', (req, res) => {
 });
 // Endpunkt zum übermitteln von den Einstellungen
 app.post('/updateSettings', async (req, res) => {
-//   // Beispiel für die Verwendung der Funktion
-// const settings = {
-//   gripperMode: "parallelGripper",
-//   motorSpeed: 75
-// };
+  //   // Beispiel für die Verwendung der Funktion
+  // const settings = {
+  //   gripperMode: "parallelGripper",
+  //   motorSpeed: 75
+  // };
 
   const settings = req.body;
   if (!settings) {
@@ -118,7 +118,8 @@ app.post('/updateSettings', async (req, res) => {
 
     // Durchlaufen aller Einstellungen und Publizieren auf den entsprechenden Topics
     if (settings.gripperMode) {
-      await mqttClient.publish('gripper/mode', settings.gripperMode);
+      const gripperModeJson = JSON.stringify(settings.gripperMode);
+      await mqttClient.publish('gripper/mode', gripperModeJson);
     }
     if (settings.motorSpeed !== undefined) { // Einschließlich 0 als gültiger Wert
       await mqttClient.publish('motors/speed', settings.motorSpeed.toString());

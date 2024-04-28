@@ -4,7 +4,7 @@ export const settingAtom = atom({
   default: {             
     speed: 50,
     manualMode: "buttons",
-    gripper: "1option",
+    gripper: "vacuumGripper",
     color: "#1e293b",
     workSpaceRadius:200,
     workSpaceHeight:200
