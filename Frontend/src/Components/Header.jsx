@@ -4,10 +4,6 @@ import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-import { settingAtom } from "../utils/atoms";
-import { useNavigate } from "react-router-dom";
-import { Unity, useUnityContext } from "react-unity-webgl";
 // Header-Komponente
 const Header = () => {
   // State-Hook, um den Anzeigezustand des Menüs zu verwalten
@@ -18,12 +14,6 @@ const Header = () => {
   const [icon, setIcon] = useState(0);
   const navigate = useNavigate();
 
-  const { unityProvider } = useUnityContext({
-    loaderUrl: "Build/FlappyBird.loader.js",
-    dataUrl: "Build/webgl.data",
-    frameworkUrl: "Build/build.framework.js",
-    codeUrl: "Build/build.wasm",
-  });
   const ManualMode = () => {
     navigate("/");
   };
@@ -67,18 +57,17 @@ const Header = () => {
   };
 
   const toggle = () => {
-    const newIconValue = icon + 1;
-    if (newIconValue > 3) {
-      setIcon(0);
-    } else {
-      setIcon(newIconValue);
-      if (newIconValue === 3) {
+    setIcon(prevIcon => {
+      const newIconValue = prevIcon + 1;
+      if (newIconValue === 2) {
         setIsModalOpen(true);
+        return 0; 
       }
-    }
+      return newIconValue;
+    });
   };
   const ModalhandleConfirm = () => {
-    navigate("/oula");
+    navigate("/debug-mode");
     setIsModalOpen(false);
   };
   const closeModal = () => {
@@ -93,10 +82,6 @@ const Header = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
       >
-        <Unity
-          unityProvider={unityProvider}
-          style={{ width: "800px", height: "600px" }}
-        />
       </ConfirmationModal>
       <div
         style={{ backgroundColor: settings.color }}

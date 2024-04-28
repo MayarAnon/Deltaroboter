@@ -5,8 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SettingsPage from "./Components/Settings";
 import Header from "./Components/Header";
 import ManuellMode from "./Components/manualMode";
-import PickPlaceMode from "./Components/pickPlaceMode";
-import Game from "./Components/game"
+import Debugger from "./Components/debugger"
 import GCode from "./Components/GCode";
 
 
@@ -18,7 +17,7 @@ const App = () => {
           <Header/>
           <Routes>
             <Route path="/" element={<ManuellMode/>} />
-            <Route path="/oula" element={<Game/>} />
+            <Route path="/debug-mode" element={<Debugger/>} />
             <Route path="/settings" element={<SettingsPage/>} />
             <Route path="/gcode-editor" element={<GCode/>} />         
           </Routes>
