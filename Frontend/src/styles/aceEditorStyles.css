@@ -42,10 +42,10 @@
   }
   
   
-  @media (max-width: 600px) {
+  @media (max-width: 1000px) {
     .gcode-editor .ace_editor {
       height: 300px; 
-      max-width: 350px
+      max-width: 600px
     }
     
     .gcode-editor button {

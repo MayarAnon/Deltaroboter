@@ -1,18 +1,23 @@
 import React, { useState, useEffect } from 'react';
 
 const Slider = ({ label, min, max, onChange, externalValue, color }) => {
-    const [value, setValue] = useState((min + max) / 2);
+    const [value, setValue] = useState(((min + max) / 2).toFixed(1));
+
     const percentage = ((value - min) / (max - min)) * 100;
 
-    // Wird aufgerufen, wenn der Benutzer die Interaktion mit dem Slider beendet
+    const handleInputChange = (e) => {
+        const newValue = parseFloat(e.target.value).toFixed(1);
+        setValue(newValue);
+    };
+
     const handleRelease = (e) => {
-        const newValue = e.target.value;
+        const newValue = parseFloat(e.target.value).toFixed(1);
         setValue(newValue);
         onChange(newValue); // Aktualisiert den Wert nur, wenn der Benutzer die Interaktion beendet
     };
 
     useEffect(() => {
-      setValue(externalValue); // Aktualisiert den lokalen Wert, wenn der externe Wert sich ändert
+      setValue(parseFloat(externalValue).toFixed(1)); // Stellt sicher, dass auch externe Änderungen auf 0.1 genau sind
     }, [externalValue]);
 
     return (
@@ -23,8 +28,9 @@ const Slider = ({ label, min, max, onChange, externalValue, color }) => {
           min={min}
           max={max}
           value={value}
+          step="0.1" // Erlaubt Feinjustierung auf 0.1 Schritte
           className="slider slider-thumb w-full h-2 bg-blue-400 rounded-full cursor-pointer"
-          onChange={(e) => setValue(e.target.value)} // Aktualisiert den lokalen Wert kontinuierlich beim Verschieben
+          onChange={handleInputChange} // Rundet und aktualisiert den lokalen Wert kontinuierlich beim Verschieben
           onMouseUp={handleRelease} // Fügt das MouseUp-Event hinzu
           onTouchEnd={handleRelease} // Fügt das TouchEnd-Event hinzu für Touch-Geräte
         />
