@@ -33,7 +33,7 @@ def on_connect(client, userdata, flags, rc):
 def send_motor_commands(pulses, timing):
     message = json.dumps([{"motorpulses": pulses, "timing": timing}])
     client.publish(MQTT_TOPIC_MOTORS_SEQUENCE, message)
-    print(f"Motor commands sent: {message}")
+   
 
 def start_homing_process():
     """
@@ -50,26 +50,25 @@ def start_homing_process():
     global is_homing_active
     is_homing_active = True
     try:
-        pulses = [80, 80, 80,80]  # Standardpulswerte für die Motoren
-        timing = [100, 100, 5]      # Standard-Timing für die Motoren
-        while True:
+        pulses = [-10, -10, -10,-20]
+        timing = [2000, 2000, 5]
+        while is_homing_active:
             all_homed = True
             for index, pin in enumerate(ENDSCHALTER_PINS):
                 if not GPIO.input(pin):
-                    print(f"Motor {index + 1} erreicht noch nicht die Home-Position.")
+                   
                     all_homed = False
-                    pulses[index] = 80 #pulse-anpassung wenn nötig
+                    pulses[index] = -10
                 else:
                     pulses[index] = 0
-                    print(f"Motor {index + 1} ist homed.")
+                    
 
             send_motor_commands(pulses, timing)
 
             if all_homed:
                 break
-            time.sleep(1)  # Wartezeit zwischen den Überprüfungen
+            time.sleep(0.005)  # Wartezeit zwischen den Überprüfungen
         client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process completed successfully.')
-        print("Homing-Prozess erfolgreich abgeschlossen.")
     finally:
         is_homing_active = False
 
@@ -78,18 +77,44 @@ def check_end_switches():
         if not is_homing_active:
             for index, pin in enumerate(ENDSCHALTER_PINS):
                 if GPIO.input(pin):
-                    print(f"Endschalter {index + 1} betätigt! Sende Stop-Signal.")
+                    
                     client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
                     break
-        time.sleep(0.1)  # Kurze Verzögerung, um das Polling zu begrenzen
+        time.sleep(0.05)  # Kurze Verzögerung, um das Polling zu begrenzen
 
 def setup_end_switch_monitoring():
     threading.Thread(target=check_end_switches, daemon=True).start()
 
 def on_message(client, userdata, msg):
-    if msg.topic == MQTT_TOPIC_CONTROL and msg.payload.decode() == 'true':
-        print("Start homing")
-        threading.Thread(target=start_homing_process).start()
+    """
+    Diese Funktion wird aufgerufen, wenn eine Nachricht auf einem der abonnierten Topics eintrifft.
+    Es überprüft den Inhalt der Nachricht und startet oder stoppt den Homing-Prozess entsprechend.
+
+    Parameter:
+    - client: Der MQTT-Client
+    - userdata: Die Benutzerdaten, normalerweise nicht verwendet
+    - msg: Die empfangene Nachricht mit .topic und .payload Eigenschaften
+    """
+    if msg.topic == MQTT_TOPIC_CONTROL:
+        command = msg.payload.decode()
+        if command == 'true':
+            print("Start homing")
+            global is_homing_active
+            if not is_homing_active:
+                threading.Thread(target=start_homing_process).start()
+        elif command == 'false':
+            print("Stop homing")
+            stop_homing_process()
+
+def stop_homing_process():
+    """
+    Stoppt den Homing-Prozess, indem die globale Variable `is_homing_active` auf False gesetzt wird.
+    Dies wird überprüft in der Hauptschleife des Homing-Prozesses, um den Loop vorzeitig zu beenden.
+    """
+    global is_homing_active
+    is_homing_active = False
+    client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process stopped by user.')
+
 
 # MQTT-Client-Setup
 client = mqtt.Client()

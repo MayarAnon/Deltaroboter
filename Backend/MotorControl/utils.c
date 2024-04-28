@@ -11,6 +11,7 @@ volatile sig_atomic_t emergency_stop_triggered = 0;
 
 void trigger_emergency_stop() {
     gpioWaveTxStop();
+    clearQueue(&messageQueue);
     emergency_stop_triggered = 0;
 }
 void* sequence_worker_thread(void* arg) {

@@ -140,6 +140,7 @@ app.post('/motors/stop', async (req, res) => {
 
   try {
     await mqttClient.publish('motors/stop', JSON.stringify(stopSignal));
+    await mqttClient.publish('homing/control', JSON.stringify(false));
     res.status(200).json({ message: 'Motorstopp signalisiert.' });
   } catch (error) {
     console.error('Fehler beim Publizieren des Motorstopps:', error);
