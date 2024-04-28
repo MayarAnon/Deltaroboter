@@ -38,7 +38,7 @@ const ManuellMode = () => {
         setter = setXValue;
         valueChecker = (value) => {
           const step = calculateStep() * direction; // Richtung und Schrittgröße einbeziehen
-          const newX = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+          const newX = (parseFloat(value) + step).toFixed(1); // Rundet auf eine Nachkommastelle
           const newY = yValue;
           return newX * newX + newY * newY <= 40000 ? newX : value;
         };

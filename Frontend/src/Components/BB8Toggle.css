@@ -3,9 +3,9 @@
 /* completely redone toggle and droid */
 
 .bb8-toggle {
-    --toggle-size: 10px;
+    --toggle-size:8px;
     /* finally I removed the scale now everything depends on the font-size */
-    --margin-top-for-head: 0.2em;
+    --margin-top-for-head: 1.2em;
     /* it's just in case 👆 */
     --toggle-width: 10.625em;
     --toggle-height: 5.625em;

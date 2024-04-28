@@ -12,7 +12,7 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                 },
                 {
                     token: "command",
-                    regex: "\\b(G0|G1|G2|G3|G17|G18|G19|G28|M100|M200|M300|M400)\\b"
+                    regex: "\\b(G0|G1|G2|G3|G4|G17|G18|G19|G28|M100|M200|M300|M400)\\b"
                 },
                 {
                     token: "error", // Fehlende Werte erkennen
@@ -67,8 +67,8 @@ ace.define('ace/mode/gcode_highlight_rules', ['require', 'exports', 'module', 'a
                     regex: "\\b([XYZ])\\s*-?\\d+\\.?\\d*\\b"
                 },
                 {
-                    token: "interpolation", // oder "parameter", wenn du denselben Stil verwenden möchtest
-                    regex: "\\b([IJ])\\s*-?\\d+\\.?\\d*\\b"
+                    token: "interpolation",
+                    regex: "\\b([IJP])\\s*-?\\d+\\.?\\d*\\b"
                 },
                 {
                     token: "radius", // Für den R Parameter
