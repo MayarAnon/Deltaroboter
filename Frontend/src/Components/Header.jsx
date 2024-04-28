@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
+import {settingAtom} from "../utils/atoms";
+import { useNavigate } from 'react-router-dom';
+import axios from "axios";
+
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
 import { Unity, useUnityContext } from "react-unity-webgl";
@@ -33,6 +37,54 @@ const Header = () => {
     navigate("/gcode-editor");
   };
 
+    // Event-Handler-Funktion, um den Menüzustand zu ändern
+    const toggleMenu = () => {
+      setMenuHidden(!isMenuHidden);
+    };
+  
+    const toggleDarkMode = () => {
+      if(darkMode===10){
+        setDarkMode(0)
+        document.body.classList.add('dark-mode2');
+        console.log("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+      }else if(darkMode <10){
+        document.body.classList.remove('dark-mode2');
+        setDarkMode(darkMode +1)
+        document.body.classList.toggle('dark-mode'); 
+        
+    };
+      
+    };
+    
+    
+    const [icon,setIcon] = useState(0)
+    const toggle = () =>{
+      if(icon >= 3){
+        setIcon(0)
+      }else if(icon<3){
+        setIcon(icon + 1);
+      }
+      
+    }
+
+    const sendMotorStop = async () => {
+      try {
+        const response = await axios.post("/motors/stop", {
+          stop: true // Korrekt formatiertes Objekt
+        });
+        console.log("Motors stoppen", response.data); // Ausgabe der Serverantwort
+      } catch (error) {
+        console.error(
+          "Fehler beim Senden von MotorStop:",
+          error.response ? error.response.data : error.message // Verbesserte Fehlerausgabe
+        );
+      }
+    };
+  
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    
+  
+    return (
   // Event-Handler-Funktion, um den Menüzustand zu ändern
   const toggleMenu = () => {
     setMenuHidden(!isMenuHidden);
@@ -119,90 +171,50 @@ const Header = () => {
               className="object-contain object-center w-10 h-10"
             ></img>
           </button>
-          <button
-            onClick={PickPlaceMode}
-            className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-          >
-            <img
-              src="Addpositionicon.png"
-              className="object-contain object-center w-10 h-10"
-            ></img>
+          {/*  
+          <button onClick={PickPlaceMode} className="px-4 py-2 border-2 border-white rounded hover:bg-black">
+          <img src="Addpositionicon.png" className="object-contain object-center w-10 h-10"></img>
+            </button>
+          */}
+          <button onClick={SettingsMode} className="px-4 py-2 border-2 border-white rounded hover:bg-black">
+          <img src="Settingsicon.png" className=" object-contain object-center w-10 h-10"></img>
           </button>
-          <button
-            onClick={SettingsMode}
-            className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-          >
-            <img
-              src="Settingsicon.png"
-              className=" object-contain object-center w-10 h-10"
-            ></img>
+          <button onClick={sendMotorStop}  className="px-2 py-2 rounded hover:bg-black"> 
+            <img src="stopIcon.png" className="object-contain object-center w-10 h-10"></img>
           </button>
-          <button
-            onClick={toggleDarkMode}
-            className="px-4 py-2 border-2 border-white rounded hover:bg-black"
-          >
-            <img
-              src="Darkmodeicon.png"
-              className="object-contain object-center w-10 h-10"
-            ></img>
+          <button onClick={toggleDarkMode} className="px-2 py-2 rounded hover:bg-black"> 
+            <img src="Darkmodeicon.png" className="object-contain object-center w-10 h-10"></img>
           </button>
         </div>
       </div>
       {isMenuHidden === true && (
-        <div
-          style={{ backgroundColor: settings.color }}
-          className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between"
-        >
-          <div className="flex justify-between items-center w-full">
-            <button
-              onClick={GCode}
-              className="px-2 smm:px-4 py-2 ml-2 border-2 border-white rounded hover:bg-black"
-            >
-              <img
-                src="GCode.png"
-                className=" object-contain object-center w-10 h-10"
-              ></img>
-            </button>
-
-            <button
-              onClick={ManualMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-            >
-              <img
-                src="JoystickIcon.png"
-                className="object-contain object-center w-10 h-10"
-              ></img>
-            </button>
-            <button
-              onClick={PickPlaceMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-            >
-              <img
-                src="Addpositionicon.png"
-                className="object-contain object-center w-10 h-10"
-              ></img>
-            </button>
-            <button
-              onClick={SettingsMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-            >
-              <img
-                src="Settingsicon.png"
-                className=" object-contain object-center w-10 h-10"
-              ></img>
-            </button>
-            <button
-              onClick={toggleDarkMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
-            >
-              <img
-                src="Darkmodeicon.png"
-                className="object-contain object-center w-10 h-10"
-              ></img>
-            </button>
-          </div>
-        </div>
-      )}
+      <div style={{ backgroundColor: settings.color }} className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between">
+            <div className="flex justify-between items-center w-full">
+              <button onClick={GCode} className="px-2 smm:px-4 py-2 ml-2 border-2 border-white rounded hover:bg-black">
+                <img src="GCode.png" className=" object-contain object-center w-10 h-10"></img>
+              </button>
+              
+              <button onClick={ManualMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black">
+                <img src="JoystickIcon.png" className="object-contain object-center w-10 h-10"></img>
+              </button>
+              {/*
+              <button onClick={PickPlaceMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black">
+                <img src="Addpositionicon.png" className="object-contain object-center w-10 h-10"></img>
+              </button>
+              */}
+              <button onClick={SettingsMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black">
+                <img src="Settingsicon.png" className=" object-contain object-center w-10 h-10"></img>
+              </button>
+             
+              <button  onClick={sendMotorStop} className="px-2 py-2 rounded hover:bg-black"> 
+                <img src="stopIcon.png" className="object-contain object-center w-10 h-10"></img>
+              </button>
+              
+              <button onClick={toggleDarkMode} className="px-2 smm:px-4 py-2 rounded hover:bg-black"> 
+                <img src="Darkmodeicon.png" className="object-contain object-center w-10 h-10"></img>
+              </button>
+            </div>
+      </div>)}
     </>
   );
 };

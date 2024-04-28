@@ -148,7 +148,7 @@ import { TouchBackend } from 'react-dnd-touch-backend';
           />
         ))
       ) : (
-        <p>Keine Programme verfügbar.</p>
+        <img src="loading.gif" className="object-contain object-center w-24 h-24"/>
       )}
     </>
     );
