@@ -6,6 +6,7 @@ import SettingsPage from "./Components/Settings";
 import Header from "./Components/Header";
 import ManuellMode from "./Components/manualMode";
 import PickPlaceMode from "./Components/pickPlaceMode";
+import Game from "./Components/game"
 import GCode from "./Components/GCode";
 
 
@@ -17,6 +18,7 @@ const App = () => {
           <Header/>
           <Routes>
             <Route path="/" element={<ManuellMode/>} />
+            <Route path="/oula" element={<Game/>} />
             <Route path="/settings" element={<SettingsPage/>} />
             <Route path="/gcode-editor" element={<GCode/>} />         
           </Routes>
