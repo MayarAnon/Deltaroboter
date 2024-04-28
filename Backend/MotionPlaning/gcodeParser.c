@@ -327,11 +327,12 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     Steps localSteps = currentSteps;          // Lokale Kopie der Schrittzahlen
     double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
 
-    //pulsweite von den Motorpulsen auf 100% Skalieren 330 maximale minimale bei 105% 15µs
+    //pulsweite von den Motorpulsen auf 100% skalieren. 0% = 630   maximale minimale bei 105% 15µs
     //int pulsewith = f;
-    int pulsewith = 220 - 2 * f;
-    if (pulsewith < 15) {
-        pulsewith = 15;
+    int pulsewidth = 530 - 5 * f;
+
+    if (pulsewidth < 15) {
+        pulsewidth = 15;
     }
 
     cJSON* jsonRoot = cJSON_CreateArray();
