@@ -74,15 +74,16 @@ const ManuellMode = () => {
     countIntervalRef.current = setInterval(() => {
       setter((prevValue) => valueChecker(prevValue));
     }, Math.max(0, 100 - settings.speed * 0.1)); // Die Geschwindigkeit beeinflusst das Intervall und darf nicht negativ sein
+    sendCoordinates();
   };
 
   const handleMouseUpOrLeave = () => {
     clearInterval(countIntervalRef.current);
   };
 
-  useEffect(() => {
-    sendCoordinates(); // Ruft sendCoordinates auf, wenn sich einer der Werte ändert
-  }, [xValue, yValue, zValue, phiValue]); // Abhängigkeiten des useEffect Hooks
+  // useEffect(() => {
+  //   sendCoordinates(); // Ruft sendCoordinates auf, wenn sich einer der Werte ändert
+  // }, [xValue, yValue, zValue, phiValue]); // Abhängigkeiten des useEffect Hooks
 
   const sendCoordinates = async () => {
     const coordinates = [
@@ -104,6 +105,36 @@ const ManuellMode = () => {
     }
   };
 
+  const sendGripperSignals = async (signal) => {
+    
+    try {
+      const response = await axios.post("/manual/control/gripper", {
+        signal,
+      });
+      console.log("Koordinaten gesendet:", signal);
+    } catch (error) {
+      console.error(
+        "Fehler beim Senden der Koordinaten:",
+        error.response ? error.response.data : error.message
+      );
+    }
+  };
+  const updateActuator = (newMode, newValue) => {
+    setActuator({
+      mode: newMode,
+      value: newValue
+    });
+    sendGripperSignals(newValue)
+  };
+
+
+  const updateCoordinates = (newXValue, newYValue,newZValue,newPhiValue) => {
+    setXValue(newXValue);
+    setYValue(newYValue);
+    setZValue(newZValue);
+    setPhiValue(newPhiValue);
+    sendCoordinates()
+  };
   return (
     <>
       <div className="flex flex-wrap justify-center mx-2 mt-10 sm:mt-15 gap-4">
@@ -115,7 +146,7 @@ const ManuellMode = () => {
               min={0}
               max={100}
               externalValue={actuator.value}
-              onChange={(value) => setActuator({mode:settings.gripper, value:value})}
+              onChange={(value) => updateActuator(settings.gripper, value)}
             />
           </div>
         )}
@@ -131,7 +162,7 @@ const ManuellMode = () => {
               min={-settings.workSpaceRadius * 0.7}
               max={settings.workSpaceRadius * 0.7}
               externalValue={xValue}
-              onChange={(value) => setXValue(value)}
+              onChange={(value) => updateCoordinates(value,yValue,zValue,phiValue)}
             />
             <Slider
               color={settings.color}
@@ -139,7 +170,7 @@ const ManuellMode = () => {
               min={-settings.workSpaceRadius * 0.7}
               max={settings.workSpaceRadius * 0.7}
               externalValue={yValue}
-              onChange={(value) => setYValue(value)}
+              onChange={(value) => updateCoordinates(xValue,value,zValue,phiValue)}
             />
             <Slider
               color={settings.color}
@@ -147,7 +178,7 @@ const ManuellMode = () => {
               min={-settings.workSpaceHeight / 2 - 380}
               max={settings.workSpaceHeight / 2 - 380}
               externalValue={zValue}
-              onChange={(value) => setZValue(value)}
+              onChange={(value) => updateCoordinates(xValue,yValue,value,phiValue)}
             />
             <Slider
               color={settings.color}
@@ -155,7 +186,7 @@ const ManuellMode = () => {
               min={-180}
               max={180}
               externalValue={phiValue}
-              onChange={(value) => setPhiValue(value)}
+              onChange={(value) => updateCoordinates(xValue,yValue,zValue,value)}
             />
           </div>
         )}
@@ -276,10 +307,7 @@ const ManuellMode = () => {
           <div className="flex flex-row items-center sm:flex-col justify-center border-4 border-black rounded-2xl p-2">
             <span className="hidden md:block select-none text-black text-lg">{settings.gripper}</span>
             <button
-              onClick={() => setActuator({
-                mode: settings.gripper,
-                value: -1
-              })}
+              onClick={() => updateActuator(settings.gripper,-1)}
               style={{ backgroundColor: settings.color }}
               className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
@@ -287,20 +315,14 @@ const ManuellMode = () => {
             </button>
 
             <button
-              onClick={() => setActuator({
-                mode: settings.gripper,
-                value: 0
-              })}
+              onClick={() => updateActuator(settings.gripper,0)}
               style={{ backgroundColor: settings.color }}
               className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
               Off
             </button>
             <button
-              onClick={() => setActuator({
-                mode: settings.gripper,
-                value: 1
-              })}
+              onClick={() => updateActuator(settings.gripper,1)}
               style={{ backgroundColor: settings.color }}
               className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
@@ -315,10 +337,7 @@ const ManuellMode = () => {
           <div className="flex flex-row items-center   sm:flex-col justify-center border-4 border-black rounded-2xl p-2">
             <span className="hidden md:block select-none text-black text-lg">{settings.gripper}</span>
             <button
-              onClick={() => setActuator({
-                mode: settings.gripper,
-                value: 1
-              })}
+              onClick={() => updateActuator(settings.gripper,1)}
               style={{ backgroundColor: settings.color }}
               className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
@@ -326,10 +345,7 @@ const ManuellMode = () => {
             </button>
 
             <button
-              onClick={() => setActuator({
-                mode: settings.gripper,
-                value: 0
-              })}
+              onClick={() => updateActuator(settings.gripper,0)}
               style={{ backgroundColor: settings.color }}
               className=" select-none  text-white w-20 h-20 sm:w-32 sm:h-32 rounded-xl mb-2 text-xl mr-2 ml-2 smm:mr-20 smm:ml-20 sm:mr-0 sm:ml-0 flex items-center justify-center hover:bg-black border-4 border-black"
             >
@@ -346,7 +362,7 @@ const ManuellMode = () => {
               min={0}
               max={100}
               externalValue={actuator.value}
-              onChange={(value) => setActuator({mode:settings.gripper, value:value})}
+              onChange={(value) => updateActuator(settings.gripper,value)}
             />
           </div>
         )}
@@ -360,7 +376,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={xValue}
-              onChange={(e) => setXValue(e.target.value)}
+              onChange={(e) => updateCoordinates(e.target.value,yValue,zValue,phiValue)}
               style={{ backgroundColor: settings.color }} // Markiert das Feld als schreibgeschützt
               className="text-white w-20  rounded ml-2"
             />
@@ -373,7 +389,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={yValue}
-              onChange={(e) => setYValue(e.target.value)}
+              onChange={(e) => updateCoordinates(xValue,e.target.value,zValue,phiValue)}
               style={{ backgroundColor: settings.color }} // Markiert das Feld als schreibgeschützt
               className="text-white w-20  rounded ml-2"
             />
@@ -387,7 +403,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={zValue}
-              onChange={(e) => setZValue(e.target.value)}
+              onChange={(e) => updateCoordinates(xValue,yValue,e.target.value,phiValue)}
               style={{ backgroundColor: settings.color }} // Markiert das Feld als schreibgeschützt
               className="text-white w-20  rounded ml-2"
             />
@@ -400,7 +416,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={phiValue}
-              onChange={(e) => setPhiValue(e.target.value)}
+              onChange={(e) => updateCoordinates(xValue,yValue,zValue,e.target.value)}
               style={{ backgroundColor: settings.color }} // Markiert das Feld als schreibgeschützt
               className="text-white w-20  rounded ml-2"
             />
