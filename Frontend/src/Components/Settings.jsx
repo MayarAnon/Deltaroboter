@@ -3,13 +3,21 @@ import InfoComponent from "./Info";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
+import axios from "axios";
 const SettingsPage = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
 
-  const handleSpeedChange = useCallback((e) => {
-    setSettings((prevSettings) => ({ ...prevSettings, speed: e.target.value }));
-  }, [settings]);
+   // Lokalen Zustand verwenden, um die temporäre Geschwindigkeit zu speichern
+   const [tempSpeed, setTempSpeed] = useState(settings.speed);
 
+   const handleSpeedChange = (e) => {
+     setTempSpeed(e.target.value); // Aktualisiere nur den lokalen Zustand
+   };
+ 
+   const handleSpeedChangeComplete = (e) => {
+     // Aktualisiere den globalen Zustand, wenn die Maus losgelassen wird oder die Touch-Interaktion endet
+     setSettings((prevSettings) => ({ ...prevSettings, speed: parseInt(e.target.value, 10) }));
+   };
   const handleGripper = useCallback((e) => {
     setSettings((prevSettings) => ({
       ...prevSettings,
@@ -37,6 +45,24 @@ const SettingsPage = () => {
   useEffect(() => {
     setSettings(settings);
   }, [settings]);
+
+  useEffect(() => {
+    const apiUrl = 'http://deltarobot:3010/updateSettings';
+  
+  
+    const adjustedSettings = {
+      gripperMode: settings.gripper,
+      motorSpeed: settings.speed
+    };
+  
+    axios.post(apiUrl, adjustedSettings)
+      .then(response => {
+        console.log('Einstellungen erfolgreich aktualisiert:',adjustedSettings, response.data);
+      })
+      .catch(error => {
+        console.error('Fehler beim Aktualisieren der Einstellungen:', error);
+      });
+  }, [settings]); // Abhängigkeit, sodass dieser Effekt nur ausgelöst wird, wenn sich `settings` ändert
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -92,8 +118,10 @@ const SettingsPage = () => {
             type="range"
             min="1"
             max="100"
-            value={settings.speed}
+            value={tempSpeed}
             onChange={handleSpeedChange}
+            onMouseUp={handleSpeedChangeComplete}
+            onTouchEnd={handleSpeedChangeComplete}
             className="slider w-full"
           />
         </div>
@@ -117,10 +145,10 @@ const SettingsPage = () => {
             onChange={handleGripper}
             className="ml-2 p-2 bg-black text-white rounded"
           >
-            <option value="1option">Vakuumgreifer</option>
-            <option value="2option">Compliant Greifer</option>
-            <option value="3option">Mechanischer Parallelgreifer</option>
-            <option value="4option">4. Greifer</option>
+            <option value="vacuumGripper">vacuum Gripper</option>
+            <option value="complientGripper">complient Gripper</option>
+            <option value="parallelGripper">parellel Gripper</option>
+            <option value="magnetGripper">Magnet Gripper</option>
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
