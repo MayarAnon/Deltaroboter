@@ -367,7 +367,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             maxSteps = fmax(maxSteps, abs(steps[i].Motor3));
             maxSteps = fmax(maxSteps, abs(steps[i].Motor4));
 
-            long long stepDuration = (long long)(maxSteps * 2 * pulsewith);
+            long long stepDuration = (long long)(maxSteps * 2 * pulsewidth);
             totalDuration += stepDuration;
 
             localErrorAccumulators[0] = stepCalc1 - steps[i].Motor1;
@@ -397,7 +397,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                     cJSON* stepObj = cJSON_CreateObject();
                     cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewith, (int)pulsewith, 5}, 3));
+                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewidth, (int)pulsewidth, 5}, 3));
                     cJSON_AddItemToArray(jsonRoot, stepObj);
                 }
             }
