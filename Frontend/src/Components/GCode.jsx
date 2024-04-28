@@ -52,7 +52,7 @@ const GCode = (p) =>{
           <div className='flex space-x-2 '>
             
             <button className="sm:hidden" id="burgerheader" onClick={toggleMenu}>
-              <img src="Burgermenu.png" className="object-contain object-center w-10 h-10"></img>
+              <img src="Burgermenu.png" className="object-contain object-center w-10 h-10" alt="Menu"></img>
             </button>
             <div className={`hidden sm:flex space-x-2`} id="menu">
             
@@ -61,21 +61,21 @@ const GCode = (p) =>{
               onClick={() => {  updateModeGCode(0) }}
               >
             
-               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>
+               <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10" alt="loadCode"/>
             </button>
             <button
               className="px-4 py-2 border-2 border-white rounded hover:bg-black"
               onClick={() => {  updateModeGCode(1) }}
             >
               
-               <img src="GCode.png" className="object-contain object-center w-10 h-10"/>
+               <img src="GCode.png" className="object-contain object-center w-10 h-10" alt="Editor"/>
             </button>
             <button
               className="px-4 py-2  rounded hover:bg-black" onClick={() => { GCodemode === 2 ? updateModeGCode(1) : updateModeGCode(2) }}>
               
               {GCodemode === 2 ?
-               <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="Saveicon.png" className="object-contain object-center w-10 h-10"/>}
+               <img src="Closeicon.png" className="object-contain object-center w-10 h-10" alt="CloseSave"/> :
+               <img src="Saveicon.png" className="object-contain object-center w-10 h-10" alt="Save" />}
             </button>
             </div>
           </div>
@@ -89,20 +89,20 @@ const GCode = (p) =>{
                 className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
                 onClick={() => {  updateModeGCode(0) }}
                 >
-                <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10"/>
+                <img src="loadprogrammicon.png" className="object-contain object-center w-10 h-10" alt="loadCode"/>
                 </button>
                 <button
                 className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
                 onClick={() => {  updateModeGCode(1) }}
                 >
-                <img src="GCode.png" className="object-contain object-center w-10 h-10"/>
+                <img src="GCode.png" className="object-contain object-center w-10 h-10" alt="Editor"/>
                 </button>
                 <button
               className="px-4 py-2  rounded hover:bg-black" onClick={() => { GCodemode === 2 ? updateModeGCode(1) : updateModeGCode(2) }}>
               
               {GCodemode === 2 ?
-               <img src="Closeicon.png" className="object-contain object-center w-10 h-10"/> :
-               <img src="Saveicon.png" className="object-contain object-center w-10 h-10"/>}
+               <img src="Closeicon.png" className="object-contain object-center w-10 h-10" alt="CloseSave" /> :
+               <img src="Saveicon.png" className="object-contain object-center w-10 h-10" alt="Save"/>}
             </button>
                 
                 </div>

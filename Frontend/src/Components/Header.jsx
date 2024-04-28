@@ -48,7 +48,7 @@ const Header = () => {
     if (darkMode >= 10 && darkMode <= 13) {
       setDarkMode(0);
       document.body.classList.add("dark-mode2");
-      console.log("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+      
     } else if (darkMode < 10 || darkMode > 13) {
       document.body.classList.remove("dark-mode2");
 
@@ -93,6 +93,7 @@ const Header = () => {
             <img
               src="Delta.png"
               className="hidden smm:block object-contain object-center w-10 h-10 "
+              alt="DeltaPic"
             />
           </button>
         </div>
@@ -101,6 +102,7 @@ const Header = () => {
           <img
             src="Burgermenu.png"
             className="object-contain object-center w-10 h-10"
+            alt="Menu"
           ></img>
         </button>
         <div className={`hidden md:flex md:space-x-2`} id="menu">
@@ -111,6 +113,7 @@ const Header = () => {
             <img
               src="JoystickIcon.png"
               className="object-contain object-center w-10 h-10"
+              alt="manualMode"
             ></img>
           </button>
           <button
@@ -120,6 +123,7 @@ const Header = () => {
             <img
               src="GCode.png"
               className=" object-contain object-center w-10 h-10"
+              alt="GCodeMode"
             ></img>
           </button>
           
@@ -135,6 +139,7 @@ const Header = () => {
             <img
               src="Settingsicon.png"
               className=" object-contain object-center w-10 h-10"
+              alt="Settings"
             ></img>
           </button>
           <button
@@ -144,6 +149,7 @@ const Header = () => {
             <img
               src="stopIcon.png"
               className="object-contain object-center w-12 h-12"
+              alt="Stop"
             ></img>
           </button>
           {/* <button
@@ -171,6 +177,7 @@ const Header = () => {
               <img
                 src="JoystickIcon.png"
                 className="object-contain object-center w-10 h-10"
+                alt="manualMode"
               ></img>
             </button>
             <button
@@ -180,6 +187,7 @@ const Header = () => {
               <img
                 src="GCode.png"
                 className=" object-contain object-center w-10 h-10"
+                alt="GCodeMode"
               ></img>
             </button>
 
@@ -196,6 +204,7 @@ const Header = () => {
               <img
                 src="Settingsicon.png"
                 className=" object-contain object-center w-10 h-10"
+                alt="Settings"
               ></img>
             </button>
 
@@ -206,6 +215,7 @@ const Header = () => {
               <img
                 src="stopIcon.png"
                 className="object-contain object-center w-10 h-10"
+                alt="Stop"
               ></img>
             </button>
             <BB8Toggle onClick={toggleDarkMode}></BB8Toggle>
