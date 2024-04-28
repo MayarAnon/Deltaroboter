@@ -3,6 +3,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
+import BB8Toggle from "./darkmodeToggle"
 import axios from "axios";
 // Header-Komponente
 const Header = () => {
@@ -96,7 +97,7 @@ const Header = () => {
             />
           </button>
         </div>
-
+        
         <button className="md:hidden" id="burgerheader" onClick={toggleMenu}>
           <img
             src="Burgermenu.png"
@@ -142,10 +143,10 @@ const Header = () => {
           >
             <img
               src="stopIcon.png"
-              className="object-contain object-center w-10 h-10"
+              className="object-contain object-center w-12 h-12"
             ></img>
           </button>
-          <button
+          {/* <button
             onClick={toggleDarkMode}
             className="px-2 py-2 rounded hover:bg-black"
           >
@@ -153,7 +154,8 @@ const Header = () => {
               src="Darkmodeicon.png"
               className="object-contain object-center w-10 h-10"
             ></img>
-          </button>
+          </button> */}
+          <BB8Toggle  onClick={toggleDarkMode}></BB8Toggle>
         </div>
       </div>
       {isMenuHidden === true && (
@@ -205,8 +207,8 @@ const Header = () => {
                 className="object-contain object-center w-10 h-10"
               ></img>
             </button>
-
-            <button
+            <BB8Toggle  onClick={toggleDarkMode}></BB8Toggle>
+            {/* <button
               onClick={toggleDarkMode}
               className="px-2 smm:px-4 py-2 rounded hover:bg-black"
             >
@@ -214,7 +216,7 @@ const Header = () => {
                 src="Darkmodeicon.png"
                 className="object-contain object-center w-10 h-10"
               ></img>
-            </button>
+            </button> */}
           </div>
         </div>
       )}
