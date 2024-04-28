@@ -1,4 +1,4 @@
-//  gcc -o program ./main.c  -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c global.c gcodeParser.c manualMode.c updateRobotState.c pathInterpolation.c -lpaho-mqtt3c inverseKinematic.c -lm -lcjson
+//  gcc -o MotionPlaning ./main.c  -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c global.c gcodeParser.c manualMode.c updateRobotState.c pathInterpolation.c -lpaho-mqtt3c inverseKinematic.c -lm -lcjson
 
 
 
