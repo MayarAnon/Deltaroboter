@@ -6,7 +6,20 @@ import { settingAtom } from "../utils/atoms";
 import axios from "axios";
 const SettingsPage = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
+  useEffect(() => {
+    // Speichern der Einstellungen im LocalStorage bei Änderung
+    localStorage.setItem('settings', JSON.stringify(settings));
 
+  }, [settings]);
+  
+  useEffect(() => {
+    // Laden der Einstellungen aus dem LocalStorage beim Initialisieren der Komponente
+    const savedSettings = localStorage.getItem('settings');
+    if (savedSettings) {
+      setSettings(JSON.parse(savedSettings));
+      console.log(settings)
+    }
+  }, []);
    // Lokalen Zustand verwenden, um die temporäre Geschwindigkeit zu speichern
    const [tempSpeed, setTempSpeed] = useState(settings.speed);
 
@@ -41,10 +54,10 @@ const SettingsPage = () => {
     console.log("API Anleitung anzeigen");
   };
 
-  //Schicken an Parent kommponente
-  useEffect(() => {
-    setSettings(settings);
-  }, [settings]);
+  // Schicken an Parent kommponente //?
+  // useEffect(() => {
+  //   setSettings(settings);
+  // }, [settings]);
 
   useEffect(() => {
     const apiUrl = 'http://deltarobot:3010/updateSettings';
@@ -93,6 +106,7 @@ const SettingsPage = () => {
     setIsModalOpen(false);
   };
 
+  
   return (
     <>
       <div

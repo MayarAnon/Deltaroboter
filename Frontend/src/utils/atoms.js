@@ -1,13 +1,13 @@
 import { atom } from 'recoil';
 export const settingAtom = atom({
   key: 'settingAtom', 
-  default: {             
+  default: JSON.parse(localStorage.getItem('settings')) || {
     speed: 50,
     manualMode: "buttons",
     gripper: "vacuumGripper",
     color: "#1e293b",
-    workSpaceRadius:200,
-    workSpaceHeight:200
+    workSpaceRadius: 200,
+    workSpaceHeight: 200
   }
 });
 export const xValueAtom = atom({
