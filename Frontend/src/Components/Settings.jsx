@@ -54,11 +54,6 @@ const SettingsPage = () => {
     console.log("API Anleitung anzeigen");
   };
 
-  // Schicken an Parent kommponente //?
-  // useEffect(() => {
-  //   setSettings(settings);
-  // }, [settings]);
-
   useEffect(() => {
     const apiUrl = 'http://deltarobot:3010/updateSettings';
   

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 
 const RobotStateDisplay = () => {
-  const [robotState, setRobotState] = useState({});
+  const [robotState, setRobotState] = useState(() => {
+    const savedState = localStorage.getItem('robotState');
+    return savedState ? JSON.parse(savedState) : {};
+  });
   const [ws, setWs] = useState(null);
 
   useEffect(() => {
@@ -15,6 +18,8 @@ const RobotStateDisplay = () => {
       websocket.onmessage = (event) => {
         const data = JSON.parse(event.data);
         setRobotState(data);
+        localStorage.setItem('robotState', JSON.stringify(data)); // Speichern des neuen Zustands im localStorage
+       
       };
 
       websocket.onerror = (error) => {
