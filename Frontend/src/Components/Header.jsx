@@ -60,7 +60,7 @@ const Header = () => {
   const toggle = () => {
     setIcon((prevIcon) => {
       const newIconValue = prevIcon + 1;
-      if (newIconValue === 2) {
+      if (newIconValue === 4) {
         setIsModalOpen(true);
         return 0;
       }
@@ -74,7 +74,29 @@ const Header = () => {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
+  function lightenHexColor(hex, percent) {
+    // Zuerst die Hex-Farbe in R, G, B umwandeln
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+  
+    // Helligkeit anpassen
+    r = parseInt(r * (100 + percent) / 100);
+    g = parseInt(g * (100 + percent) / 100);
+    b = parseInt(b * (100 + percent) / 100);
+  
+    // Sicherstellen, dass die Werte im gültigen Bereich bleiben
+    r = Math.min(255, r);
+    g = Math.min(255, g);
+    b = Math.min(255, b);
+  
+    // Zurück in Hex konvertieren
+    r = r.toString(16).padStart(2, '0');
+    g = g.toString(16).padStart(2, '0');
+    b = b.toString(16).padStart(2, '0');
+  
+    return `#${r}${g}${b}`;
+  }
   return (
     <>
       <ConfirmationModal
@@ -84,7 +106,10 @@ const Header = () => {
         onClose={closeModal}
       ></ConfirmationModal>
       <div
-        style={{ backgroundColor: settings.color }}
+        style={{
+        background: `linear-gradient(45deg, ${settings.color}, ${lightenHexColor(settings.color,180)})`,
+        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+        borderRadius: '10px'}}
         className={`p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black`}
       >
         <div className="text-3xl sm:text-l flex item-center">
@@ -127,11 +152,6 @@ const Header = () => {
             ></img>
           </button>
           
-          {/*  
-          <button onClick={PickPlaceMode} className="px-4 py-2 border-2 border-white rounded hover:bg-black">
-          <img src="Addpositionicon.png" className="object-contain object-center w-10 h-10"></img>
-            </button>
-          */}
           <button
             onClick={SettingsMode}
             className="px-4 py-2 border-2 border-white rounded hover:bg-black"
@@ -152,21 +172,17 @@ const Header = () => {
               alt="Stop"
             ></img>
           </button>
-          {/* <button
-            onClick={toggleDarkMode}
-            className="px-2 py-2 rounded hover:bg-black"
-          >
-            <img
-              src="Darkmodeicon.png"
-              className="object-contain object-center w-10 h-10"
-            ></img>
-          </button> */}
           <BB8Toggle onClick={toggleDarkMode}></BB8Toggle>
         </div>
       </div>
       {isMenuHidden === true && (
         <div
-          style={{ backgroundColor: settings.color }}
+        style={{
+          background: `linear-gradient(45deg, ${settings.color}, ${lightenHexColor(settings.color,180)})`,
+          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+          borderRadius: '10px',
+          position: 'relative',
+          overflow: 'hidden'}}
           className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between"
         >
           <div className="flex justify-between items-center w-full">
@@ -191,12 +207,6 @@ const Header = () => {
               ></img>
             </button>
 
-            
-            {/*
-              <button onClick={PickPlaceMode} className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black">
-                <img src="Addpositionicon.png" className="object-contain object-center w-10 h-10"></img>
-              </button>
-              */}
             <button
               onClick={SettingsMode}
               className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
@@ -219,15 +229,7 @@ const Header = () => {
               ></img>
             </button>
             <BB8Toggle onClick={toggleDarkMode}></BB8Toggle>
-            {/* <button
-              onClick={toggleDarkMode}
-              className="px-2 smm:px-4 py-2 rounded hover:bg-black"
-            >
-              <img
-                src="Darkmodeicon.png"
-                className="object-contain object-center w-10 h-10"
-              ></img>
-            </button> */}
+            
           </div>
         </div>
       )}
