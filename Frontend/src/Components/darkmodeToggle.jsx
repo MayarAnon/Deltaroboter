@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './BB8Toggle.css'; // Stellen Sie sicher, dass der CSS-Code in einer separaten Datei namens 'BB8Toggle.css' gespeichert ist.
+import '../styles/BB8Toggle.css'; // Stellen Sie sicher, dass der CSS-Code in einer separaten Datei namens 'BB8Toggle.css' gespeichert ist.
 
 function BB8Toggle({ onClick }) {
   const [isChecked, setIsChecked] = useState(false);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import { Unity, useUnityContext } from "react-unity-webgl";
-import "./debugger.css";
+import "../styles/debugger.css";
 const Debugger = () => {
   const { unityProvider } = useUnityContext({
     loaderUrl: "Build/FlappyBird.loader.js",

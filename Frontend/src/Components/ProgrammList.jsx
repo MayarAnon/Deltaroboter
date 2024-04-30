@@ -40,7 +40,7 @@ const LoadProgrammList = () => {
         ))
       ) : (
         <>
-         <div className="flex justify-center items-center h-screen">
+         <div className="flex justify-center items-center p-10">
         <img src="loading.gif" className="object-contain object-center w-24 h-24" alt="Load Icon"/>
         </div>
         </>

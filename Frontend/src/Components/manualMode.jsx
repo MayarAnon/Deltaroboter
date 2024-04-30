@@ -429,7 +429,7 @@ const ManuellMode = () => {
           >
             Actuator
             <input
-              value={actuator}
+              value={actuator.value}
               readOnly
               style={{ backgroundColor: settings.color }} // Markiert das Feld als schreibgeschützt
               className="text-white w-20  rounded ml-2"
