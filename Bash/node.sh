@@ -2,12 +2,20 @@
 
 # Node installieren 
 
-cd ..
+sudo apt install nodejs npm
 
-curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-sudo apt-get install -y nodejs
 
 # alle Packages installieren 
 
-npm install --all
+FrontendPath=$(realpath ../Frontend)
+
+BackendPath=$(realpath ../Backend/WebServer)
+
+cd $FrontendPath
+
+npm install # installiert alle Benötigten Packages im Frontend 
+
+cd $BackendPath 
+
+npm install # installiert alle Benötigten Packages im Backend 
 
