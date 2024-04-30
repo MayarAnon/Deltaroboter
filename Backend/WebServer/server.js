@@ -213,6 +213,8 @@ app.post('/pickandplace/program', async (req, res) => {
   }
 });
 
+
+
 //websocket-mqtt-service
 wss.on('connection', function connection(ws) {
   console.log('WebSocket client verbunden.');
