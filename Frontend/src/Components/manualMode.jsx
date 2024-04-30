@@ -38,7 +38,7 @@ const ManuellMode = () => {
         setter = setXValue;
         valueChecker = (value) => {
           const step = calculateStep() * direction; // Richtung und Schrittgröße einbeziehen
-          const newX = (parseFloat(value) + step).toFixed(1); // Rundet auf eine Nachkommastelle
+          const newX = Math.round((parseFloat(value) + step) * 10) / 10; // Rundet auf eine Nachkommastelle
           const newY = yValue;
           return newX * newX + newY * newY <= 40000 ? newX : value;
         };
@@ -47,7 +47,7 @@ const ManuellMode = () => {
         setter = setYValue;
         valueChecker = (value) => {
           const step = calculateStep() * direction;
-          const newY = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+          const newY = Math.round((parseFloat(value) + step) * 10) / 10; // Rundet auf eine Nachkommastelle
           const newX = xValue;
           return newX * newX + newY * newY <= 40000 ? newY : value;
         };
@@ -56,7 +56,7 @@ const ManuellMode = () => {
         setter = setZValue;
         valueChecker = (value) => {
           const step = calculateStep() * direction;
-          const newZ = parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+          const newZ = Math.round((parseFloat(value) + step) * 10) / 10; // Rundet auf eine Nachkommastelle
           return newZ >= -480 && newZ <= -280 ? newZ : value;
         };
         break;
@@ -64,7 +64,7 @@ const ManuellMode = () => {
         setter = setPhiValue;
         valueChecker = (value) => {
           const step = calculateStep() * direction;
-          return parseFloat((value + step).toFixed(1)); // Rundet auf eine Nachkommastelle
+          return Math.round((parseFloat(value) + step) * 10) / 10; // Rundet auf eine Nachkommastelle
         };
         break;
       default:
@@ -90,10 +90,10 @@ const ManuellMode = () => {
 
   const sendCoordinates = async () => {
     const coordinates = [
-      parseFloat(xValue),
-      parseFloat(yValue),
-      parseFloat(zValue),
-      parseFloat(phiValue),
+      Math.round(parseFloat(xValue) * 10) / 10,
+      Math.round(parseFloat(yValue) * 10) / 10,
+      Math.round(parseFloat(zValue) * 10) / 10,
+      Math.round(parseFloat(phiValue) * 10) / 10,
     ];
     try {
       const response = await axios.post("/manual/control/coordinates", {
@@ -130,13 +130,34 @@ const ManuellMode = () => {
   };
 
 
-  const updateCoordinates = (newXValue, newYValue,newZValue,newPhiValue) => {
+  const updateCoordinates = (newXValue, newYValue, newZValue, newPhiValue) => {
+    // Phi-Wert auf den Bereich von -180 bis 180 begrenzen
+    const adjustedPhiValue = Math.max(-180, Math.min(180, newPhiValue));
+
+    // Z-Wert auf den Bereich von -480 bis -280 begrenzen
+    const adjustedZValue = Math.max(-480, Math.min(-280, newZValue));
+
+    // Berechnung der Entfernung von (0,0) um sicherzustellen, dass x und y innerhalb eines Kreises mit Radius 200 bleiben
+    const distance = Math.sqrt(newXValue * newXValue + newYValue * newYValue);
+    if (distance > 200) {
+      // Skalieren von newXValue und newYValue, falls nötig, um innerhalb des Kreises zu bleiben
+      const scale = 200 / distance;
+      newXValue *= scale;
+      newYValue *= scale;
+    }
+
+    // Setzen der korrigierten Werte
     setXValue(newXValue);
     setYValue(newYValue);
-    setZValue(newZValue);
-    setPhiValue(newPhiValue);
-    sendCoordinates()
+    setZValue(adjustedZValue);
+    setPhiValue(adjustedPhiValue);
   };
+
+  // Funktion, um den maximalen Wert für einen gegebenen Wert und einen Radius zu berechnen
+  const calculateLimit = (value, radius) => {
+    return Math.sqrt(radius * radius - value * value);
+  };
+
   return (
     <>
       <div className="flex flex-wrap justify-center mx-2 mt-10 sm:mt-15 gap-4">
@@ -161,16 +182,16 @@ const ManuellMode = () => {
             <Slider
               color={settings.color}
               label="+X / -X"
-              min={-settings.workSpaceRadius * 0.7}
-              max={settings.workSpaceRadius * 0.7}
+              min={-calculateLimit(yValue, 200)}
+              max={calculateLimit(yValue, 200)}
               externalValue={xValue}
               onChange={(value) => updateCoordinates(value,yValue,zValue,phiValue)}
             />
             <Slider
               color={settings.color}
               label="+Y / -Y"
-              min={-settings.workSpaceRadius * 0.7}
-              max={settings.workSpaceRadius * 0.7}
+              min={-calculateLimit(xValue, 200)}
+              max={calculateLimit(xValue, 200)}
               externalValue={yValue}
               onChange={(value) => updateCoordinates(xValue,value,zValue,phiValue)}
             />

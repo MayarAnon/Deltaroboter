@@ -1,5 +1,5 @@
 import React from 'react';
-import RobotState from './Robotstate';
+import RobotState from './robotstate';
 
 const DigitalTwin = () => {
   return (

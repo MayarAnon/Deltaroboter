@@ -4,8 +4,8 @@ import { RecoilRoot } from "recoil";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SettingsPage from "./Components/Settings";
 import Header from "./Components/Header";
-import ManuellMode from "./Components/ManualMode";
-import Debugger from "./Components/Debugger"
+import ManuellMode from "./Components/manualMode";
+import Debugger from "./Components/debugger"
 import GCode from "./Components/GCode";
 import DigitalTwin from "./Components/DigitalTwin";
 

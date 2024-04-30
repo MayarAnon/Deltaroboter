@@ -4,7 +4,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import axios from "axios";
-import RobotStateDisplay from "./Robotstate";
+import RobotStateDisplay from "./robotstate";
 const SettingsPage = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
   useEffect(() => {
