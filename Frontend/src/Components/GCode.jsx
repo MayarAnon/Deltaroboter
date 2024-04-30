@@ -1,6 +1,5 @@
-import React, { useState} from 'react';
+import React from 'react';
 import axios from 'axios';
-import {TextEditor} from './Texteditor';
 import LoadProgrammList from './ProgrammList'
 import { useRecoilState } from "recoil";
 import { settingAtom,gCodeStringAtom,gCodeModeAtom } from "../utils/atoms";

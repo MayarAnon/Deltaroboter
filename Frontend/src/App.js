@@ -4,10 +4,10 @@ import { RecoilRoot } from "recoil";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SettingsPage from "./Components/Settings";
 import Header from "./Components/Header";
-import ManuellMode from "./Components/manualMode";
-import Debugger from "./Components/debugger"
+import ManuellMode from "./Components/ManualMode";
+import Debugger from "./Components/Debugger"
 import GCode from "./Components/GCode";
-
+import DigitalTwin from "./Components/DigitalTwin";
 
 const App = () => {
 
@@ -19,7 +19,8 @@ const App = () => {
             <Route path="/" element={<ManuellMode/>} />
             <Route path="/debug-mode" element={<Debugger/>} />
             <Route path="/settings" element={<SettingsPage/>} />
-            <Route path="/gcode-editor" element={<GCode/>} />         
+            <Route path="/gcode-editor" element={<GCode/>} />
+            <Route path="/digital-twin" element={<DigitalTwin/>} />          
           </Routes>
       </RecoilRoot>
       </Router>

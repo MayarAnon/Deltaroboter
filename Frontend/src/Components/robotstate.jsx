@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-
+import { useRecoilState } from "recoil";
+import { settingAtom } from "../utils/atoms";
 const RobotStateDisplay = () => {
+  const [settings, setSettings] = useRecoilState(settingAtom);
   const [robotState, setRobotState] = useState(() => {
     const savedState = localStorage.getItem('robotState');
     return savedState ? JSON.parse(savedState) : {};
@@ -45,25 +47,27 @@ const RobotStateDisplay = () => {
   }, []);
 
   return (
-    <div className="p-4 max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl">
-      <div className="md:flex">
-        <div className="p-8">
-          <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold">Robot State</div>
+    <div style={{ backgroundColor: settings.color }} className="p-4 text-white font-bold rounded-xl mt-10 mx-5 border-4 border-black">
+      <div className="flex flex-col md:flex-row">
+        <div className="p-8 w-full">
+          <div className="text-xl font-semibold tracking-wide">Robot State</div>
+          <div className="border-t border-gray-600 my-2 w-full"></div> {/* Divider */}
           {Object.keys(robotState).length === 0 ? (
-            <p className="mt-2 text-gray-500">Waiting for data...</p>
+            <p className="mt-2">Waiting for data...</p>
           ) : (
-            <div className="mt-2 text-gray-900">
-              {Object.entries(robotState).map(([key, value]) => (
-                <p key={key} className="text-sm font-medium">
-                  {key}: {JSON.stringify(value)}
-                </p>
-              ))}
-            </div>
+            <div className="ml-5 mb-2">
+            {Object.entries(robotState).map(([key, value]) => (
+              <p key={key} className="text-md">
+                {key.charAt(0).toUpperCase() + key.slice(1).toLowerCase()}: {JSON.stringify(value)}
+              </p>
+            ))}
+          </div>
           )}
         </div>
       </div>
     </div>
   );
-};
+  
+}  
 
 export default RobotStateDisplay;

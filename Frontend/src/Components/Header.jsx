@@ -3,11 +3,10 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
-import BB8Toggle from "./darkmodeToggle";
+import BB8Toggle from "./DarkmodeToggle";
 import axios from "axios";
-// Header-Komponente
+
 const Header = () => {
-  // State-Hook, um den Anzeigezustand des Menüs zu verwalten
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [isMenuHidden, setMenuHidden] = React.useState(true);
   const [darkMode, setDarkMode] = React.useState(0); // Zustand für Dark Mode
@@ -29,7 +28,7 @@ const Header = () => {
   const toggleMenu = () => {
     setMenuHidden(!isMenuHidden);
   };
-
+  //sendet stop signal an den endpoint
   const sendMotorStop = async () => {
     try {
       const response = await axios.post("/motors/stop", {
@@ -44,6 +43,7 @@ const Header = () => {
     }
   };
 
+  //managet darkmode und regenbogen-mode ;)
   const toggleDarkMode = () => {
     if (darkMode >= 10 && darkMode <= 13) {
       setDarkMode(0);
@@ -57,23 +57,26 @@ const Header = () => {
     setDarkMode(darkMode + 1);
   };
 
+  //zum öffnen vom Modalfenster 2 mal auf das logo  klicken
   const toggle = () => {
     setIcon((prevIcon) => {
       const newIconValue = prevIcon + 1;
-      if (newIconValue === 4) {
+      if (newIconValue === 2) {
         setIsModalOpen(true);
         return 0;
       }
       return newIconValue;
     });
   };
-  const ModalhandleConfirm = () => {
+  //leitet den Nutzer zum debug-mode ;)
+  const handleConfirm = () => {
     navigate("/debug-mode");
     setIsModalOpen(false);
   };
   const closeModal = () => {
     setIsModalOpen(false);
   };
+  //für berechnung der farbe vom header
   function lightenHexColor(hex, percent) {
     // Zuerst die Hex-Farbe in R, G, B umwandeln
     let r = parseInt(hex.slice(1, 3), 16);
@@ -100,11 +103,14 @@ const Header = () => {
   return (
     <>
       <ConfirmationModal
-        color={settings.color}
-        onConfirm={ModalhandleConfirm}
+        color={settings.color} // Setze die Farbe nach Bedarf
         isOpen={isModalOpen}
         onClose={closeModal}
-      ></ConfirmationModal>
+        onConfirm={handleConfirm}
+        text="Bitte geben Sie das Passwort ein, um fortzufahren."
+        requirePassword={true}
+        correctPassword="1234" // Setze das korrekte Passwort hier
+      />
       <div
         style={{
         background: `linear-gradient(45deg, ${settings.color}, ${lightenHexColor(settings.color,180)})`,
