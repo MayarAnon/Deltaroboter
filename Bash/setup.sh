@@ -6,8 +6,9 @@ sudo apt-get update -y || { echo "Fehler beim Aktualisieren der Paketlisten"; ex
 
 #Python pip installieren 
 sudo apt-get install python-pip
+sudo apt-get install python3-pip
 # Paho bib installieren 
-sudo pip install paho-mqtt
+sudo apt-get install python3-paho-mqtt
 # rpi.gpio installiern für Homing und GripperControl
 sudo apt-get install python3-rpi.gpio
 
@@ -21,7 +22,8 @@ done
 # Skripte für zusätzliche Dienste ausführen
 ./node.sh || { echo "Fehler beim Ausführen von node.sh"; exit 1; }
 ./Mosquitto.sh || { echo "Fehler beim Ausführen von Mosquitto.sh"; exit 1; }
-./packages.sh || {echo "Fehler beim Ausführen von packages.sh";exit 1;}
+./packages.sh || { echo "Fehler beim Ausführen von packages.sh"; exit 1; }
+
 
 #./service.sh || {echo "Fehler beim Ausführen von service.sh";exit 1;}
 
