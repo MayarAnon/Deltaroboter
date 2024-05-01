@@ -178,7 +178,7 @@ const LoadProgrammList = () => {
                     className="hidden sm:block mr-2 px-4 py-2 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                     onClick={handleExpandChange}
                   >
-                    {expand ? 'Schließen' : 'Expandieren'}
+                    {expand ? 'Close' : 'Expand'}
                   </button>
                   <button
                     className="hidden sm:block mr-2 px-4 py-2 border-2 bg-red-600 hover:bg-red-700 text-white rounded"

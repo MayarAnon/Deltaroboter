@@ -115,10 +115,10 @@ const SettingsPage = () => {
           isOpen={isModalOpen}
           onClose={calibratehandleCloseModal}
           onConfirm={calibratehandleConfirm}
-          text={"Deltaroboter Kalibrieren"}
+          text={"Calibrate Deltarobot"}
         />
         <div className="mb-4">
-          <label>Geschwindigkeit: {settings.speed}%</label>
+          <label>Speed: {settings.speed}%</label>
           <input
             type="range"
             min="1"
@@ -132,19 +132,19 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
-          <label>Manueller Modus:</label>
+          <label>Manual Mode:</label>
           <select
             value={settings.manualMode}
             onChange={handleManualModeChange}
             className="ml-2 p-2 bg-black text-white rounded"
           >
-            <option value="buttons">Knöpfe</option>
-            <option value="sliders">Schieberegler</option>
+            <option value="buttons">Buttons</option>
+            <option value="sliders">Sliders</option>
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
-          <label>Greifersystem:</label>
+          <label>Grippersystem:</label>
           <select
             value={settings.gripper}
             onChange={handleGripper}
@@ -163,21 +163,21 @@ const SettingsPage = () => {
             onClick={calibratehandleOpenModal}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
           >
-            Deltaroboter Kalibrieren
+            Calibrate Deltarobot 
           </button>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <a href="http://deltarobot:3010/downloadApiGuide" target="_blank">
             <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded" >
-              API Anleitung herunterladen
+              Download API Guide
             </button>
           </a>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div>
           <button className="px-4 py-2 mt-4 text-white rounded bg-black">
-            Farbe wählen:{" "}
+            Chose Color:{" "}
             <input
               type="color"
               onChange={handleColorChange}

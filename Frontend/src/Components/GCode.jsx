@@ -112,7 +112,7 @@ const GCode = (p) =>{
           <>
           <div style={{ backgroundColor: settings.color }} className="mx-5 p-2 border-4 border-black rounded-2xl flex items-center justify-between">
             <div className="flex flex-col sm:flex-row justify-between items-center w-full">
-              <label className="text-white mb-2 mr-2 font-bold">Speichern Unter:</label>
+              <label className="text-white mb-2 mr-2 font-bold">Save as:</label>
               <input
                 value={sharedString.name}
                 onChange={handleNameChange}
@@ -122,7 +122,7 @@ const GCode = (p) =>{
                 className="px-4 py-1 border-2 border-white text-white text-l font-bold rounded hover:bg-black"
                 onClick={saveGCode}
               >
-                Speichern
+                Save
               </button>
             </div>
   

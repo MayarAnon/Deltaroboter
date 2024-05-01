@@ -32,15 +32,15 @@ const ConfirmationModal = ({color, isOpen, onClose, onConfirm,text,requirePasswo
                 onChange={(e) => { setPassword(e.target.value); setPasswordError(false); }}
                 className="text-black rounded px-2 py-1"
               />
-              {passwordError && <p className="text-sm text-red-500">Falsches Passwort</p>}
+              {passwordError && <p className="text-sm text-red-500">Wrong Password</p>}
             </div>
           )}
             <div className="mt-2 px-7 py-3">
-              <p className="text-sm text-white">Möchten Sie fortfahren?</p>
+              <p className="text-sm text-white">Do you want to continue?</p>
             </div>
             <div className="items-center px-4 py-3">
-              <button onClick={handleClose} style={{ backgroundColor: color }}   className="px-4 py-2 border-4 border-white  text-white rounded hover:bg-black focus:outline-none mr-2">Abbrechen</button>
-              <button onClick={handleConfirm} style={{ backgroundColor: color }}  className="px-4 py-2 border-4 border-white text-white rounded hover:bg-black focus:outline-none">Bestätigen</button>
+              <button onClick={handleClose} style={{ backgroundColor: color }}   className="px-4 py-2 border-4 border-white  text-white rounded hover:bg-black focus:outline-none mr-2">Abort</button>
+              <button onClick={handleConfirm} style={{ backgroundColor: color }}  className="px-4 py-2 border-4 border-white text-white rounded hover:bg-black focus:outline-none">Continue</button>
             </div>
           </div>
         </div>

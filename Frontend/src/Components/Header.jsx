@@ -107,7 +107,7 @@ const Header = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onConfirm={handleConfirm}
-        text="Bitte geben Sie das Passwort ein, um fortzufahren."
+        text="Please enter the password to continue."
         requirePassword={true}
         correctPassword="1234" // Setze das korrekte Passwort hier
       />
