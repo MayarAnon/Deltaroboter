@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# Erhöht die Robustheit des Skripts
-set -euo pipefail
 
 # System auf den aktuellen Stand bringen
 sudo apt-get update -y || { echo "Fehler beim Aktualisieren der Paketlisten"; exit 1; }
+
+#Python pip installieren 
+sudo apt-get install python-pip
+# Paho bib installieren 
+sudo pip install paho-mqtt
+# rpi.gpio installiern für Homing und GripperControl
+sudo apt-get install python3-rpi.gpio
+
 
 # Stelle sicher, dass Skriptdateien im Unix-Format sind
 for script in node.sh Mosquitto.sh start.sh packages.sh service.sh; do
