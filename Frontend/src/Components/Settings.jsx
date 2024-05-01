@@ -168,12 +168,11 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
-          <button
-            onClick={showApiGuide}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-          >
-            API Anleitung
-          </button>
+          <a href="http://deltarobot:3010/downloadApiGuide" target="_blank">
+            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded" >
+              API Anleitung herunterladen
+            </button>
+          </a>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div>

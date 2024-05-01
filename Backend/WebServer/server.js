@@ -213,6 +213,32 @@ app.post('/pickandplace/program', async (req, res) => {
   }
 });
 
+// Endpunkt zum Herunterladen der API-Anleitung
+app.get('/downloadApiGuide', (req, res) => {
+  const apiGuidePath = path.join(__dirname, 'API_Anleitung.pdf');
+
+  // Überprüfen, ob die API-Anleitung existiert
+  fs.exists(apiGuidePath, exists => {
+    if (exists) {
+      // Setzt den Content-Type für PDF-Dateien
+      res.setHeader('Content-Type', 'application/pdf');
+      
+      // Stellt die API-Anleitung zum Download bereit
+      res.download(apiGuidePath, 'API-Anleitung.pdf', err => {
+        if (err) {
+          // Fehler beim Senden der Datei
+          console.error('Fehler beim Herunterladen der API-Anleitung:', err);
+          res.status(500).json({ error: 'Fehler beim Herunterladen der API-Anleitung' });
+        }
+      });
+    } else {
+      // Datei nicht gefunden
+      res.status(404).json({ error: 'API-Anleitung nicht gefunden' });
+    }
+  });
+});
+
+
 
 
 //websocket-mqtt-service
