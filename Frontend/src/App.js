@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./App.css";
 import { RecoilRoot } from "recoil";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SettingsPage from "./Components/Settings";
 import Header from "./Components/Header";
-import ManuellMode from "./Components/manualMode";
-import Debugger from "./Components/debugger"
+import ManuellMode from "./Components/ManualMode";
+import Debugger from "./Components/Debugger"
 import GCode from "./Components/GCode";
 import DigitalTwin from "./Components/DigitalTwin";
 

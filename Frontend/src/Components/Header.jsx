@@ -3,7 +3,7 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
-import BB8Toggle from "./darkmodeToggle";
+import BB8Toggle from "./DarkmodeToggle";
 import axios from "axios";
 
 const Header = () => {

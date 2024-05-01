@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import InfoComponent from "./Info";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import axios from "axios";
-import RobotStateDisplay from "./robotstate";
+import RobotStateDisplay from "./Robotstate";
 const SettingsPage = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
   useEffect(() => {
