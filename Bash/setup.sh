@@ -24,8 +24,8 @@ done
 ./Mosquitto.sh || { echo "Fehler beim Ausführen von Mosquitto.sh"; exit 1; }
 ./packages.sh || { echo "Fehler beim Ausführen von packages.sh"; exit 1; }
 
-
-#./service.sh || {echo "Fehler beim Ausführen von service.sh";exit 1;}
+#Services starten 
+./service.sh || {echo "Fehler beim Ausführen von service.sh"; exit 1;}
 
 
 
