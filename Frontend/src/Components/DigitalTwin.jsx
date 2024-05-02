@@ -65,6 +65,8 @@ const DigitalTwin = () => {
     );
     const effectorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
     const effector = new THREE.Mesh(effectorGeometry, effectorMaterial);
+    effector.position.x = robotState.currentCoordinates[0];
+    effector.position.y = robotState.currentCoordinates[1];
     effector.position.z = robotState.currentCoordinates[2];
     effector.rotation.x = Math.PI / 2;
     scene.add(effector);
@@ -104,67 +106,81 @@ const DigitalTwin = () => {
   // Update der Gelenke und Arme
   useEffect(() => {
     if (!objects.scene) return;
-
-    const { scene } = objects;
-    const jointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0aaa });
-    const armMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const lowerArmMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
-
-    const jointPositions = calculateJointPositions(robotState.currentAngles);
-    const endEffectorPositions = [
-      { x: effectorRadius * Math.cos(0), y: effectorRadius * Math.sin(0), z: robotState.currentCoordinates[2] },
-      {
-        x: effectorRadius * Math.cos((2 * Math.PI) / 3),
-        y: effectorRadius * Math.sin((2 * Math.PI) / 3),
-        z: robotState.currentCoordinates[2]
-      },
-      {
-        x: effectorRadius * Math.cos((4 * Math.PI) / 3),
-        y: effectorRadius * Math.sin((4 * Math.PI) / 3),
-        z: robotState.currentCoordinates[2]
-      },
-    ];
-    jointPositions.forEach((position, index) => {
-       // Gelenke erstellen
-      const jointGeometry = new THREE.SphereGeometry(10, 32, 32);
-      const joint = new THREE.Mesh(jointGeometry, jointMaterial);
-      joint.position.set(position.x, position.y, position.z);
-      scene.add(joint);
-
-      // Oberarme erstellen
-      const motorPosition = new THREE.Vector3(basePositions[index].x, basePositions[index].y, 0);
-      const jointPosition = new THREE.Vector3(position.x, position.y, position.z);
-      const armGeometry = new THREE.CylinderGeometry(5, 5, upperArmLength, 32);
-      const arm = new THREE.Mesh(armGeometry, armMaterial);
-      arm.position.copy(motorPosition).lerp(jointPosition, 0.5);
-      arm.lookAt(jointPosition);
-      arm.rotateX(Math.PI / 2); // Justieren der Ausrichtung, falls nötig
-      scene.add(arm);
-
-      // Unterarme erstellen
-      const endEffectorPosition = new THREE.Vector3(
-        endEffectorPositions[index].x,
-        endEffectorPositions[index].y,
-        robotState.currentCoordinates[2] // Z-Position des Endeffektors
-      );
-      const lowerArmGeometry = new THREE.CylinderGeometry(5, 5, lowerArmLength, 32);
-      const lowerArm = new THREE.Mesh(lowerArmGeometry, lowerArmMaterial);
-      lowerArm.position.copy(jointPosition).lerp(endEffectorPosition, 0.5);
-      lowerArm.lookAt(endEffectorPosition);
-      lowerArm.rotateX(Math.PI / 2); // Justieren der Ausrichtung
-      scene.add(lowerArm);
-    });
-
-    setObjects(objects); // Speichern der aktualisierten Objekte
-  }, [objects.scene, robotState]); 
+  
+    // Berechnet die Positionen der Gelenke und aktualisiert die Arme
+    const updatePositions = () => {
+      const jointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0aaa });
+      const armMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+      const lowerArmMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+  
+      const jointPositions = calculateJointPositions(robotState.currentAngles);
+      const endEffectorPositions = [
+        { x: effectorRadius * Math.cos(0), y: effectorRadius * Math.sin(0), z: robotState.currentCoordinates[2] },
+        {
+          x: effectorRadius * Math.cos((2 * Math.PI) / 3),
+          y: effectorRadius * Math.sin((2 * Math.PI) / 3),
+          z: robotState.currentCoordinates[2]
+        },
+        {
+          x: effectorRadius * Math.cos((4 * Math.PI) / 3),
+          y: effectorRadius * Math.sin((4 * Math.PI) / 3),
+          z: robotState.currentCoordinates[2]
+        },
+      ];
+  
+      objects.scene.children.forEach(child => {
+        if (child.type === 'Mesh' && (child.material.color.getHex() === jointMaterial.color.getHex() || child.material.color.getHex() === armMaterial.color.getHex() || child.material.color.getHex() === lowerArmMaterial.color.getHex())) {
+          objects.scene.remove(child);
+        }
+      });
+  
+      jointPositions.forEach((position, index) => {
+        // Gelenke neu erstellen
+        const jointGeometry = new THREE.SphereGeometry(10, 32, 32);
+        const joint = new THREE.Mesh(jointGeometry, jointMaterial);
+        joint.position.set(position.x, position.y, position.z);
+        objects.scene.add(joint);
+  
+        // Oberarme neu erstellen
+        const motorPosition = new THREE.Vector3(basePositions[index].x, basePositions[index].y, 0);
+        const jointPosition = new THREE.Vector3(position.x, position.y, position.z);
+        const armGeometry = new THREE.CylinderGeometry(5, 5, upperArmLength, 32);
+        const arm = new THREE.Mesh(armGeometry, armMaterial);
+        arm.position.copy(motorPosition).lerp(jointPosition, 0.5);
+        arm.lookAt(jointPosition);
+        arm.rotateX(Math.PI / 2);
+        objects.scene.add(arm);
+  
+        // Unterarme neu erstellen
+        const endEffectorPosition = new THREE.Vector3(
+          endEffectorPositions[index].x,
+          endEffectorPositions[index].y,
+          robotState.currentCoordinates[2]
+        );
+        const lowerArmGeometry = new THREE.CylinderGeometry(5, 5, lowerArmLength, 32);
+        const lowerArm = new THREE.Mesh(lowerArmGeometry, lowerArmMaterial);
+        lowerArm.position.copy(jointPosition).lerp(endEffectorPosition, 0.5);
+        lowerArm.lookAt(endEffectorPosition);
+        lowerArm.rotateX(Math.PI / 2);
+        objects.scene.add(lowerArm);
+      });
+    };
+  
+    updatePositions();
+    objects.renderer.render(objects.scene, objects.camera);
+  
+  }, [robotState, objects]);
+  
   useEffect(() => {
     function connect() {
       const websocket = new WebSocket('ws://deltarobot.local:3010');
       websocket.onopen = () => console.log('WebSocket connected');
       websocket.onmessage = event => {
         const data = JSON.parse(event.data);
-        setRobotState(data);
-        localStorage.setItem('robotState', JSON.stringify(data));
+        setRobotState(prevState => ({
+          ...prevState,
+          ...data
+        }));
       };
       websocket.onerror = error => console.error('WebSocket error:', error);
       websocket.onclose = event => {
@@ -174,6 +190,20 @@ const DigitalTwin = () => {
     }
     connect();
   }, []);
+  
+
+
+  useEffect(() => {
+    const updateScene = () => {
+      if (!objects.scene) return;
+      objects.effector.position.x = robotState.currentCoordinates[0];
+      objects.effector.position.x = robotState.currentCoordinates[1];
+      objects.effector.position.z = robotState.currentCoordinates[2]; // Update Endeffector position
+      objects.renderer.render(objects.scene, objects.camera);
+    };
+
+    updateScene();
+  }, [robotState.currentCoordinates, objects]);
   return (
     <div>
       <h1>Digital Twin of Delta Robot</h1>
