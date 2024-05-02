@@ -5,8 +5,8 @@
 
 
 // Definition der geometrischen Konstanten des Roboters
-const float e = 50;     // Länge des Endeffektors
-const float f = 100;    // Länge der Basis
+const float e = 173.21;     // Länge des Endeffektors
+const float f = 346.41;    // Länge der Basis
 const float re = 400.0; // Länge der Verbindungsglieder des Endeffektors
 const float rf = 150.0; // Länge der Verbindungsglieder der Basis
 
