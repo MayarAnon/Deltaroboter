@@ -22,10 +22,10 @@ done
 # Skripte für zusätzliche Dienste ausführen
 ./node.sh || { echo "Fehler beim Ausführen von node.sh"; exit 1; }
 ./Mosquitto.sh || { echo "Fehler beim Ausführen von Mosquitto.sh"; exit 1; }
-./packages.sh || { echo "Fehler beim Ausführen von packages.sh"; exit 1; }
+./packages.sh 
 
 #Services starten 
-./service.sh || {echo "Fehler beim Ausführen von service.sh"; exit 1;}
+./service.sh 
 
 
 

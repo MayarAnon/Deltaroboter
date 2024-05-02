@@ -6,7 +6,4 @@ sudo systemctl start deltarobot.service || { echo "Fehler beim Starten des Diens
 
 
 
-# Rechte im Verzeichnis /home/pi/Deltarobot nur für den Benutzer 'pi' setzen
-chmod u+rwx,go= -R /home/pi/Deltarobot || { echo "Fehler beim Setzen der Berechtigungen"; exit 1; }
-
 echo "Alle Vorgänge erfolgreich abgeschlossen."

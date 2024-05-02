@@ -262,7 +262,7 @@ wss.on('connection', function connection(ws) {
 
 
 // Statische Dateien bedienen
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.static(path.join(__dirname,'../../Frontend' , 'build')));
 
 // Anhören sowohl auf dem HTTP- als auch auf dem WebSocket-Server
 server.listen(port, () => {
