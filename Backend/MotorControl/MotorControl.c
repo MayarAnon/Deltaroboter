@@ -39,7 +39,7 @@ void execute_interpolated_sequence(int* pulses, int pulseWidthUs, int pauseBetwe
     // Zu Beginn der Sequenz: Richtungsänderung einfügen, falls notwendig, mit einer Verzögerung vor dem ersten Puls
     for (int i = 0; i < globalConfig.motor_count; ++i)
     {
-        if (pulses[i] < 0)
+        if (pulses[i] > 0)
         { // Nur wenn die Pulse negativ sind, setze den dir_GPIO auf HIGH
             combinedPulses[pulseIndex++] = (gpioPulse_t){
                 .gpioOn = (1 << globalConfig.dir_gpios[i]),
