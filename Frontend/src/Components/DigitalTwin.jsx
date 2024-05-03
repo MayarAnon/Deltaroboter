@@ -1,6 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useRecoilState } from "recoil";
+import {
+  xValueAtom,
+  yValueAtom,
+  zValueAtom,
+  phiValueAtom,
+  actuatorAtom,
+  settingAtom
+} from "../utils/atoms";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import delta_calcInverse  from "./IK" 
 const baseRadius = 100;
 const effectorRadius = 50;
 const upperArmLength = 150;
@@ -21,13 +31,20 @@ const baseAngles = [0, 120, 240];
 const DigitalTwin = () => {
   const mountRef = useRef(null);
   const [objects, setObjects] = useState({});
+  const [xValue, setXValue] = useRecoilState(xValueAtom);
+  const [yValue, setYValue] = useRecoilState(yValueAtom);
+  const [zValue, setZValue] = useRecoilState(zValueAtom);
   const [robotState, setRobotState] = useState({
-    homing: true,
-    currentCoordinates: [0, 0, -280], // M1, M2, M3, Drehachse für den Greifer
-    currentAngles: [-31, -31, -31], // Motorwinkel in Grad
+    currentCoordinates: [xValue, yValue,zValue], 
+    currentAngles:[-31,-31,31]
   });
-  
-  
+  useEffect(() => {
+    setRobotState(prevState => ({
+      ...prevState,
+      currentCoordinates: [xValue, yValue, zValue]
+    }));
+    console.log(robotState)
+  }, [xValue, yValue, zValue]);
   // Initialisierung der Basis, Endeffektor und Arme
   useEffect(() => {
     const scene = new THREE.Scene();
@@ -162,26 +179,26 @@ const DigitalTwin = () => {
   }, [robotState, objects]);
   
   
-  useEffect(() => {
-    function connect() {
-      const websocket = new WebSocket('ws://deltarobot.local:3010');
-      websocket.onopen = () => console.log('WebSocket connected');
-      websocket.onmessage = event => {
-        const data = JSON.parse(event.data);
-        setRobotState(prevState => ({
-          ...prevState,
-          ...data
-        }));
-      };
+  // useEffect(() => {
+  //   function connect() {
+  //     const websocket = new WebSocket('ws://deltarobot.local:3010');
+  //     websocket.onopen = () => console.log('WebSocket connected');
+  //     websocket.onmessage = event => {
+  //       const data = JSON.parse(event.data);
+  //       setRobotState(prevState => ({
+  //         ...prevState,
+  //         ...data
+  //       }));
+  //     };
       
-      websocket.onerror = error => console.error('WebSocket error:', error);
-      websocket.onclose = event => {
-        console.log('WebSocket disconnected', event.reason);
-        setTimeout(connect, 5000);
-      };
-    }
-    connect();
-  }, []);
+  //     websocket.onerror = error => console.error('WebSocket error:', error);
+  //     websocket.onclose = event => {
+  //       console.log('WebSocket disconnected', event.reason);
+  //       setTimeout(connect, 5000);
+  //     };
+  //   }
+  //   connect();
+  // }, []);
   
 
 
@@ -193,7 +210,15 @@ const DigitalTwin = () => {
       objects.effector.position.z = robotState.currentCoordinates[2]; // Update Endeffector position
       objects.renderer.render(objects.scene, objects.camera);
     };
-
+    const result = delta_calcInverse(robotState.currentCoordinates[0],robotState.currentCoordinates[1],robotState.currentCoordinates[2]);
+    if (result.status === 0) {
+      setRobotState(prevState => ({
+        ...prevState,
+        currentAngles: [result.theta1, result.theta2, result.theta3]  // Aktualisieren der Winkel im Zustand
+      }));
+    } else {
+      console.error("Berechnungsfehler: Position nicht existent");
+    }
     updateScene();
   }, [robotState.currentCoordinates, objects]);
   return (
