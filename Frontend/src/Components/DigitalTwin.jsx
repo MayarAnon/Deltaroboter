@@ -1,14 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { useRecoilState } from "recoil";
-import {
-  xValueAtom,
-  yValueAtom,
-  zValueAtom,
-  phiValueAtom,
-  actuatorAtom,
-  settingAtom
-} from "../utils/atoms";
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import delta_calcInverse  from "./IK" 
 const baseRadius = 100;
@@ -26,34 +17,56 @@ const basePositions = [
     y: baseRadius * Math.sin((4 * Math.PI) / 3),
   },
 ];
+function createAxesHelper(length, thickness) {
+  const axes = new THREE.Object3D();
 
-const baseAngles = [0, 120, 240];
+  // Material für die Achsen
+  const materials = {
+    x: new THREE.MeshBasicMaterial({color: 0xff0000}), // Rot für die X-Achse
+    y: new THREE.MeshBasicMaterial({color: 0x00ff00}), // Grün für die Y-Achse
+    z: new THREE.MeshBasicMaterial({color: 0x0000ff})  // Blau für die Z-Achse
+  };
+
+  // X-Achse (Rot)
+  const xAxisGeometry = new THREE.CylinderGeometry(thickness, thickness, length, 32);
+  const xAxis = new THREE.Mesh(xAxisGeometry, materials.x);
+  xAxis.rotation.z = -Math.PI / 2;
+  xAxis.position.x = length / 2;
+
+  // Y-Achse (Grün)
+  const yAxisGeometry = new THREE.CylinderGeometry(thickness, thickness, length, 32);
+  const yAxis = new THREE.Mesh(yAxisGeometry, materials.y);
+  yAxis.position.y = length / 2;
+
+  // Z-Achse (Blau)
+  const zAxisGeometry = new THREE.CylinderGeometry(thickness, thickness, length, 32);
+  const zAxis = new THREE.Mesh(zAxisGeometry, materials.z);
+  zAxis.rotation.x = Math.PI / 2;
+  zAxis.position.z = length / 2;
+
+  axes.add(xAxis, yAxis, zAxis);
+  return axes;
+}
 const DigitalTwin = () => {
   const mountRef = useRef(null);
   const [objects, setObjects] = useState({});
-  const [xValue, setXValue] = useRecoilState(xValueAtom);
-  const [yValue, setYValue] = useRecoilState(yValueAtom);
-  const [zValue, setZValue] = useRecoilState(zValueAtom);
   const [robotState, setRobotState] = useState({
-    currentCoordinates: [xValue, yValue,zValue], 
-    currentAngles:[-31,-31,31]
+    currentCoordinates: [0, 0,-280], 
+    currentAngles:[-32,-32,32]
   });
-  useEffect(() => {
-    setRobotState(prevState => ({
-      ...prevState,
-      currentCoordinates: [xValue, yValue, zValue]
-    }));
-    console.log(robotState)
-  }, [xValue, yValue, zValue]);
+  
   // Initialisierung der Basis, Endeffektor und Arme
   useEffect(() => {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, mountRef.current.clientWidth / mountRef.current.clientHeight, 0.1, 2000);
+    
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+    renderer.setClearColor(0xffffff);
     mountRef.current.appendChild(renderer.domElement);
-    camera.position.set(0,0,1000);
-
+    
+    camera.position.set(0, 500, 0);
+    
     // Licht hinzufügen
     const light = new THREE.AmbientLight(0x404040); // weiches Licht
     scene.add(light);
@@ -61,6 +74,24 @@ const DigitalTwin = () => {
       directionalLight.position.set(1, 2, 3);
       scene.add(directionalLight);
 
+
+      // Koordinatengitter hinzufügen
+    const gridHelperXY = new THREE.GridHelper(5000, 60);
+    scene.add(gridHelperXY);
+    gridHelperXY.rotation.x=Math.PI / 2
+    gridHelperXY.position.set(0,0,-500)
+
+    // const gridHelperZ = new THREE.GridHelper(5000, 60);
+    // scene.add(gridHelperZ);
+    // gridHelperZ.rotation.x=Math.PI 
+    // gridHelperZ.position.set(0,1000,0)
+    // Koordinatenachsen hinzufügen
+    const axesHelper = createAxesHelper(150, 3); // 150 ist die Länge, 2 ist die Dicke
+    scene.add(axesHelper);
+    axesHelper.position.x = robotState.currentCoordinates[0];
+    axesHelper.position.y = robotState.currentCoordinates[1];
+    axesHelper.position.z = robotState.currentCoordinates[2];
+    axesHelper.rotation.z = Math.PI/50
      // Basis
      const baseGeometry = new THREE.CylinderGeometry(
       baseRadius,
@@ -68,7 +99,7 @@ const DigitalTwin = () => {
       10,
       32
     );
-    const baseMaterial = new THREE.MeshBasicMaterial({ color: 0xaaaaaa });
+    const baseMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.5, transparent: true });
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
     base.rotation.x = Math.PI / 2;
     scene.add(base);
@@ -80,7 +111,7 @@ const DigitalTwin = () => {
       10,
       32
     );
-    const effectorMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    const effectorMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.5, transparent: true });
     const effector = new THREE.Mesh(effectorGeometry, effectorMaterial);
     effector.position.x = robotState.currentCoordinates[0];
     effector.position.y = robotState.currentCoordinates[1];
@@ -102,8 +133,13 @@ const DigitalTwin = () => {
       controls.dampingFactor = 0.05;
       controls.screenSpacePanning = false;
       controls.maxPolarAngle = Math.PI / 2;
+
+      controls.target.set(0,0,0); 
+  
+      controls.update();
+      scene.rotation.x = Math.PI;
     // Speichern von Objekten zur späteren Aktualisierung
-    setObjects({ scene, camera, renderer, base, effector, controls });
+    setObjects({ scene, camera, renderer, base, effector, controls,axesHelper });
 
     // Render-Schleife
     const animate = () => {
@@ -123,7 +159,6 @@ const DigitalTwin = () => {
   // Update der Gelenke und Arme
   useEffect(() => {
     if (!objects.scene) return;
-    console.log(robotState)
     // Lösche alle vorherigen Arme und Gelenke
     const toRemove = [];
     objects.scene.traverse(child => {
@@ -137,8 +172,8 @@ const DigitalTwin = () => {
   
     // Update und Neuerstellung der Gelenke und Arme
     const jointMaterial = new THREE.MeshBasicMaterial({ color: 0xff0aaa });
-    const armMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-    const lowerArmMaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff });
+    const armMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.4, transparent: true });
+    const lowerArmMaterial = new THREE.MeshBasicMaterial({ color: 0x000000, opacity: 0.4, transparent: true });
   
     const jointPositions = calculateJointPositions(robotState.currentAngles);
     jointPositions.forEach((position, index) => {
@@ -178,36 +213,39 @@ const DigitalTwin = () => {
     setObjects(objects);
   }, [robotState, objects]);
   
-  
-  // useEffect(() => {
-  //   function connect() {
-  //     const websocket = new WebSocket('ws://deltarobot.local:3010');
-  //     websocket.onopen = () => console.log('WebSocket connected');
-  //     websocket.onmessage = event => {
-  //       const data = JSON.parse(event.data);
-  //       setRobotState(prevState => ({
-  //         ...prevState,
-  //         ...data
-  //       }));
-  //     };
+  //ws
+  useEffect(() => {
+    function connect() {
+      const websocket = new WebSocket('ws://deltarobot:3010');
+      websocket.onopen = () => console.log('WebSocket connected');
+      websocket.onmessage = event => {
+        const data = JSON.parse(event.data);
+        setRobotState(prevState => ({
+          ...prevState,
+          currentCoordinates: [data.currentCoordinates[0], data.currentCoordinates[1], data.currentCoordinates[2]]
+        }));
+      };
       
-  //     websocket.onerror = error => console.error('WebSocket error:', error);
-  //     websocket.onclose = event => {
-  //       console.log('WebSocket disconnected', event.reason);
-  //       setTimeout(connect, 5000);
-  //     };
-  //   }
-  //   connect();
-  // }, []);
+      websocket.onerror = error => console.error('WebSocket error:', error);
+      websocket.onclose = event => {
+        console.log('WebSocket disconnected', event.reason);
+        setTimeout(connect, 5000);
+      };
+    }
+    connect();
+  }, []);
   
 
-
+  //update Effector position and calc motor angles
   useEffect(() => {
     const updateScene = () => {
       if (!objects.scene) return;
+      objects.axesHelper.position.x = robotState.currentCoordinates[0];
+      objects.axesHelper.position.y = robotState.currentCoordinates[1];
+      objects.axesHelper.position.z = robotState.currentCoordinates[2]; 
       objects.effector.position.x = robotState.currentCoordinates[0];
       objects.effector.position.y = robotState.currentCoordinates[1];
-      objects.effector.position.z = robotState.currentCoordinates[2]; // Update Endeffector position
+      objects.effector.position.z = robotState.currentCoordinates[2]; 
       objects.renderer.render(objects.scene, objects.camera);
     };
     const result = delta_calcInverse(robotState.currentCoordinates[0],robotState.currentCoordinates[1],robotState.currentCoordinates[2]);
@@ -224,7 +262,7 @@ const DigitalTwin = () => {
   return (
     <div>
       <h1>Digital Twin of Delta Robot</h1>
-      <div ref={mountRef} style={{ width: "50%", height: "50vh" }}></div>
+      <div ref={mountRef} style={{ width: "80%", height: "80vh" }}></div>
     </div>
   );
 };
