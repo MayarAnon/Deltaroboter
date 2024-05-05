@@ -21,6 +21,7 @@ const GCode = (p) =>{
     };
 
     const saveGCode = () =>{
+      updateModeGCode(0)
         const address = "http://deltarobot:3010/gcode";
     
       // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
