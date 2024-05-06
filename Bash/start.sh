@@ -61,9 +61,12 @@ cleanup() {
         kill -9 "$pid" >/dev/null 2>&1
     done
     echo "Alle Dienste wurden gestoppt."
+    exit 0
 }
 
-trap cleanup EXIT
+trap 'cleanup' SIGINT SIGTERM EXIT
+
+
 
 # Starte die Dienste in einer Endlosschleife
 while true; do
