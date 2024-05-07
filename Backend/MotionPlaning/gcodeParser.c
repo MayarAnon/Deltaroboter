@@ -12,10 +12,16 @@
 
 #include "global.h"
 
+typedef enum {
+    ConstSpeed,
+    TrapezProfil
+} MotionProfile;
+
+MotionProfile profile = ConstSpeed;
 
 void processLine(const char* line); 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
-
+int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int totalSteps);
 void publishCurrentState(Coordinate pos, Angles ang); 
 
 
@@ -31,6 +37,8 @@ void processLine(const char* line) {
     x = y  = i = j = phi = t = r = 0.0;
     f = 75;
     z = -280.0;
+
+    
     // Extrahiere den Befehlstyp aus der Zeile
     numParams = sscanf(line, "%s", command);
 
@@ -312,6 +320,27 @@ void processLine(const char* line) {
     }
 }
 
+// Funktion zur Berechnung der Pulsweite für das Trapezprofil
+int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int totalSteps) {
+    int rampUpSteps = totalSteps * 0.25;   // 25% der Schritte für das Heruntermodulieren
+    int constantSteps = totalSteps * 0.5;  // 50% der Schritte konstant
+    int rampDownSteps = totalSteps - rampUpSteps - constantSteps;  // 25% der Schritte für das Hochmodulieren
+
+    // Startet mit dem höchsten Wert (530) und moduliert herunter auf basePulsewidth
+    int startPulsewidth = 530;
+    
+    if (currentStep < rampUpSteps) {
+        // Ramp-down Phase (Modulierung herunter)
+        return startPulsewidth - (int)((startPulsewidth - basePulsewidth) * (currentStep / (float)rampUpSteps));
+    } else if (currentStep < (rampUpSteps + constantSteps)) {
+        // Konstante Phase
+        return basePulsewidth;
+    } else {
+        // Ramp-up Phase (Modulierung hoch)
+        return basePulsewidth + (int)((startPulsewidth - basePulsewidth) * ((currentStep - rampUpSteps - constantSteps) / (float)rampDownSteps));
+    }
+}
+
 // Verarbeitet die Interpolation erzeugt eine entsprechende JSON-Nachricht und publisht diese an MotorControll.
 // Parameter:
 //   - Coordinate* coordinates: Array von Koordinaten für die Interpolation.
@@ -329,17 +358,22 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 
     //pulsweite von den Motorpulsen auf 100% skalieren. 0% = 630   maximale minimale bei 105% 15µs
     //int pulsewith = f;
-    int pulsewidth = 530 - 5 * f;
-
-    if (pulsewidth < 15) {
-        pulsewidth = 15;
-    }
+    int maxSpeed = 530 - 5 * f;
+    maxSpeed = maxSpeed < 15 ? 15 : maxSpeed;
+    //initialisieren 
+    int pulsewidth = 530;
 
     cJSON* jsonRoot = cJSON_CreateArray();
     long long totalDuration = 0;
     bool errorOccurred = false;
 
     for (int i = 0; i < InterpolationSteps; i++) {
+
+        if (profile == TrapezProfil && InterpolationSteps > 20) {
+            pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
+        } else {
+            pulsewidth = maxSpeed;
+        }
         float theta1, theta2, theta3;
 
         localPosition.x = coordinates[i].x;
@@ -387,18 +421,55 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             }
             int maxSplit = fmax(fmax(splitCount[0], splitCount[1]), fmax(splitCount[2], splitCount[3]));
 
-            for (int k = 0; k < maxSplit; k++) {
-                int currentPulses[4];
-                for (int j = 0; j < 4; j++) {
-                    currentPulses[j] = pulses[j] / splitCount[j];
-                    pulses[j] -= currentPulses[j];
-                    splitCount[j]--;
+            // Innerhalb der Schleife, nachdem maxSteps berechnet wurde
+            if (InterpolationSteps == 2 && maxSteps > 50 && profile == TrapezProfil) {
+                // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
+                maxSplit = 20;
+                int totalSteps[4] = {0, 0, 0, 0};  // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
+
+                for (int k = 0; k < maxSplit; k++) {
+                    int currentPulses[4];
+                    for (int j = 0; j < 4; j++) { 
+                        // Berechne die aktuell zugeteilten Schritte für diese Nachricht
+                        int originalPulses = pulses[j];
+                        if (k == maxSplit - 1) {
+                            // Füge alle verbleibenden Schritte zur letzten Nachricht hinzu
+                            currentPulses[j] = pulses[j];
+                        } else {
+                            currentPulses[j] = (int)((double)(originalPulses) / (maxSplit - k));  // Gleichmäßige Aufteilung der verbleibenden Schritte
+                        }
+                        pulses[j] -= currentPulses[j];
+                        totalSteps[j] += currentPulses[j];
+                    }
+
+                    // Berechnen der Pulsweite für jede Nachricht gemäß Trapezprofil
+                    int messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, k, maxSplit);
+
+                    if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
+                        cJSON* stepObj = cJSON_CreateObject();
+                        cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
+                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){messagePulsewidth, messagePulsewidth, 5}, 3));
+                        cJSON_AddItemToArray(jsonRoot, stepObj);
+                    }
                 }
-                if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
-                    cJSON* stepObj = cJSON_CreateObject();
-                    cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
-                    cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewidth, (int)pulsewidth, 5}, 3));
-                    cJSON_AddItemToArray(jsonRoot, stepObj);
+
+                // Debug-Ausgabe, um die Genauigkeit der Schrittberechnung zu überprüfen
+                printf("Total steps calculated: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n", totalSteps[0], totalSteps[1], totalSteps[2], totalSteps[3]);
+            }else {
+                // Bestehende Logik für normale Interpolation oder andere Profile
+                for (int k = 0; k < maxSplit; k++) {
+                    int currentPulses[4];
+                    for (int j = 0; j < 4; j++) {
+                        currentPulses[j] = pulses[j] / splitCount[j];
+                        pulses[j] -= currentPulses[j];
+                        splitCount[j]--;
+                    }
+                    if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
+                        cJSON* stepObj = cJSON_CreateObject();
+                        cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
+                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewidth, (int)pulsewidth, 5}, 3));
+                        cJSON_AddItemToArray(jsonRoot, stepObj);
+                    }
                 }
             }
         } else {

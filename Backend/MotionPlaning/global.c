@@ -4,7 +4,7 @@
 
 
 // `currentPosition` speichert die aktuelle Position
-Coordinate currentPosition = {0.0, 0.0, -280.0, 0.0};
+Coordinate currentPosition = {0.0, 0.0, -280.0, 0.0}; 
 
 // `currentAngles` speichert die aktuellen Winkel der Roboterarme.
 Angles currentAngles = {-41.489, -41.489, -41.489};
