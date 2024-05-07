@@ -1,101 +1,77 @@
 
 
-#include "MQTTClient.h"
+#include "mqttClient.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "global.h"
 
+// Anpassen der Definition, um den Typ aus der Header-Datei zu verwenden
+const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC};
+const char** globalTopics = globalTopicsTemp;  // Pointer auf das Array zuweisen
+int globalTopicCount = sizeof(globalTopicsTemp) / sizeof(globalTopicsTemp[0]);
+MessageCallback globalOnMessageCallback;
 
-MQTTClient client;
+MQTTAsync client;
 
-// `destroyMqtt` trennt die Verbindung des MQTT-Clients und zerstört das Client-Objekt.
-void destroyMqtt() {
-    MQTTClient_disconnect(client, 1000);
-    MQTTClient_destroy(&client);
+void onConnect(void* context, MQTTAsync_successData* response) {
+    printf("Connected\n");
+    // Subscribing to topics after successful connection
+    for (int i = 0; i < globalTopicCount; i++) {
+        MQTTAsync_subscribe(client, globalTopics[i], QOS, NULL);
+    }
 }
 
+void onConnectFailure(void* context, MQTTAsync_failureData* response) {
+    fprintf(stderr, "Connect failed, rc %d\n", response ? response->code : 0);
+}
 
-// `messageArrived` wird aufgerufen, wenn eine Nachricht auf einem abonnierten Topic ankommt.
-// Parameter:
-//   - void *context: Kontext für Callback-Funktionen, hier zur Verarbeitung der Nachricht verwendet
-//   - char *topicName: Name des Topics, auf dem die Nachricht empfangen wurde
-//   - int topicLen: Länge des Topic-Namens
-//   - MQTTClient_message *message: Struktur, die die empfangene Nachricht enthält
-// Rückgabewert:
-//   - int: Gibt immer 1 zurück, um den erfolgreichen Empfang der Nachricht zu bestätigen
-int messageArrived(void *context, char *topicName, int topicLen, MQTTClient_message *message) {
-    char* payloadStr = malloc(message->payloadlen + 1);
-    memcpy(payloadStr, message->payload, message->payloadlen);
-    payloadStr[message->payloadlen] = '\0'; // Sicherstellen, dass die Zeichenkette korrekt terminiert ist
-    ((void(*)(char*, char*))context)(topicName, payloadStr); // Aufruf der Callback-Funktion mit Topic und Nachricht
-    free(payloadStr); // Freigabe des Speichers für die Nachricht
-    MQTTClient_freeMessage(&message); // Freigabe der Nachrichtenstruktur
-    MQTTClient_free(topicName); // Freigabe des Topic-Namens
+void connectionLost(void *context, char *cause) {
+    fprintf(stderr, "Connection lost, cause: %s\n", cause);
+    initializeMqtt(globalTopics, globalTopicCount, globalOnMessageCallback);
+}
+
+int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
+    char* payloadStr = strndup(message->payload, message->payloadlen);
+    printf("Received message on topic '%s': %s\n", topicName, payloadStr);
+    globalOnMessageCallback(topicName, payloadStr);
+    free(payloadStr);
+
+    MQTTAsync_freeMessage(&message);
+    MQTTAsync_free(topicName);
     return 1;
 }
 
-// `publishMessage` veröffentlicht eine Nachricht auf einem spezifischen MQTT-Topic.
-// Parameter:
-//   - const char* topic: Name des Topics, auf dem die Nachricht veröffentlicht werden soll
-//   - const char* message: Nachricht, die veröffentlicht werden soll
+void initializeMqtt(const char* topics[], int topicCount, void(*onMessageCallback)(char*, char*)) {
+    globalOnMessageCallback = onMessageCallback;  // Setzen der globalen Callback-Funktion
+    MQTTAsync_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL);
+    MQTTAsync_setCallbacks(client, NULL, connectionLost, messageArrived, NULL);
+
+    globalTopicCount = topicCount;  // Store topic count globally if needed
+    globalTopics = topics;          // Store topics array globally if needed
+    globalOnMessageCallback = onMessageCallback;
+
+    MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
+    conn_opts.keepAliveInterval = 20;
+    conn_opts.cleansession = 1;
+    conn_opts.onSuccess = onConnect;
+    conn_opts.onFailure = onConnectFailure;
+    conn_opts.context = client;
+    MQTTAsync_connect(client, &conn_opts);
+}
+
 void publishMessage(const char* topic, const char* message) {
-    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    MQTTAsync_message pubmsg = MQTTAsync_message_initializer;
     pubmsg.payload = (void*)message;
     pubmsg.payloadlen = strlen(message);
-    pubmsg.qos = QOS; // Qualität der Service-Einstellung aus global.h
-    pubmsg.retained = 0; // Nachricht wird nicht im Broker gespeichert
-    MQTTClient_deliveryToken token;
-    int rc = MQTTClient_publishMessage(client, topic, &pubmsg, &token);  // Senden der Nachricht
-    if (rc != MQTTCLIENT_SUCCESS) {
-        printf("Failed to publish message, return code: %d\n", rc);
-    }
+    pubmsg.qos = QOS;
+    pubmsg.retained = 0;
+
+    MQTTAsync_sendMessage(client, topic, &pubmsg, NULL);
 }
 
-// `initializeMqtt` initialisiert den MQTT-Client, setzt die Callbacks und subscribt zu definierten Topics.
-// Parameter:
-//   - const char* topics[]: Array von Topics, zu denen der Client subscriben wird
-//   - int topicCount: Anzahl der Topics
-//   - void(*onMessageCallback)(char*, char*): Callback-Funktion, die bei eingehenden Nachrichten aufgerufen wird
-void initializeMqtt(const char* topics[], int topicCount, void(*onMessageCallback)(char*, char*)) {
-    MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL); // Erstellung des MQTT-Client-Objekts
-    MQTTClient_setCallbacks(client, onMessageCallback, NULL, messageArrived, NULL); // Setzen der Callback-Funktionen
-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;  // Initialisierung der Verbindungsoptionen
-    conn_opts.keepAliveInterval = 20;
-    conn_opts.cleansession = 1; // Startet eine neue Session bei Verbindungsaufbau
-    MQTTClient_connect(client, &conn_opts);
-    for (int i = 0; i < topicCount; i++) {
-        MQTTClient_subscribe(client, topics[i], QOS);  // Subscriben zu den angegebenen Topics
-    }
-    
+void destroyMqtt() {
+    MQTTAsync_disconnect(client, NULL);
+    MQTTAsync_destroy(&client);
 }
-
-
-
-/*
-void onMessage(char *topicName, char *payloadStr) {
-    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
-}
-
-
-
-int main() {
-    // Topics, zu denen wir subscriben möchten.
-    const char* topics[] = {"Topic1", "Topic2"};
-    int topicCount = sizeof(topics) / sizeof(topics[0]);
-
-    
-    // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.
-    initializeMqtt(topics, topicCount, onMessage);
-
-    // Veröffentlicht eine Nachricht auf "Topic1".
-    publishMessage("Topic1", "Hello, MQTT World!");
-    while (1) {
-        usleep(100000);
-    }
-    destroyMqtt();
-
-    return 0;
-}
-*/

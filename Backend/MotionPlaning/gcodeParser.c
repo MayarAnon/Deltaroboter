@@ -17,7 +17,7 @@ typedef enum {
     TrapezProfil
 } MotionProfile;
 
-MotionProfile profile = ConstSpeed;
+MotionProfile profile = TrapezProfil;
 
 void processLine(const char* line); 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
@@ -347,28 +347,35 @@ int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int tota
 //   - int InterpolationSteps: Anzahl der Schritte in einer Interpolation.
 //   - float f: Geschwindigkeitsfaktor
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f) {
+    // Reserviert Speicher für die Interpolationschritte
     Steps* steps = malloc(InterpolationSteps * sizeof(Steps));
-    Coordinate localPosition = currentPosition;  // Lokale Kopie der aktuellen Position
+    // Lokale Kopie der aktuellen Position
+    Coordinate localPosition = currentPosition;  
     
+    // Berechnet Winkel basierend auf der aktuellen Position damit diese Richtig hinterlegt sind
     delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &currentAngles.theta1, &currentAngles.theta2, &currentAngles.theta3); //Winkel aktualisieren
 
-    Angles localAngles = currentAngles;       // Lokale Kopie der aktuellen Winkel
-    Steps localSteps = currentSteps;          // Lokale Kopie der Schrittzahlen
+    // Lokale Kopien der aktuellen Winkel und Schrittzahlen
+    Angles localAngles = currentAngles;       
+    Steps localSteps = currentSteps; 
+    // Fehlerakkumulatoren für jeden Motor         
     double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
 
-    //pulsweite von den Motorpulsen auf 100% skalieren. 0% = 630   maximale minimale bei 105% 15µs
-    //int pulsewith = f;
+    // Berechnet die maximale Geschwindigkeit basierend auf dem Faktor 'f'
     int maxSpeed = 530 - 5 * f;
     maxSpeed = maxSpeed < 15 ? 15 : maxSpeed;
-    //initialisieren 
+    // Initialisiert die Pulsbreite 
     int pulsewidth = 530;
 
+    // Erzeugt ein JSON Array zum Speichern der Motorsequenzen
     cJSON* jsonRoot = cJSON_CreateArray();
     long long totalDuration = 0;
     bool errorOccurred = false;
 
+     // Iteriert über die Interpolationsschritte
     for (int i = 0; i < InterpolationSteps; i++) {
 
+        // Anpassung der Pulsbreite für ein Trapezprofil
         if (profile == TrapezProfil && InterpolationSteps > 20) {
             pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
         } else {
@@ -376,16 +383,20 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         }
         float theta1, theta2, theta3;
 
+        // Setzt lokale Position auf die aktuellen Koordinaten
         localPosition.x = coordinates[i].x;
         localPosition.y = coordinates[i].y;
         localPosition.z = coordinates[i].z;
 
+        // Berechnen & Überprüft die Machbarkeit der neuen Position
         if (delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &theta1, &theta2, &theta3) == 0) {
+            // Berechnet die Schrittzahlen für die Motoren
             double stepCalc1 = ((theta1 - localAngles.theta1)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[0];
             double stepCalc2 = ((theta2 - localAngles.theta2)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[1];
             double stepCalc3 = ((theta3 - localAngles.theta3)/360) * STEPSPERREVOLUTION * GEARRATIO + localErrorAccumulators[2];
             double stepCalc4 = ((coordinates[i].phi - localPosition.phi)/360) * STEPSPERREVOLUTION + localErrorAccumulators[3];
 
+            // Speichert und summiert Schritte für jede Achse
             steps[i].Motor1 = round(stepCalc1);
             steps[i].Motor2 = round(stepCalc2);
             steps[i].Motor3 = round(stepCalc3);
@@ -396,14 +407,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             localSteps.Motor3 += steps[i].Motor3;
             localSteps.Motor4 += steps[i].Motor4;
 
-            int maxSteps = abs(steps[i].Motor1);
-            maxSteps = fmax(maxSteps, abs(steps[i].Motor2));
-            maxSteps = fmax(maxSteps, abs(steps[i].Motor3));
-            maxSteps = fmax(maxSteps, abs(steps[i].Motor4));
-
-            long long stepDuration = (long long)(maxSteps * 2 * pulsewidth);
-            totalDuration += stepDuration;
-
+            // Aktualisiert Fehlerakkumulatoren und lokale Winkel
             localErrorAccumulators[0] = stepCalc1 - steps[i].Motor1;
             localErrorAccumulators[1] = stepCalc2 - steps[i].Motor2;
             localErrorAccumulators[2] = stepCalc3 - steps[i].Motor3;
@@ -413,38 +417,44 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             localAngles.theta3 = theta3;
             localPosition.phi = coordinates[i].phi;
 
-            // Überprüfung, ob eine Nachricht aufgeteilt werden muss
-            int splitCount[4];
             int pulses[4] = {steps[i].Motor1, steps[i].Motor2, steps[i].Motor3, steps[i].Motor4};
-            for (int j = 0; j < 4; j++) {
-                splitCount[j] = (abs(pulses[j]) + 4999) / 5000; // Berechnet, wie viele Nachrichten nötig sind Maximale Anzahl an Pulsen pro Nachricht 5000
-            }
-            int maxSplit = fmax(fmax(splitCount[0], splitCount[1]), fmax(splitCount[2], splitCount[3]));
+            int maxSteps = fmax(fmax(abs(steps[i].Motor1), abs(steps[i].Motor2)), fmax(abs(steps[i].Motor3), abs(steps[i].Motor4)));
 
-            // Innerhalb der Schleife, nachdem maxSteps berechnet wurde
+            // Point to Point Verfahren 2 Nachrichten und maxStep größer 50 und Trapezprofil
             if (InterpolationSteps == 2 && maxSteps > 50 && profile == TrapezProfil) {
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
-                maxSplit = 20;
-                int totalSteps[4] = {0, 0, 0, 0};  // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
+                int devision = 20;
+                // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
+                int totalSteps[4] = {0, 0, 0, 0};  
 
-                for (int k = 0; k < maxSplit; k++) {
+                //Durchiterieren durch die Unterteilungen 
+                for (int i = 0; i < devision; i++) {
                     int currentPulses[4];
+                    //Durchiterieren durch die Motorpulse
                     for (int j = 0; j < 4; j++) { 
-                        // Berechne die aktuell zugeteilten Schritte für diese Nachricht
+                        //Pulse von Berechnungen übernehmen 
                         int originalPulses = pulses[j];
-                        if (k == maxSplit - 1) {
-                            // Füge alle verbleibenden Schritte zur letzten Nachricht hinzu
+                         // Füge alle verbleibenden Schritte zur letzten Nachricht hinzu
+                        if (i == devision - 1) {
                             currentPulses[j] = pulses[j];
                         } else {
-                            currentPulses[j] = (int)((double)(originalPulses) / (maxSplit - k));  // Gleichmäßige Aufteilung der verbleibenden Schritte
+                            // Gleichmäßige Aufteilung der verbleibenden Schritte
+                            currentPulses[j] = (int)((double)(originalPulses) / (devision - i));  
                         }
+                        //Abziehen Pulse
                         pulses[j] -= currentPulses[j];
                         totalSteps[j] += currentPulses[j];
                     }
 
-                    // Berechnen der Pulsweite für jede Nachricht gemäß Trapezprofil
-                    int messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, k, maxSplit);
+                    // Berechnen der Pulsweite für diese Nachricht gemäß Trapezprofil
+                    int messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, devision);
 
+                    // Berechnet die maximale Anzahl von Schritten für das Stopen des Programmes für die Ausführungszeit
+                    int maxSteps = fmax(fmax(abs(currentPulses[0]), abs(currentPulses[1])), fmax(abs(currentPulses[2]), abs(currentPulses[3])));
+                    long long stepDuration = (long long)(maxSteps * 2 * messagePulsewidth);
+                    totalDuration += stepDuration;
+
+                    //Wenn Pulse nicht alle 0 dann hinzufügen zu JSON 
                     if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                         cJSON* stepObj = cJSON_CreateObject();
                         cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
@@ -457,6 +467,18 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 printf("Total steps calculated: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n", totalSteps[0], totalSteps[1], totalSteps[2], totalSteps[3]);
             }else {
                 // Bestehende Logik für normale Interpolation oder andere Profile
+
+                // Überprüfung, ob eine Nachricht aufgeteilt werden muss
+                int splitCount[4];
+                int pulses[4] = {steps[i].Motor1, steps[i].Motor2, steps[i].Motor3, steps[i].Motor4};
+                // Berechnet, wie viele Nachrichten nötig sind Maximale Anzahl an Pulsen pro Nachricht 5000
+                for (int j = 0; j < 4; j++) {
+                    //wenn unter 5000 ist dann splitCount = 1
+                    splitCount[j] = (abs(pulses[j]) + 4999) / 5000; 
+                }
+                
+                int maxSplit = fmax(fmax(splitCount[0], splitCount[1]), fmax(splitCount[2], splitCount[3]));
+                //Pulse werden auf die Anzahl an Splits gleichmäßig aufgeteilt 
                 for (int k = 0; k < maxSplit; k++) {
                     int currentPulses[4];
                     for (int j = 0; j < 4; j++) {
@@ -464,6 +486,12 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                         pulses[j] -= currentPulses[j];
                         splitCount[j]--;
                     }
+
+                    // Berechnet die maximale Anzahl von Schritten für das Stopen des Programmes für die Ausführungszeit
+                    int maxSteps = fmax(fmax(abs(currentPulses[0]), abs(currentPulses[1])), fmax(abs(currentPulses[2]), abs(currentPulses[3])));
+                    long long stepDuration = (long long)(maxSteps * 2 * pulsewidth);
+                    totalDuration += stepDuration;
+
                     if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                         cJSON* stepObj = cJSON_CreateObject();
                         cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
@@ -473,12 +501,14 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 }
             }
         } else {
+            // Wird ausgeführt wenn delta_calcInverse einen Fehler zurückgibt da der Wert nicht erreicht werden kann mit der Kinematik
             errorOccurred = true;
             printf("Punkt existiert nicht (%f,%f,%f),\n", coordinates[i].x, coordinates[i].y, coordinates[i].z);
             break;
         }
     }
 
+     // Verarbeitet die erfolgreiche Durchführung und sendet die Daten
     if (!errorOccurred) {
         currentPosition = localPosition;
         currentAngles = localAngles;
