@@ -18,6 +18,7 @@
 #include "gcodeParser.h"
 #include "updateRobotState.h"
 #include "manualMode.h"
+#include <signal.h>
 
 
 
@@ -83,6 +84,12 @@ void onMessage(char *topicName, char *payloadStr) {
     }
 }
 
+// Funktion zum sicheren Beenden des Programms und Aufrufen der MQTT-Zerstörungsfunktion
+void handle_signal(int sig) {
+    printf("Signal erhalten (%d), beende MQTT und schließe Programm...\n", sig);
+    destroyMqtt();
+    exit(0);
+}
 
 // Hauptfunktion des Programms. Initialisiert den MQTT-Client, subscribt zu bestimmten Topics
 // und tritt in eine Endlosschleife ein, um das Programm am Laufen zu halten.
@@ -95,6 +102,10 @@ int main() {
     
     // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.
     initializeMqtt(topics, topicCount, onMessage);
+
+    // Initialisiere Signalhandler
+    signal(SIGINT, handle_signal);
+    signal(SIGTERM, handle_signal);
 
     // Veröffentlicht eine Nachricht auf "Topic1".
     while (1) {

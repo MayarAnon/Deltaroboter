@@ -61,7 +61,7 @@ extern int currentGripperValue;
 
 //Mqtt defines
 #define ADDRESS     "tcp://localhost:1883"
-#define CLIENTID    "MotionPlaning"
+#define CLIENTID    "MotionPlaningClient"
 #define QOS         1  // Set Quality of Service Level to 0 (At most once)
 
 #endif

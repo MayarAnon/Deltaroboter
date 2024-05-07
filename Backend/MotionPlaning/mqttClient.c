@@ -29,12 +29,12 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 
 void connectionLost(void *context, char *cause) {
     fprintf(stderr, "Connection lost, cause: %s\n", cause);
+    usleep(1000); // 1 Sekunden Wartezeit
     initializeMqtt(globalTopics, globalTopicCount, globalOnMessageCallback);
 }
 
 int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
     char* payloadStr = strndup(message->payload, message->payloadlen);
-    printf("Received message on topic '%s': %s\n", topicName, payloadStr);
     globalOnMessageCallback(topicName, payloadStr);
     free(payloadStr);
 
@@ -55,6 +55,7 @@ void initializeMqtt(const char* topics[], int topicCount, void(*onMessageCallbac
     MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
     conn_opts.keepAliveInterval = 20;
     conn_opts.cleansession = 1;
+    conn_opts.automaticReconnect = 1; 
     conn_opts.onSuccess = onConnect;
     conn_opts.onFailure = onConnectFailure;
     conn_opts.context = client;
