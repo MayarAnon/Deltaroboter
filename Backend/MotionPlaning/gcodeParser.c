@@ -12,12 +12,7 @@
 
 #include "global.h"
 
-typedef enum {
-    ConstSpeed,
-    TrapezProfil
-} MotionProfile;
 
-MotionProfile profile = TrapezProfil;
 
 void processLine(const char* line); 
 void processInterpolationAndCreateJSON(Coordinate* coordinates, int InterpolationSteps, float f);
@@ -376,7 +371,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     for (int i = 0; i < InterpolationSteps; i++) {
 
         // Anpassung der Pulsbreite für ein Trapezprofil
-        if (profile == TrapezProfil && InterpolationSteps > 20) {
+        if (currentMotionProfil == TrapezProfil && InterpolationSteps > 20) {
             pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
         } else {
             pulsewidth = maxSpeed;
@@ -421,7 +416,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             int maxSteps = fmax(fmax(abs(steps[i].Motor1), abs(steps[i].Motor2)), fmax(abs(steps[i].Motor3), abs(steps[i].Motor4)));
 
             // Point to Point Verfahren 2 Nachrichten und maxStep größer 50 und Trapezprofil
-            if (InterpolationSteps == 2 && maxSteps > 50 && profile == TrapezProfil) {
+            if (InterpolationSteps == 2 && maxSteps > 50 && currentMotionProfil == TrapezProfil) {
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
                 int devision = 20;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung

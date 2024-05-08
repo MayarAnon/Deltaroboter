@@ -216,3 +216,45 @@
 2024-05-08 09:34:55 nohup: ignoring input
 2024-05-08 09:34:55 MotionPlaning online
 2024-05-08 09:37:19 Connected
+2024-05-08 09:52:03 nohup: ignoring input
+2024-05-08 09:52:03 MotionPlaning online
+2024-05-08 09:56:14 Connected
+2024-05-08 09:56:14 Lade Program: Dennis.gcodeProgramm wird ausgeführt. 
+2024-05-08 09:56:14 Unsupported command: G21
+2024-05-08 09:56:14 Unsupported command: G90
+2024-05-08 09:56:14 Total steps calculated: Motor1=1387, Motor2=-562, Motor3=28, Motor4=0
+2024-05-08 09:56:15 Unsupported command: M1002
+2024-05-08 09:56:17 Unsupported command: M08
+2024-05-08 09:56:17 Total steps calculated: Motor1=189, Motor2=-17, Motor3=41, Motor4=0
+2024-05-08 09:56:17 Unsupported command: M1002
+2024-05-08 09:56:18 Unsupported command: M08
+2024-05-08 09:56:18 Total steps calculated: Motor1=-454, Motor2=-257, Motor3=603, Motor4=0
+2024-05-08 09:56:19 Unsupported command: M1002
+2024-05-08 09:56:19 Unsupported command: M08
+2024-05-08 09:56:19 Total steps calculated: Motor1=157, Motor2=-18, Motor3=26, Motor4=0
+2024-05-08 09:56:19 Unsupported command: M1002
+2024-05-08 09:56:20 Unsupported command: M08
+2024-05-08 09:56:20 Total steps calculated: Motor1=212, Motor2=-104, Motor3=646, Motor4=0
+2024-05-08 09:56:20 Unsupported command: M1002
+2024-05-08 09:56:21 Total steps calculated: Motor1=-55, Motor2=7, Motor3=-25, Motor4=0
+2024-05-08 09:56:23 Unsupported command: M08
+2024-05-08 09:56:23 Total steps calculated: Motor1=277, Motor2=12, Motor3=648, Motor4=0
+2024-05-08 09:56:23 Unsupported command: M1002
+2024-05-08 09:56:24 Total steps calculated: Motor1=-57, Motor2=1, Motor3=-26, Motor4=0
+2024-05-08 09:56:25 Unsupported command: M08
+2024-05-08 09:56:25 Total steps calculated: Motor1=632, Motor2=66, Motor3=338, Motor4=0
+2024-05-08 09:56:25 Unsupported command: M1002
+2024-05-08 09:56:25 Unsupported command: M08
+2024-05-08 09:56:25 Total steps calculated: Motor1=-416, Motor2=-24, Motor3=12, Motor4=0
+2024-05-08 09:56:26 Unsupported command: M1002
+2024-05-08 09:56:27 Unsupported command: M08
+2024-05-08 09:56:27 Total steps calculated: Motor1=251, Motor2=93, Motor3=513, Motor4=0
+2024-05-08 09:56:27 Unsupported command: M1002
+2024-05-08 09:56:27 Total steps calculated: Motor1=5, Motor2=14, Motor3=52, Motor4=0
+2024-05-08 09:56:27 Total steps calculated: Motor1=-54, Motor2=6, Motor3=-16, Motor4=0
+2024-05-08 09:56:28 Total steps calculated: Motor1=-4, Motor2=-15, Motor3=-54, Motor4=0
+2024-05-08 09:56:28 Unsupported command: M08
+2024-05-08 09:56:28 Total steps calculated: Motor1=-2235, Motor2=811, Motor3=-2855, Motor4=0
+2024-05-08 09:56:41 Unsupported command: M02
+2024-05-08 10:15:54 nohup: ignoring input
+2024-05-08 10:15:54 MotionPlaning online

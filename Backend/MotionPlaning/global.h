@@ -28,12 +28,18 @@ typedef enum {
     ZX_PLANE
 } Plane;
 
+typedef enum {
+    RectangleProfil,
+    TrapezProfil
+} MotionProfile;
+
 // Global MQTT Variables
 extern const char** globalTopics;
 extern int globalTopicCount;
 extern void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
 
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
+extern MotionProfile currentMotionProfil;
 extern Coordinate currentPosition;
 extern Angles currentAngles;
 extern Steps currentSteps;

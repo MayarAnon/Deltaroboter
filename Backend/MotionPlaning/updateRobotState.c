@@ -26,6 +26,20 @@ Gripper parseGripperMode(const char* mode) {
     }
 }
 
+// Die Funktion `parseMotionProfile` konvertiert einen String in einen entsprechenden Enum-Wert für Bewegungsprofile.
+// Parameter:
+//   - const char* profile: Zeichenkette, die das Bewegungsprofil beschreibt (z.B. "RectangleProfil")
+// Rückgabewert:
+//   - MotionProfile: Enum-Wert des Bewegungsprofils, z.B. RectangleProfil, TrapezProfil. Bei unbekanntem Profil wird -1 zurückgegeben.
+MotionProfile parseMotionProfile(const char* profile) {
+    if (strcmp(profile, "RectangleProfil") == 0) return RectangleProfil;
+    else if (strcmp(profile, "TrapezProfil") == 0) return TrapezProfil;
+    else {
+        fprintf(stderr, "Unknown motion profile: %s\n", profile);
+        return -1; // Undefined behavior, could define an 'unknown' in the enum
+    }
+}
+
 
 // Die Funktion `parseRobotState` parst den Zustand eines Roboters aus einem JSON-String.
 // Parameter:
@@ -71,6 +85,10 @@ void parseRobotState(const char *payloadStr) {
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
     Gripper gripperModeValue = parseGripperMode(gripperModeStr);
 
+    // Neues Parsing für das Motion Profile
+    cJSON *motionProfileItem = cJSON_GetObjectItemCaseSensitive(json, "motionProfile");
+    MotionProfile motionProfileValue = parseMotionProfile(motionProfileItem->valuestring);
+
     // Parsing eines Integer-Werts für die Geschwindigkeit der Motoren
     cJSON *motorsSpeed = cJSON_GetObjectItemCaseSensitive(json, "motorsSpeed");
     int motorsSpeedValue = motorsSpeed->valueint;
@@ -90,7 +108,7 @@ void parseRobotState(const char *payloadStr) {
     }
 
     homingFlag = homingValue;
-
+    currentMotionProfil = motionProfileValue;
     speedSetting = motorsSpeedValue;   // Setzt die globale Geschwindigkeitseinstellung
     currentGripper = gripperModeValue; // Setzt den aktuellen Greifermodus
     

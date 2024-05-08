@@ -11,6 +11,9 @@ void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
 // `currentPosition` speichert die aktuelle Position
 Coordinate currentPosition = {0.0, 0.0, -280.0, 0.0}; 
 
+// `currentMotionProfil` speichert das aktuelle Bewegungsprofil
+MotionProfile currentMotionProfil = TrapezProfil;
+
 // `currentAngles` speichert die aktuellen Winkel der Roboterarme.
 Angles currentAngles = {-41.489, -41.489, -41.489};
 // `currentSteps` speichert die aktuellen Schritte der Antriebsmotoren des Roboters.
