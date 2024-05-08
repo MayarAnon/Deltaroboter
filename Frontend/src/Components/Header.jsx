@@ -3,13 +3,12 @@ import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
-import BB8Toggle from "./DarkmodeToggle";
+
 import axios from "axios";
 
 const Header = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [isMenuHidden, setMenuHidden] = React.useState(true);
-  const [darkMode, setDarkMode] = React.useState(0); // Zustand für Dark Mode
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [icon, setIcon] = useState(0);
   const navigate = useNavigate();
@@ -22,6 +21,9 @@ const Header = () => {
   };
   const GCode = () => {
     navigate("/gcode-editor");
+  };
+  const DigitalTwinMode = () => {
+    navigate("/digital-twin");
   };
 
   // Event-Handler-Funktion, um den Menüzustand zu ändern
@@ -43,19 +45,7 @@ const Header = () => {
     }
   };
 
-  //managet darkmode und regenbogen-mode ;)
-  const toggleDarkMode = () => {
-    if (darkMode >= 10 && darkMode <= 13) {
-      setDarkMode(0);
-      document.body.classList.add("dark-mode2");
-      
-    } else if (darkMode < 10 || darkMode > 13) {
-      document.body.classList.remove("dark-mode2");
-
-      document.body.classList.toggle("dark-mode");
-    }
-    setDarkMode(darkMode + 1);
-  };
+ 
 
   //zum öffnen vom Modalfenster 2 mal auf das logo  klicken
   const toggle = () => {
@@ -82,22 +72,22 @@ const Header = () => {
     let r = parseInt(hex.slice(1, 3), 16);
     let g = parseInt(hex.slice(3, 5), 16);
     let b = parseInt(hex.slice(5, 7), 16);
-  
+
     // Helligkeit anpassen
-    r = parseInt(r * (100 + percent) / 100);
-    g = parseInt(g * (100 + percent) / 100);
-    b = parseInt(b * (100 + percent) / 100);
-  
+    r = parseInt((r * (100 + percent)) / 100);
+    g = parseInt((g * (100 + percent)) / 100);
+    b = parseInt((b * (100 + percent)) / 100);
+
     // Sicherstellen, dass die Werte im gültigen Bereich bleiben
     r = Math.min(255, r);
     g = Math.min(255, g);
     b = Math.min(255, b);
-  
+
     // Zurück in Hex konvertieren
-    r = r.toString(16).padStart(2, '0');
-    g = g.toString(16).padStart(2, '0');
-    b = b.toString(16).padStart(2, '0');
-  
+    r = r.toString(16).padStart(2, "0");
+    g = g.toString(16).padStart(2, "0");
+    b = b.toString(16).padStart(2, "0");
+
     return `#${r}${g}${b}`;
   }
   return (
@@ -113,9 +103,12 @@ const Header = () => {
       />
       <div
         style={{
-        background: `linear-gradient(45deg, ${settings.color}, ${lightenHexColor(settings.color,180)})`,
-        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-        borderRadius: '10px'}}
+          background: `linear-gradient(45deg, ${
+            settings.color
+          }, ${lightenHexColor(settings.color, 180)})`,
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+          borderRadius: "10px",
+        }}
         className={`p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black`}
       >
         <div className="text-3xl sm:text-l flex item-center">
@@ -137,7 +130,7 @@ const Header = () => {
           ></img>
         </button>
         <div className={`hidden md:flex md:space-x-2`} id="menu">
-        <button
+          <button
             onClick={ManualMode}
             className="px-4 py-2 border-2 border-white rounded hover:bg-black"
           >
@@ -157,7 +150,16 @@ const Header = () => {
               alt="GCodeMode"
             ></img>
           </button>
-          
+          <button
+            onClick={DigitalTwinMode}
+            className=" px-4 py-2 ml-2 border-2 border-white rounded hover:bg-black"
+          >
+            <img
+              src="Delta.png"
+              className="object-contain object-center w-10 h-10"
+              alt="DeltaPic"
+            />
+          </button>
           <button
             onClick={SettingsMode}
             className="px-4 py-2 border-2 border-white rounded hover:bg-black"
@@ -178,63 +180,73 @@ const Header = () => {
               alt="Stop"
             ></img>
           </button>
-          <BB8Toggle onClick={toggleDarkMode}></BB8Toggle>
         </div>
       </div>
       {isMenuHidden === true && (
         <div
-        style={{
-          background: `linear-gradient(45deg, ${settings.color}, ${lightenHexColor(settings.color,180)})`,
-          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-          borderRadius: '10px',
-          position: 'relative',
-          overflow: 'hidden'}}
+          style={{
+            background: `linear-gradient(45deg, ${
+              settings.color
+            }, ${lightenHexColor(settings.color, 180)})`,
+            boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            borderRadius: "10px",
+            position: "relative",
+            overflow: "hidden",
+          }}
           className="md:hidden mx-5 p-4 border-4 border-black rounded-2xl flex items-center justify-between"
         >
           <div className="flex justify-between items-center w-full">
-          <button
+            <button
               onClick={ManualMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
+              className="px-1 py-1 border-2 border-white rounded hover:bg-black"
             >
               <img
                 src="JoystickIcon.png"
-                className="object-contain object-center w-10 h-10"
+                className="object-contain object-center w-11 h-11"
                 alt="manualMode"
               ></img>
             </button>
             <button
               onClick={GCode}
-              className="px-2 smm:px-4 py-2 ml-2 border-2 border-white rounded hover:bg-black"
+              className="px-1 py-1 ml-2 border-2 border-white rounded hover:bg-black"
             >
               <img
                 src="GCode.png"
-                className=" object-contain object-center w-10 h-10"
+                className=" object-contain object-center w-11 h-11"
                 alt="GCodeMode"
               ></img>
             </button>
-
+            <button
+              onClick={DigitalTwinMode}
+              className="px-1 py-1 ml-2 border-2 border-white rounded hover:bg-black"
+            >
+              <img
+                src="Delta.png"
+                className="object-contain object-center w-11 h-11"
+                alt="DeltaPic"
+              />
+            </button>
             <button
               onClick={SettingsMode}
-              className="px-2 smm:px-4 py-2 border-2 border-white rounded hover:bg-black"
+              className="px-1 py-1 ml-2 border-2 border-white rounded hover:bg-black"
             >
               <img
                 src="Settingsicon.png"
-                className=" object-contain object-center w-10 h-10"
+                className=" object-contain object-center w-11 h-11"
                 alt="Settings"
               ></img>
             </button>
 
             <button
               onClick={sendMotorStop}
-              className="px-2 py-2 rounded hover:bg-black"
+              className="px-1 py-1 rounded hover:bg-black"
             >
               <img
                 src="stopIcon.png"
-                className="object-contain object-center w-10 h-10"
+                className="object-contain object-center w-14 h-14"
                 alt="Stop"
               ></img>
             </button>
-            <BB8Toggle onClick={toggleDarkMode}></BB8Toggle>
             
           </div>
         </div>

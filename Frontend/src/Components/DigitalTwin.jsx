@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import dat from 'dat.gui';
+import delta_calcInverse from "./IK";
 
 // Konstanten für die Basisgeometrie und Positionsdaten.
 const baseRadius = 100;
@@ -101,16 +103,67 @@ function calculateJointPositions(motorAngles) {
 
   return [joint1, joint2, joint3];
 }
+
+
+
 // Hauptkomponente für das Digital Twin Modell.
 const DigitalTwin = () => {
   const mountRef = useRef(null);// Referenz für das DOM-Element.
+  const [cameraPosition, setCameraPosition] = useState(1); // 1 für die erste Position, 2 für die zweite
+  const cameraPositionRef = useRef(cameraPosition);
+  const cameraRef = useRef();
   const [objects, setObjects] = useState({}); // Zustand für verwaltete 3D-Objekte.
+  const [sceneObjects, setSceneObjects] = useState({
+    gridSize: 5000,
+    gridDivisions: 60,
+    gridVisible: true,
+    axesVisible:true
+  });
   const [robotState, setRobotState] = useState({ 
     currentCoordinates: [0, 0, -280],
-    currentAngles: [-32, -32, -32],
+    currentAngles: [-31.429121, -31.429121, -31.429121],
   });// Initialer Zustand des Roboters, wird vom ws geupdatet.
   const loader = new GLTFLoader();// Loader für 3D-Modelle.
+  const [pathPoints, setPathPoints] = useState([]);
 
+  useEffect(() => {
+    cameraPositionRef.current = cameraPosition;  // Aktualisiere den Ref-Wert jedes Mal, wenn sich cameraPosition ändert
+}, [cameraPosition]); 
+const toggleCameraPosition = () => {
+  if (cameraRef.current) {
+      if (cameraPositionRef.current === 1) {
+          setCameraPosition(2);
+          cameraRef.current.position.set(0, 0, -1);
+      } else {
+          setCameraPosition(1);
+          cameraRef.current.position.set(0, 700, 0);
+      }
+  }
+};
+  const handleCoordinateChange = (index, value) => {
+    setRobotState(prevState => {
+        // Neue Koordinaten basierend auf dem geänderten Wert aktualisieren
+        const newCoordinates = [...prevState.currentCoordinates];
+        newCoordinates[index] = value;
+
+        // Berechnung der neuen Winkel basierend auf den neuen Koordinaten
+        const [newX, newY, newZ] = newCoordinates;
+        const result = delta_calcInverse(newX, newY, newZ);
+
+        if (result.status === 0) { // Überprüfung, ob die Berechnung erfolgreich war
+            const newAngles = [result.theta1, result.theta2, result.theta3];
+            return {
+                ...prevState,
+                currentCoordinates: newCoordinates,
+                currentAngles: newAngles
+            };
+        } else {
+            // Fehlerbehandlung, falls die Berechnung fehlschlägt
+            console.error('Fehler bei der Berechnung der Motorwinkel');
+            return prevState; // Keine Änderung, wenn Fehler auftritt
+        }
+    });
+};
    // Haupt-Effect-Hook zur Initialisierung und Aktualisierung der 3D-Szene.
   useEffect(() => {
     // scene, kamera, renderer erstellen
@@ -121,17 +174,23 @@ const DigitalTwin = () => {
       0.1,
       2000
     );
-
+    cameraRef.current = camera;
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(
       mountRef.current.clientWidth,
       mountRef.current.clientHeight
     );
+
     renderer.setClearColor(0xffffff);
     mountRef.current.appendChild(renderer.domElement);
+    
+    if (cameraPosition === 1) {
+      camera.position.set(0, 700, 0);
+    } else {
+      camera.position.set(0, 0, -1);
+    }
 
-    camera.position.set(0, 700, 0);
-
+    
     // Licht hinzufügen
     const light = new THREE.AmbientLight(0x404040); // weiches Licht
     scene.add(light);
@@ -139,19 +198,24 @@ const DigitalTwin = () => {
     directionalLight.position.set(1, 2, 3);
     scene.add(directionalLight);
 
+    // Pfadlinie initialisieren
+    const material = new THREE.LineBasicMaterial({ color: 0xff0000 });
+    const geometry = new THREE.BufferGeometry(); // Keine Punkte anfangs
+    const line = new THREE.Line(geometry, material);
+    scene.add(line);
     // Koordinatengitter hinzufügen
-    const gridHelperXY = new THREE.GridHelper(5000, 60);
+    let gridHelperXY = new THREE.GridHelper(sceneObjects.gridSize, sceneObjects.gridDivisions);
     scene.add(gridHelperXY);
     gridHelperXY.rotation.x = Math.PI / 2;
     gridHelperXY.position.set(0, 0, -500);
+    gridHelperXY.visible = sceneObjects.gridVisible;
     //achsen für den endeffektor
     const axesHelper = createAxesHelper(150, 3); // 150 ist die Länge, 2 ist die Dicke
     scene.add(axesHelper);
     axesHelper.position.x = robotState.currentCoordinates[0];
     axesHelper.position.y = robotState.currentCoordinates[1];
     axesHelper.position.z = robotState.currentCoordinates[2];
-    axesHelper.rotation.z = Math.PI / 50;
-    
+    axesHelper.visible = sceneObjects.axesVisible;
   
     // // einfache Basis
     // const baseGeometry = new THREE.CylinderGeometry(
@@ -290,13 +354,52 @@ const DigitalTwin = () => {
     workspaceCylinder.position.z = -380; // Mitte zwischen -280 und -480
     workspaceCylinder.rotation.x = Math.PI / 2; // Drehung um die X-Achse, um den Zylinder senkrecht zu stellen
     scene.add(workspaceCylinder);
+
+    
+   
+    // dat.GUI initialisieren
+    const gui = new dat.GUI();
+    gui.add({ toggleCamera: () => toggleCameraPosition() }, 'toggleCamera').name('Switch View');
+    const coordinatesFolder = gui.addFolder('Effector Coordinates');
+    
+   // GUI für jede Koordinate
+   coordinatesFolder.add(robotState.currentCoordinates, '0', -200, 200).name('X').onChange(val => handleCoordinateChange(0, val));
+   coordinatesFolder.add(robotState.currentCoordinates, '1', -200, 200).name('Y').onChange(val => handleCoordinateChange(1, val));
+   coordinatesFolder.add(robotState.currentCoordinates, '2', 280, 480).name('Z').onChange(val => handleCoordinateChange(2, -val));
+   coordinatesFolder.close();
+   const gridFolder = gui.addFolder('Grid Configuration');
+    gridFolder.add(sceneObjects, 'gridSize', 100, 10000).name('Grid Size').onChange(value => {
+      scene.remove(gridHelperXY);
+      gridHelperXY = new THREE.GridHelper(value, sceneObjects.gridDivisions);
+      gridHelperXY.rotation.x = Math.PI / 2;
+      gridHelperXY.position.set(0, 0, -500);
+      gridHelperXY.visible = sceneObjects.gridVisible;
+      scene.add(gridHelperXY);
+    });
+    gridFolder.add(sceneObjects, 'gridDivisions', 10, 100).name('Grid Divisions').onChange(value => {
+      scene.remove(gridHelperXY);
+      gridHelperXY = new THREE.GridHelper(sceneObjects.gridSize, value);
+      gridHelperXY.rotation.x = Math.PI / 2;
+      gridHelperXY.position.set(0, 0, -500);
+      gridHelperXY.visible = sceneObjects.gridVisible;
+      scene.add(gridHelperXY);
+    });
+    gridFolder.add(sceneObjects, 'gridVisible').name('Show Grid').onChange(value => {
+      gridHelperXY.visible = value;
+    });
+    gridFolder.add(sceneObjects, 'axesVisible').name('Show Axes').onChange(value => {
+      axesHelper.visible = value; 
+      setSceneObjects(prevState => ({ ...prevState, axesVisible: value }));
+    });
     // Steuerung
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; // Optional, für weicheres "Dämpfung" Effekt
     controls.dampingFactor = 0.05;
-    controls.screenSpacePanning = false;
-    controls.maxPolarAngle = Math.PI / 2;
-
+    controls.screenSpacePanning = true;
+    // controls.maxPolarAngle = Math.PI / 2;
+    controls.maxDistance = 1500;
+    controls.enablePan = true;
+    controls.panSpeed = 0.5;
     controls.target.set(0, 0, 0);
 
     controls.update();
@@ -312,6 +415,7 @@ const DigitalTwin = () => {
       effector,
       controls,
       axesHelper,
+      line
     });
 
     // Render-Schleife
@@ -326,9 +430,10 @@ const DigitalTwin = () => {
     return () => {
       renderer.dispose();
       controls.dispose();
+      // gui.destroy();
     };
   }, []);
-
+  
   // Update der Gelenke und Arme
   useEffect(() => {
     if (!objects.scene) return;
@@ -423,6 +528,7 @@ const DigitalTwin = () => {
       // });
 
       // //einfacher lowerArm, funktioniert, armlänge ist fix
+      // const lowerArmGeometry = new THREE.CylinderGeometry(5, 5, lowerArmLength, 32);
       // const lowerArm = new THREE.Mesh(lowerArmGeometry, lowerArmMaterial);
       // lowerArm.position.copy(jointPosition).lerp(endEffectorPosition, 0.5);
       // lowerArm.lookAt(endEffectorPosition);
@@ -494,6 +600,22 @@ const DigitalTwin = () => {
     if (!objects.scene || !objects.effector || !objects.base) return;
     updateScene();
   }, [robotState.currentCoordinates, objects]);
+  
+  //update endeffektor pfad
+  useEffect(() => {
+    if (robotState.currentCoordinates.length > 0) {
+        setPathPoints(prev => [...prev, new THREE.Vector3(...robotState.currentCoordinates)]);
+    }
+}, [robotState.currentCoordinates]);
+
+  useEffect(() => {
+    if (objects.line && pathPoints.length > 0) {
+        const geometry = new THREE.BufferGeometry().setFromPoints(pathPoints);
+        objects.line.geometry.dispose(); // Bereinigen der alten Geometrie
+        objects.line.geometry = geometry; // Zuweisen der neuen Geometrie
+        objects.line.geometry.verticesNeedUpdate = true; // Flag setzen, um das Update zu erzwingen
+    }
+}, [pathPoints, objects.line]);
 
   //szene
   return (

@@ -3,7 +3,7 @@
 /* completely redone toggle and droid */
 
 .bb8-toggle {
-    --toggle-size:8px;
+    --toggle-size:6px;
     /* finally I removed the scale now everything depends on the font-size */
     --margin-top-for-head: 1.2em;
     /* it's just in case 👆 */
@@ -20,7 +20,7 @@
   }
   @media (max-width: 600px) {
     .bb8-toggle {
-      --toggle-size: 6px;
+      --toggle-size: 4.5px;
       --margin-top-for-head: 0.2em;
     }
   }
