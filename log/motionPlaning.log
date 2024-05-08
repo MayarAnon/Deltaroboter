@@ -98,3 +98,121 @@
 2024-05-08 01:38:59 Total steps calculated: Motor1=-376, Motor2=744, Motor3=-1488, Motor4=0
 2024-05-08 01:38:59 Total steps calculated: Motor1=376, Motor2=-744, Motor3=1488, Motor4=0
 2024-05-08 01:39:00 Total steps calculated: Motor1=-376, Motor2=744, Motor3=-1488, Motor4=0
+2024-05-08 09:25:59 nohup: ignoring input
+2024-05-08 09:25:59 MotionPlaning online
+2024-05-08 09:27:09 Connected
+2024-05-08 09:27:09 Lade Program: Dennis.gcodeProgramm wird ausgeführt. 
+2024-05-08 09:27:09 Unsupported command: G21
+2024-05-08 09:27:09 Unsupported command: G90
+2024-05-08 09:27:09 Total steps calculated: Motor1=1387, Motor2=-562, Motor3=28, Motor4=0
+2024-05-08 09:27:10 Unsupported command: M1002
+2024-05-08 09:27:11 Unsupported command: M08
+2024-05-08 09:27:11 Total steps calculated: Motor1=189, Motor2=-17, Motor3=41, Motor4=0
+2024-05-08 09:27:11 Unsupported command: M1002
+2024-05-08 09:27:13 Unsupported command: M08
+2024-05-08 09:27:13 Total steps calculated: Motor1=-454, Motor2=-257, Motor3=603, Motor4=0
+2024-05-08 09:27:13 Unsupported command: M1002
+2024-05-08 09:27:13 Unsupported command: M08
+2024-05-08 09:27:13 Total steps calculated: Motor1=157, Motor2=-18, Motor3=26, Motor4=0
+2024-05-08 09:27:13 Unsupported command: M1002
+2024-05-08 09:27:15 Unsupported command: M08
+2024-05-08 09:27:15 Total steps calculated: Motor1=212, Motor2=-104, Motor3=646, Motor4=0
+2024-05-08 09:27:15 Unsupported command: M1002
+2024-05-08 09:27:16 Total steps calculated: Motor1=-55, Motor2=7, Motor3=-25, Motor4=0
+2024-05-08 09:27:17 Unsupported command: M08
+2024-05-08 09:27:17 Total steps calculated: Motor1=277, Motor2=12, Motor3=648, Motor4=0
+2024-05-08 09:27:17 Unsupported command: M1002
+2024-05-08 09:27:18 Total steps calculated: Motor1=-57, Motor2=1, Motor3=-26, Motor4=0
+2024-05-08 09:27:19 Unsupported command: M08
+2024-05-08 09:27:19 Total steps calculated: Motor1=632, Motor2=66, Motor3=338, Motor4=0
+2024-05-08 09:27:20 Unsupported command: M1002
+2024-05-08 09:27:20 Unsupported command: M08
+2024-05-08 09:27:20 Total steps calculated: Motor1=-416, Motor2=-24, Motor3=12, Motor4=0
+2024-05-08 09:27:20 Unsupported command: M1002
+2024-05-08 09:27:21 Unsupported command: M08
+2024-05-08 09:27:21 Total steps calculated: Motor1=251, Motor2=93, Motor3=513, Motor4=0
+2024-05-08 09:27:21 Unsupported command: M1002
+2024-05-08 09:27:22 Total steps calculated: Motor1=5, Motor2=14, Motor3=52, Motor4=0
+2024-05-08 09:27:22 Total steps calculated: Motor1=-54, Motor2=6, Motor3=-16, Motor4=0
+2024-05-08 09:27:22 Total steps calculated: Motor1=-4, Motor2=-15, Motor3=-54, Motor4=0
+2024-05-08 09:27:23 Unsupported command: M08
+2024-05-08 09:27:23 Total steps calculated: Motor1=-2235, Motor2=811, Motor3=-2855, Motor4=0
+2024-05-08 09:27:54 Unsupported command: M02
+2024-05-08 09:27:54 Lade Program: Dennis.gcodeProgramm wird ausgeführt. 
+2024-05-08 09:27:54 Unsupported command: G21
+2024-05-08 09:27:54 Unsupported command: G90
+2024-05-08 09:27:54 Total steps calculated: Motor1=1387, Motor2=-562, Motor3=28, Motor4=0
+2024-05-08 09:27:55 Unsupported command: M1002
+2024-05-08 09:27:56 Unsupported command: M08
+2024-05-08 09:27:56 Total steps calculated: Motor1=189, Motor2=-17, Motor3=41, Motor4=0
+2024-05-08 09:27:56 Unsupported command: M1002
+2024-05-08 09:27:58 Unsupported command: M08
+2024-05-08 09:27:58 Total steps calculated: Motor1=-454, Motor2=-257, Motor3=603, Motor4=0
+2024-05-08 09:27:58 Unsupported command: M1002
+2024-05-08 09:27:58 Unsupported command: M08
+2024-05-08 09:27:58 Total steps calculated: Motor1=157, Motor2=-18, Motor3=26, Motor4=0
+2024-05-08 09:27:58 Unsupported command: M1002
+2024-05-08 09:28:00 Unsupported command: M08
+2024-05-08 09:28:00 Total steps calculated: Motor1=212, Motor2=-104, Motor3=646, Motor4=0
+2024-05-08 09:28:00 Unsupported command: M1002
+2024-05-08 09:28:01 Total steps calculated: Motor1=-55, Motor2=7, Motor3=-25, Motor4=0
+2024-05-08 09:28:02 Unsupported command: M08
+2024-05-08 09:28:02 Total steps calculated: Motor1=277, Motor2=12, Motor3=648, Motor4=0
+2024-05-08 09:28:02 Unsupported command: M1002
+2024-05-08 09:28:03 Total steps calculated: Motor1=-57, Motor2=1, Motor3=-26, Motor4=0
+2024-05-08 09:28:04 Unsupported command: M08
+2024-05-08 09:28:04 Total steps calculated: Motor1=632, Motor2=66, Motor3=338, Motor4=0
+2024-05-08 09:28:05 Unsupported command: M1002
+2024-05-08 09:28:05 Unsupported command: M08
+2024-05-08 09:28:05 Total steps calculated: Motor1=-416, Motor2=-24, Motor3=12, Motor4=0
+2024-05-08 09:28:05 Unsupported command: M1002
+2024-05-08 09:28:06 Unsupported command: M08
+2024-05-08 09:28:06 Total steps calculated: Motor1=251, Motor2=93, Motor3=513, Motor4=0
+2024-05-08 09:28:06 Unsupported command: M1002
+2024-05-08 09:28:07 Total steps calculated: Motor1=5, Motor2=14, Motor3=52, Motor4=0
+2024-05-08 09:28:07 Total steps calculated: Motor1=-54, Motor2=6, Motor3=-16, Motor4=0
+2024-05-08 09:28:07 Total steps calculated: Motor1=-4, Motor2=-15, Motor3=-54, Motor4=0
+2024-05-08 09:28:08 Unsupported command: M08
+2024-05-08 09:28:08 Total steps calculated: Motor1=-2235, Motor2=811, Motor3=-2855, Motor4=0
+2024-05-08 09:28:57 Unsupported command: M02
+2024-05-08 09:28:57 Lade Program: Dennis.gcodeProgramm wird ausgeführt. 
+2024-05-08 09:28:57 Unsupported command: G21
+2024-05-08 09:28:57 Unsupported command: G90
+2024-05-08 09:28:57 Total steps calculated: Motor1=1387, Motor2=-562, Motor3=28, Motor4=0
+2024-05-08 09:28:58 Unsupported command: M1002
+2024-05-08 09:28:59 Unsupported command: M08
+2024-05-08 09:28:59 Total steps calculated: Motor1=189, Motor2=-17, Motor3=41, Motor4=0
+2024-05-08 09:28:59 Unsupported command: M1002
+2024-05-08 09:29:01 Unsupported command: M08
+2024-05-08 09:29:01 Total steps calculated: Motor1=-454, Motor2=-257, Motor3=603, Motor4=0
+2024-05-08 09:29:01 Unsupported command: M1002
+2024-05-08 09:29:01 Unsupported command: M08
+2024-05-08 09:29:01 Total steps calculated: Motor1=157, Motor2=-18, Motor3=26, Motor4=0
+2024-05-08 09:29:02 Unsupported command: M1002
+2024-05-08 09:29:03 Unsupported command: M08
+2024-05-08 09:29:03 Total steps calculated: Motor1=212, Motor2=-104, Motor3=646, Motor4=0
+2024-05-08 09:29:03 Unsupported command: M1002
+2024-05-08 09:29:04 Total steps calculated: Motor1=-55, Motor2=7, Motor3=-25, Motor4=0
+2024-05-08 09:29:05 Unsupported command: M08
+2024-05-08 09:29:05 Total steps calculated: Motor1=277, Motor2=12, Motor3=648, Motor4=0
+2024-05-08 09:29:05 Unsupported command: M1002
+2024-05-08 09:29:06 Total steps calculated: Motor1=-57, Motor2=1, Motor3=-26, Motor4=0
+2024-05-08 09:29:07 Unsupported command: M08
+2024-05-08 09:29:07 Total steps calculated: Motor1=632, Motor2=66, Motor3=338, Motor4=0
+2024-05-08 09:29:08 Unsupported command: M1002
+2024-05-08 09:29:08 Unsupported command: M08
+2024-05-08 09:29:08 Total steps calculated: Motor1=-416, Motor2=-24, Motor3=12, Motor4=0
+2024-05-08 09:29:08 Unsupported command: M1002
+2024-05-08 09:29:09 Unsupported command: M08
+2024-05-08 09:29:09 Total steps calculated: Motor1=251, Motor2=93, Motor3=513, Motor4=0
+2024-05-08 09:29:09 Unsupported command: M1002
+2024-05-08 09:29:10 Total steps calculated: Motor1=5, Motor2=14, Motor3=52, Motor4=0
+2024-05-08 09:29:10 Total steps calculated: Motor1=-54, Motor2=6, Motor3=-16, Motor4=0
+2024-05-08 09:29:10 Total steps calculated: Motor1=-4, Motor2=-15, Motor3=-54, Motor4=0
+2024-05-08 09:29:11 Unsupported command: M08
+2024-05-08 09:29:11 Total steps calculated: Motor1=-2235, Motor2=811, Motor3=-2855, Motor4=0
+2024-05-08 09:31:33 nohup: ignoring input
+2024-05-08 09:31:33 MotionPlaning online
+2024-05-08 09:34:55 nohup: ignoring input
+2024-05-08 09:34:55 MotionPlaning online
+2024-05-08 09:37:19 Connected

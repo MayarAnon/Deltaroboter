@@ -94,14 +94,12 @@ void handle_signal(int sig) {
 // Hauptfunktion des Programms. Initialisiert den MQTT-Client, subscribt zu bestimmten Topics
 // und tritt in eine Endlosschleife ein, um das Programm am Laufen zu halten.
 int main() {
-    // Topics, zu denen wir subscriben möchten.
-    const char* topics[] = {LOADPROGRAMMTOPIC,ROBOTSTATETOPIC,STOPTOPIC,MANUELCONTROLCOORDINATESTOPIC,MANUELCONTROLGRIPPERTOPIC};
-    int topicCount = sizeof(topics) / sizeof(topics[0]);
+    
     printf("MotionPlaning online\n");
     fflush(stdout); // Sorgt dafür, dass "Hallo" sofort ausgegeben wird
     
     // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.
-    initializeMqtt(topics, topicCount, onMessage);
+    initializeMqtt(globalTopics, globalTopicCount, onMessage);
 
     // Initialisiere Signalhandler
     signal(SIGINT, handle_signal);

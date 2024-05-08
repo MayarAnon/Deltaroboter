@@ -28,6 +28,10 @@ typedef enum {
     ZX_PLANE
 } Plane;
 
+// Global MQTT Variables
+extern const char** globalTopics;
+extern int globalTopicCount;
+extern void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
 
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 extern Coordinate currentPosition;
@@ -63,5 +67,7 @@ extern int currentGripperValue;
 #define ADDRESS     "tcp://localhost:1883"
 #define CLIENTID    "MotionPlaningClient"
 #define QOS         1  // Set Quality of Service Level to 0 (At most once)
+
+
 
 #endif

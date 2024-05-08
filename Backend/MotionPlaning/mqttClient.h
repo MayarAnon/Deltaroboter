@@ -8,8 +8,7 @@ typedef void (*MessageCallback)(char *topicName, char *payloadStr);
 
 // Externe Variablen, die die Topics, Topic-Count und die Callback-Funktion speichern
 
-extern int globalTopicCount;
-extern MessageCallback globalOnMessageCallback;
+
 
 // Funktionen, die vom MQTT-Client verwendet werden
 void initializeMqtt(const char* topics[], int topicCount, MessageCallback onMessageCallback);

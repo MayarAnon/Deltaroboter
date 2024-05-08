@@ -17,3 +17,36 @@
 2024-05-08 01:37:32 Programm "testp2p1.gcode" erfolgreich gespeichert.
 2024-05-08 01:37:49 Anfrage zum Speichern eines Programms erhalten
 2024-05-08 01:37:49 Programm "testp2p1.gcode" erfolgreich gespeichert.
+2024-05-08 09:25:59 nohup: ignoring input
+2024-05-08 09:26:02 Server und WebSocket laufen auf Port 3010
+2024-05-08 09:26:02 MQTT-Client verbunden und bereit.
+2024-05-08 09:26:02 WebSocket client verbunden.
+2024-05-08 09:26:04 WebSocket client verbunden.
+2024-05-08 09:27:00 WebSocket client verbunden.
+2024-05-08 09:27:46 WebSocket client verbunden.
+2024-05-08 09:27:49 WebSocket client getrennt.
+2024-05-08 09:27:49 WebSocket client getrennt.
+2024-05-08 09:27:50 WebSocket client verbunden.
+2024-05-08 09:28:49 WebSocket client verbunden.
+2024-05-08 09:28:52 WebSocket client getrennt.
+2024-05-08 09:28:52 WebSocket client getrennt.
+2024-05-08 09:28:53 WebSocket client verbunden.
+2024-05-08 09:29:36 WebSocket client getrennt.
+2024-05-08 09:31:33 nohup: ignoring input
+2024-05-08 09:31:34 Server und WebSocket laufen auf Port 3010
+2024-05-08 09:31:34 WebSocket client verbunden.
+2024-05-08 09:31:34 TypeError: Cannot read properties of undefined (reading 'on')
+2024-05-08 09:31:34     at WebSocketServer.connection (/home/pi/Deltaroboter/Backend/WebServer/server.js:248:14)
+2024-05-08 09:31:34     at WebSocketServer.emit (node:events:517:28)
+2024-05-08 09:31:34     at WebSocketServer.completeUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:435:5)
+2024-05-08 09:31:34     at WebSocketServer.handleUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:343:10)
+2024-05-08 09:31:34     at Server.upgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:119:16)
+2024-05-08 09:31:34     at Server.emit (node:events:517:28)
+2024-05-08 09:31:34     at onParserExecuteCommon (node:_http_server:931:14)
+2024-05-08 09:31:34     at onParserExecute (node:_http_server:825:3)
+2024-05-08 09:34:55 nohup: ignoring input
+2024-05-08 09:34:58 Server und WebSocket laufen auf Port 3010
+2024-05-08 09:34:58 MQTT-Client verbunden und bereit.
+2024-05-08 09:34:58 WebSocket client verbunden.
+2024-05-08 09:35:24 WebSocket client getrennt.
+2024-05-08 09:36:56 WebSocket client verbunden.
