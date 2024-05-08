@@ -1,5 +1,5 @@
-2024-05-09 00:47:20 nohup: ignoring input
-2024-05-09 00:47:20 /home/pi/Deltaroboter/Backend/GripperControl/gripperControl.py:20: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
-2024-05-09 00:47:20   GPIO.setup(ParallelGripper, GPIO.OUT)
-2024-05-09 00:47:20 /home/pi/Deltaroboter/Backend/GripperControl/gripperControl.py:25: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
-2024-05-09 00:47:20   GPIO.setup(pin, GPIO.OUT)
+2024-05-09 01:32:53 nohup: ignoring input
+2024-05-09 01:32:53 /home/pi/Deltaroboter/Backend/GripperControl/gripperControl.py:20: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+2024-05-09 01:32:53   GPIO.setup(ParallelGripper, GPIO.OUT)
+2024-05-09 01:32:53 /home/pi/Deltaroboter/Backend/GripperControl/gripperControl.py:25: RuntimeWarning: This channel is already in use, continuing anyway.  Use GPIO.setwarnings(False) to disable warnings.
+2024-05-09 01:32:53   GPIO.setup(pin, GPIO.OUT)

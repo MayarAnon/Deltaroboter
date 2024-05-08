@@ -13,9 +13,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "archiver": "^7.0.1",
     "async-mqtt": "^2.6.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "fs-extra": "^11.2.0",
     "ws": "^8.16.0"
   },
   "devDependencies": {
