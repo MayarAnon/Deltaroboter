@@ -16,8 +16,8 @@ void publishCurrentState(Coordinate pos, Angles ang);
 
 // Funktion zur Berechnung der Pulsweite für das Trapezprofil
 int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int totalSteps) {
-    int rampUpSteps = totalSteps * 0.25;   // 25% der Schritte für das Heruntermodulieren
-    int constantSteps = totalSteps * 0.5;  // 50% der Schritte konstant
+    int rampUpSteps = totalSteps * RISEPERCENTAGE;   // 25% der Schritte für das Heruntermodulieren
+    int constantSteps = totalSteps * CONSTSPEEDPERCENTAGE;  // 50% der Schritte konstant
     int rampDownSteps = totalSteps - rampUpSteps - constantSteps;  // 25% der Schritte für das Hochmodulieren
 
     // Startet mit dem höchsten Wert (530) und moduliert herunter auf basePulsewidth
@@ -70,7 +70,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     for (int i = 0; i < InterpolationSteps; i++) {
 
         // Anpassung der Pulsbreite für ein Trapezprofil
-        if (currentMotionProfil == TrapezProfil && InterpolationSteps > 20) {
+        if (currentMotionProfil == TrapezProfil && InterpolationSteps > INTERPOLATIONSTEPCUTOF) {
             pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
         } else {
             pulsewidth = maxSpeed;
@@ -115,9 +115,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             int maxSteps = fmax(fmax(abs(steps[i].Motor1), abs(steps[i].Motor2)), fmax(abs(steps[i].Motor3), abs(steps[i].Motor4)));
 
             // Point to Point Verfahren 2 Nachrichten und maxStep größer 50 und Trapezprofil
-            if (InterpolationSteps == 2 && maxSteps > 50 && currentMotionProfil == TrapezProfil) {
+            if (InterpolationSteps == 2 && maxSteps > MINIMUMP2PCUTOF && currentMotionProfil == TrapezProfil) {
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
-                int devision = 20;
+                int devision = P2PINTERPOLATIONSTEPS;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
                 int totalSteps[4] = {0, 0, 0, 0};  
 
@@ -156,9 +156,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                         cJSON_AddItemToArray(jsonRoot, stepObj);
                     }
                 }
-
-                // Debug-Ausgabe, um die Genauigkeit der Schrittberechnung zu überprüfen
-                printf("Total steps calculated: Motor1=%d, Motor2=%d, Motor3=%d, Motor4=%d\n", totalSteps[0], totalSteps[1], totalSteps[2], totalSteps[3]);
+                
             }else {
                 // Bestehende Logik für normale Interpolation oder andere Profile
 

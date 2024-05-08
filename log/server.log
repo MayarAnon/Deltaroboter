@@ -1,188 +1,40 @@
-2024-05-08 01:32:03 nohup: ignoring input
-2024-05-08 01:32:05 Server und WebSocket laufen auf Port 3010
-2024-05-08 01:32:05 MQTT-Client verbunden und bereit.
-2024-05-08 01:32:05 WebSocket client verbunden.
-2024-05-08 01:32:05 WebSocket client verbunden.
-2024-05-08 01:33:01 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:33:01 Programm "Heart.gcode" erfolgreich gespeichert.
-2024-05-08 01:33:08 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:33:08 Programm "Heart.gcode" erfolgreich gespeichert.
-2024-05-08 01:35:54 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:35:54 Programm "Heart.gcode" erfolgreich gespeichert.
-2024-05-08 01:36:00 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:36:00 Programm "Heart.gcode" erfolgreich gespeichert.
-2024-05-08 01:37:29 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:37:29 Programm "testp2p1.gcode" erfolgreich gespeichert.
-2024-05-08 01:37:32 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:37:32 Programm "testp2p1.gcode" erfolgreich gespeichert.
-2024-05-08 01:37:49 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 01:37:49 Programm "testp2p1.gcode" erfolgreich gespeichert.
-2024-05-08 09:25:59 nohup: ignoring input
-2024-05-08 09:26:02 Server und WebSocket laufen auf Port 3010
-2024-05-08 09:26:02 MQTT-Client verbunden und bereit.
-2024-05-08 09:26:02 WebSocket client verbunden.
-2024-05-08 09:26:04 WebSocket client verbunden.
-2024-05-08 09:27:00 WebSocket client verbunden.
-2024-05-08 09:27:46 WebSocket client verbunden.
-2024-05-08 09:27:49 WebSocket client getrennt.
-2024-05-08 09:27:49 WebSocket client getrennt.
-2024-05-08 09:27:50 WebSocket client verbunden.
-2024-05-08 09:28:49 WebSocket client verbunden.
-2024-05-08 09:28:52 WebSocket client getrennt.
-2024-05-08 09:28:52 WebSocket client getrennt.
-2024-05-08 09:28:53 WebSocket client verbunden.
-2024-05-08 09:29:36 WebSocket client getrennt.
-2024-05-08 09:31:33 nohup: ignoring input
-2024-05-08 09:31:34 Server und WebSocket laufen auf Port 3010
-2024-05-08 09:31:34 WebSocket client verbunden.
-2024-05-08 09:31:34 TypeError: Cannot read properties of undefined (reading 'on')
-2024-05-08 09:31:34     at WebSocketServer.connection (/home/pi/Deltaroboter/Backend/WebServer/server.js:248:14)
-2024-05-08 09:31:34     at WebSocketServer.emit (node:events:517:28)
-2024-05-08 09:31:34     at WebSocketServer.completeUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:435:5)
-2024-05-08 09:31:34     at WebSocketServer.handleUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:343:10)
-2024-05-08 09:31:34     at Server.upgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:119:16)
-2024-05-08 09:31:34     at Server.emit (node:events:517:28)
-2024-05-08 09:31:34     at onParserExecuteCommon (node:_http_server:931:14)
-2024-05-08 09:31:34     at onParserExecute (node:_http_server:825:3)
-2024-05-08 09:34:55 nohup: ignoring input
-2024-05-08 09:34:58 Server und WebSocket laufen auf Port 3010
-2024-05-08 09:34:58 MQTT-Client verbunden und bereit.
-2024-05-08 09:34:58 WebSocket client verbunden.
-2024-05-08 09:35:24 WebSocket client getrennt.
-2024-05-08 09:36:56 WebSocket client verbunden.
-2024-05-08 09:52:03 nohup: ignoring input
-2024-05-08 09:52:04 Server und WebSocket laufen auf Port 3010
-2024-05-08 09:52:04 MQTT-Client verbunden und bereit.
-2024-05-08 09:52:04 WebSocket client verbunden.
-2024-05-08 09:52:59 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:52:59 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:53:27 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:53:27 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:53:39 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:53:39 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:54:27 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:54:27 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:54:44 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:54:44 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:55:14 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:55:14 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:55:23 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:55:23 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:55:31 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 09:55:31 Programm "test1.gcode" erfolgreich gespeichert.
-2024-05-08 09:56:06 WebSocket client verbunden.
-2024-05-08 09:56:36 WebSocket client getrennt.
-2024-05-08 09:56:39 WebSocket client verbunden.
-2024-05-08 09:56:41 WebSocket client verbunden.
-2024-05-08 09:56:42 WebSocket client verbunden.
-2024-05-08 09:56:47 WebSocket client getrennt.
-2024-05-08 09:56:47 WebSocket client getrennt.
-2024-05-08 09:56:47 WebSocket client getrennt.
-2024-05-08 09:56:48 WebSocket client verbunden.
-2024-05-08 09:56:50 WebSocket client getrennt.
-2024-05-08 09:56:50 WebSocket client verbunden.
-2024-05-08 09:57:00 WebSocket client getrennt.
-2024-05-08 09:57:00 WebSocket client verbunden.
-2024-05-08 09:57:01 WebSocket client getrennt.
-2024-05-08 09:57:01 WebSocket client verbunden.
-2024-05-08 09:57:01 WebSocket client getrennt.
-2024-05-08 09:57:01 WebSocket client verbunden.
-2024-05-08 09:57:03 WebSocket client verbunden.
-2024-05-08 09:57:03 (node:3274) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
-2024-05-08 09:57:03 (Use `node --trace-warnings ...` to show where the warning was created)
-2024-05-08 09:57:07 WebSocket client verbunden.
-2024-05-08 10:00:50 WebSocket client getrennt.
-2024-05-08 10:00:50 WebSocket client getrennt.
-2024-05-08 10:00:50 WebSocket client getrennt.
-2024-05-08 10:01:16 WebSocket client verbunden.
-2024-05-08 10:01:37 WebSocket client verbunden.
-2024-05-08 10:01:59 WebSocket client verbunden.
-2024-05-08 10:02:01 WebSocket client verbunden.
-2024-05-08 10:15:54 nohup: ignoring input
-2024-05-08 10:15:56 Server und WebSocket laufen auf Port 3010
-2024-05-08 10:15:56 WebSocket client verbunden.
-2024-05-08 10:15:56 TypeError: Cannot read properties of undefined (reading 'on')
-2024-05-08 10:15:56     at WebSocketServer.connection (/home/pi/Deltaroboter/Backend/WebServer/server.js:248:14)
-2024-05-08 10:15:56     at WebSocketServer.emit (node:events:517:28)
-2024-05-08 10:15:56     at WebSocketServer.completeUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:435:5)
-2024-05-08 10:15:56     at WebSocketServer.handleUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:343:10)
-2024-05-08 10:15:56     at Server.upgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:119:16)
-2024-05-08 10:15:56     at Server.emit (node:events:517:28)
-2024-05-08 10:15:56     at onParserExecuteCommon (node:_http_server:931:14)
-2024-05-08 10:15:56     at onParserExecute (node:_http_server:825:3)
-2024-05-08 10:42:13 nohup: ignoring input
-2024-05-08 10:42:16 Server und WebSocket laufen auf Port 3010
-2024-05-08 10:42:16 MQTT-Client verbunden und bereit.
-2024-05-08 10:42:17 WebSocket client verbunden.
-2024-05-08 10:42:18 WebSocket client verbunden.
-2024-05-08 10:42:34 WebSocket client verbunden.
-2024-05-08 10:43:26 WebSocket client getrennt.
-2024-05-08 10:43:26 WebSocket client getrennt.
-2024-05-08 10:43:27 WebSocket client verbunden.
-2024-05-08 10:44:13 WebSocket client verbunden.
-2024-05-08 10:44:15 WebSocket client getrennt.
-2024-05-08 10:44:15 WebSocket client getrennt.
-2024-05-08 10:44:16 WebSocket client verbunden.
-2024-05-08 10:44:28 WebSocket client verbunden.
-2024-05-08 10:44:31 WebSocket client getrennt.
-2024-05-08 10:44:31 WebSocket client getrennt.
-2024-05-08 10:44:31 WebSocket client verbunden.
-2024-05-08 10:44:40 nohup: ignoring input
-2024-05-08 10:44:42 Server und WebSocket laufen auf Port 3010
-2024-05-08 10:44:42 MQTT-Client verbunden und bereit.
-2024-05-08 10:44:42 WebSocket client verbunden.
-2024-05-08 10:44:44 WebSocket client verbunden.
-2024-05-08 10:45:12 WebSocket client verbunden.
-2024-05-08 10:45:16 WebSocket client getrennt.
-2024-05-08 10:45:16 WebSocket client getrennt.
-2024-05-08 10:45:17 WebSocket client verbunden.
-2024-05-08 10:45:45 WebSocket client verbunden.
-2024-05-08 10:45:46 WebSocket client getrennt.
-2024-05-08 10:45:46 WebSocket client getrennt.
-2024-05-08 10:45:47 WebSocket client verbunden.
-2024-05-08 10:45:58 WebSocket client verbunden.
-2024-05-08 10:46:09 nohup: ignoring input
-2024-05-08 10:46:11 Server und WebSocket laufen auf Port 3010
-2024-05-08 10:46:11 MQTT-Client verbunden und bereit.
-2024-05-08 10:46:11 WebSocket client verbunden.
-2024-05-08 10:46:11 WebSocket client getrennt.
-2024-05-08 10:46:12 WebSocket client verbunden.
-2024-05-08 10:46:12 WebSocket client verbunden.
-2024-05-08 10:46:24 WebSocket client verbunden.
-2024-05-08 10:46:27 WebSocket client getrennt.
-2024-05-08 10:46:27 WebSocket client getrennt.
-2024-05-08 10:46:28 WebSocket client verbunden.
-2024-05-08 10:46:46 nohup: ignoring input
-2024-05-08 10:46:48 Server und WebSocket laufen auf Port 3010
-2024-05-08 10:46:48 MQTT-Client verbunden und bereit.
-2024-05-08 10:46:49 WebSocket client verbunden.
-2024-05-08 10:46:50 WebSocket client verbunden.
-2024-05-08 10:47:10 WebSocket client verbunden.
-2024-05-08 10:47:11 WebSocket client getrennt.
-2024-05-08 10:47:11 WebSocket client getrennt.
-2024-05-08 10:47:11 WebSocket client verbunden.
-2024-05-08 10:47:29 WebSocket client verbunden.
-2024-05-08 10:47:32 WebSocket client getrennt.
-2024-05-08 10:47:32 WebSocket client getrennt.
-2024-05-08 10:47:32 WebSocket client verbunden.
-2024-05-08 11:01:39 nohup: ignoring input
-2024-05-08 11:01:42 Server und WebSocket laufen auf Port 3010
-2024-05-08 11:01:42 MQTT-Client verbunden und bereit.
-2024-05-08 11:01:44 WebSocket client verbunden.
-2024-05-08 11:03:01 WebSocket client getrennt.
-2024-05-08 11:03:20 nohup: ignoring input
-2024-05-08 11:03:22 Server und WebSocket laufen auf Port 3010
-2024-05-08 11:03:22 MQTT-Client verbunden und bereit.
-2024-05-08 11:03:28 WebSocket client verbunden.
-2024-05-08 11:03:30 WebSocket client getrennt.
-2024-05-08 11:03:31 WebSocket client verbunden.
-2024-05-08 11:18:49 nohup: ignoring input
-2024-05-08 11:18:50 Server und WebSocket laufen auf Port 3010
-2024-05-08 11:18:50 MQTT-Client verbunden und bereit.
-2024-05-08 11:18:50 WebSocket client verbunden.
-2024-05-08 11:18:55 WebSocket client verbunden.
-2024-05-08 11:18:58 WebSocket client verbunden.
-2024-05-08 11:19:00 WebSocket client getrennt.
-2024-05-08 11:19:00 WebSocket client getrennt.
-2024-05-08 11:19:00 WebSocket client getrennt.
-2024-05-08 11:19:00 WebSocket client verbunden.
+2024-05-08 23:36:58 nohup: ignoring input
+2024-05-08 23:36:59 Server und WebSocket laufen auf Port 3010
+2024-05-08 23:36:59 MQTT-Client verbunden und bereit.
+2024-05-08 23:37:01 WebSocket client verbunden.
+2024-05-08 23:38:08 nohup: ignoring input
+2024-05-08 23:38:10 Server und WebSocket laufen auf Port 3010
+2024-05-08 23:38:10 MQTT-Client verbunden und bereit.
+2024-05-08 23:38:10 WebSocket client verbunden.
+2024-05-08 23:38:58 Anfrage zum Speichern eines Programms erhalten
+2024-05-08 23:38:58 Programm "Heart.gcode" erfolgreich gespeichert.
+2024-05-08 23:39:07 WebSocket client verbunden.
+2024-05-08 23:39:36 WebSocket client getrennt.
+2024-05-08 23:39:36 WebSocket client getrennt.
+2024-05-08 23:39:37 WebSocket client verbunden.
+2024-05-08 23:41:01 WebSocket client verbunden.
+2024-05-08 23:41:06 WebSocket client verbunden.
+2024-05-08 23:42:10 WebSocket client verbunden.
+2024-05-08 23:42:11 WebSocket client getrennt.
+2024-05-08 23:42:11 WebSocket client getrennt.
+2024-05-08 23:42:12 WebSocket client verbunden.
+2024-05-08 23:42:22 WebSocket client verbunden.
+2024-05-08 23:42:27 WebSocket client verbunden.
+2024-05-08 23:43:57 WebSocket client verbunden.
+2024-05-08 23:44:32 WebSocket client verbunden.
+2024-05-08 23:44:32 (node:3770) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-08 23:44:32 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-08 23:45:26 WebSocket client verbunden.
+2024-05-08 23:45:27 WebSocket client getrennt.
+2024-05-08 23:45:27 WebSocket client getrennt.
+2024-05-08 23:45:27 WebSocket client getrennt.
+2024-05-08 23:45:27 WebSocket client getrennt.
+2024-05-08 23:45:30 WebSocket client verbunden.
+2024-05-08 23:45:41 WebSocket client verbunden.
+2024-05-08 23:45:47 WebSocket client getrennt.
+2024-05-08 23:45:49 WebSocket client verbunden.
+2024-05-08 23:45:51 WebSocket client getrennt.
+2024-05-08 23:45:51 WebSocket client verbunden.
+2024-05-08 23:45:52 WebSocket client verbunden.
+2024-05-08 23:46:02 WebSocket client getrennt.
+2024-05-08 23:46:04 WebSocket client verbunden.

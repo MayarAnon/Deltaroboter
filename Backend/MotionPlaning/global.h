@@ -74,6 +74,12 @@ extern int currentGripperValue;
 #define CLIENTID    "MotionPlaningClient"
 #define QOS         1  // Set Quality of Service Level to 0 (At most once)
 
+//MotionProfil Defines
 
+#define INTERPOLATIONSTEPCUTOF 5
+#define MINIMUMP2PCUTOF 10
+#define RISEPERCENTAGE 0.15
+#define CONSTSPEEDPERCENTAGE 0.7
+#define P2PINTERPOLATIONSTEPS 20
 
 #endif

@@ -71,7 +71,7 @@ void execute_interpolated_sequence(int* pulses, int pulseWidthUs, int pauseBetwe
     // Richtungsänderungen am Ende der Sequenz einfügen, falls notwendig
     for (int i = 0; i < globalConfig.motor_count; ++i)
     {
-        if (pulses[i] < 0)
+        if (pulses[i] > 0)
         { // Setze den dir_GPIO zurück auf LOW nach negativen Pulsen
             combinedPulses[pulseIndex++] = (gpioPulse_t){
                 .gpioOn = 0,
