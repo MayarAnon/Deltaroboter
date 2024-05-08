@@ -2,9 +2,17 @@
 
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 
+// Definition der globalen Variablen
+const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC};
+const char** globalTopics = globalTopicsTemp; // Zuweisung des Pointers auf das Array
+int globalTopicCount = sizeof(globalTopicsTemp) / sizeof(globalTopicsTemp[0]);
+void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
 
 // `currentPosition` speichert die aktuelle Position
 Coordinate currentPosition = {0.0, 0.0, -280.0, 0.0}; 
+
+// `currentMotionProfil` speichert das aktuelle Bewegungsprofil
+MotionProfile currentMotionProfil = TrapezProfil;
 
 // `currentAngles` speichert die aktuellen Winkel der Roboterarme.
 Angles currentAngles = {-41.489, -41.489, -41.489};

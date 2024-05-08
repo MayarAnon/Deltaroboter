@@ -7,7 +7,6 @@
 #include "gcodeParser.h"
 #include "mqttClient.h"
 
-
 // Verarbeitet die Koordinaten aus einem JSON-String und führt gegebenenfalls eine Bewegung aus.
 // Parameter:
 //   - char *payloadStr: JSON-kodierter String, der Koordinaten enthält.
