@@ -124,6 +124,11 @@ app.post('/updateSettings', async (req, res) => {
     if (settings.motorSpeed !== undefined) { // Einschließlich 0 als gültiger Wert
       await mqttClient.publish('motors/speed', settings.motorSpeed.toString());
     }
+    if (settings.motionProfil) {
+      const motionProfilJson = JSON.stringify(settings.motionProfil);
+      await mqttClient.publish('motors/motionProfil', motionProfilJson);
+    }
+    
 
     res.status(200).json({ message: 'Einstellungen erfolgreich aktualisiert und publiziert' });
   } catch (error) {

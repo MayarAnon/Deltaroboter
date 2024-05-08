@@ -30,7 +30,8 @@ typedef enum {
 
 typedef enum {
     RectangleProfil,
-    TrapezProfil
+    TrapezProfil,
+    UnknownProfil = -1  // Hinzugefügter Wert für unbekannte Profile
 } MotionProfile;
 
 // Global MQTT Variables

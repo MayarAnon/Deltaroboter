@@ -1,40 +1,10 @@
-2024-05-08 23:36:58 nohup: ignoring input
-2024-05-08 23:36:59 Server und WebSocket laufen auf Port 3010
-2024-05-08 23:36:59 MQTT-Client verbunden und bereit.
-2024-05-08 23:37:01 WebSocket client verbunden.
-2024-05-08 23:38:08 nohup: ignoring input
-2024-05-08 23:38:10 Server und WebSocket laufen auf Port 3010
-2024-05-08 23:38:10 MQTT-Client verbunden und bereit.
-2024-05-08 23:38:10 WebSocket client verbunden.
-2024-05-08 23:38:58 Anfrage zum Speichern eines Programms erhalten
-2024-05-08 23:38:58 Programm "Heart.gcode" erfolgreich gespeichert.
-2024-05-08 23:39:07 WebSocket client verbunden.
-2024-05-08 23:39:36 WebSocket client getrennt.
-2024-05-08 23:39:36 WebSocket client getrennt.
-2024-05-08 23:39:37 WebSocket client verbunden.
-2024-05-08 23:41:01 WebSocket client verbunden.
-2024-05-08 23:41:06 WebSocket client verbunden.
-2024-05-08 23:42:10 WebSocket client verbunden.
-2024-05-08 23:42:11 WebSocket client getrennt.
-2024-05-08 23:42:11 WebSocket client getrennt.
-2024-05-08 23:42:12 WebSocket client verbunden.
-2024-05-08 23:42:22 WebSocket client verbunden.
-2024-05-08 23:42:27 WebSocket client verbunden.
-2024-05-08 23:43:57 WebSocket client verbunden.
-2024-05-08 23:44:32 WebSocket client verbunden.
-2024-05-08 23:44:32 (node:3770) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
-2024-05-08 23:44:32 (Use `node --trace-warnings ...` to show where the warning was created)
-2024-05-08 23:45:26 WebSocket client verbunden.
-2024-05-08 23:45:27 WebSocket client getrennt.
-2024-05-08 23:45:27 WebSocket client getrennt.
-2024-05-08 23:45:27 WebSocket client getrennt.
-2024-05-08 23:45:27 WebSocket client getrennt.
-2024-05-08 23:45:30 WebSocket client verbunden.
-2024-05-08 23:45:41 WebSocket client verbunden.
-2024-05-08 23:45:47 WebSocket client getrennt.
-2024-05-08 23:45:49 WebSocket client verbunden.
-2024-05-08 23:45:51 WebSocket client getrennt.
-2024-05-08 23:45:51 WebSocket client verbunden.
-2024-05-08 23:45:52 WebSocket client verbunden.
-2024-05-08 23:46:02 WebSocket client getrennt.
-2024-05-08 23:46:04 WebSocket client verbunden.
+2024-05-09 00:47:20 nohup: ignoring input
+2024-05-09 00:47:21 Server und WebSocket laufen auf Port 3010
+2024-05-09 00:47:21 MQTT-Client verbunden und bereit.
+2024-05-09 00:47:21 WebSocket client verbunden.
+2024-05-09 00:47:21 WebSocket client verbunden.
+2024-05-09 00:47:21 WebSocket client verbunden.
+2024-05-09 00:47:56 WebSocket client verbunden.
+2024-05-09 00:49:30 WebSocket client verbunden.
+2024-05-09 00:50:20 WebSocket client verbunden.
+2024-05-09 00:50:23 WebSocket client verbunden.

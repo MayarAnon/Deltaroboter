@@ -37,6 +37,7 @@ const SettingsPage = () => {
       speed: parseInt(e.target.value, 10),
     }));
   };
+
   const handleGripper = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -47,6 +48,17 @@ const SettingsPage = () => {
     [settings]
   );
 
+  const handleMotionProfil = useCallback(
+    (e) => {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        motionProfil: e.target.value,
+      }));
+    },
+    [settings]
+  );
+
+  
   const handleManualModeChange = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -78,6 +90,7 @@ const SettingsPage = () => {
     const adjustedSettings = {
       gripperMode: settings.gripper,
       motorSpeed: settings.speed,
+      motionProfil : settings.motionProfil,
     };
 
     axios
@@ -184,6 +197,18 @@ const SettingsPage = () => {
             <option value="complientGripper">complient Gripper</option>
             <option value="parallelGripper">parellel Gripper</option>
             <option value="magnetGripper">Magnet Gripper</option>
+          </select>
+        </div>
+        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
+        <div className="mb-4">
+          <label>Motion Profil:</label>
+          <select
+            value={settings.motionProfil}
+            onChange={handleMotionProfil}
+            className="ml-2 p-2 bg-black text-white rounded"
+          >
+            <option value="RectangleProfil">RectangleProfil</option>
+            <option value="TrapezProfil">TrapezProfil</option>
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
