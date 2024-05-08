@@ -258,3 +258,56 @@
 2024-05-08 09:56:41 Unsupported command: M02
 2024-05-08 10:15:54 nohup: ignoring input
 2024-05-08 10:15:54 MotionPlaning online
+2024-05-08 10:42:13 nohup: ignoring input
+2024-05-08 10:42:13 MotionPlaning online
+2024-05-08 10:44:03 Connected
+2024-05-08 10:44:40 nohup: ignoring input
+2024-05-08 10:44:40 MotionPlaning online
+2024-05-08 10:45:00 Connected
+2024-05-08 10:45:00 Lade Program: Heart.gcodeProgramm wird ausgeführt. 
+2024-05-08 10:46:09 nohup: ignoring input
+2024-05-08 10:46:09 MotionPlaning online
+2024-05-08 10:46:14 Connected
+2024-05-08 10:46:14 Lade Program: Heart.gcodeProgramm wird ausgeführt. 
+2024-05-08 10:46:46 nohup: ignoring input
+2024-05-08 10:46:46 MotionPlaning online
+2024-05-08 10:46:56 Connected
+2024-05-08 10:46:56 Lade Program: Heart.gcodeProgramm wird ausgeführt. 
+2024-05-08 11:01:39 nohup: ignoring input
+2024-05-08 11:01:39 MotionPlaning online
+2024-05-08 11:02:43 Connected
+2024-05-08 11:03:20 nohup: ignoring input
+2024-05-08 11:03:20 MotionPlaning online
+2024-05-08 11:03:34 Connected
+2024-05-08 11:18:49 nohup: ignoring input
+2024-05-08 11:18:49 MotionPlaning online
+2024-05-08 11:19:10 Connected
+2024-05-08 11:19:10 Lade Program: Kiara.gcodeProgramm wird ausgeführt. 
+2024-05-08 11:19:10 Total steps calculated: Motor1=1719, Motor2=-728, Motor3=383, Motor4=0
+2024-05-08 11:19:11 Unsupported command: M1002
+2024-05-08 11:19:14 Unsupported command: M08
+2024-05-08 11:19:14 Total steps calculated: Motor1=57, Motor2=-91, Motor3=265, Motor4=0
+2024-05-08 11:19:14 Unsupported command: M1002
+2024-05-08 11:19:14 Unsupported command: M08
+2024-05-08 11:19:14 Total steps calculated: Motor1=-457, Motor2=-28, Motor3=19, Motor4=0
+2024-05-08 11:19:14 Unsupported command: M1002
+2024-05-08 11:19:16 Total steps calculated: Motor1=-341, Motor2=-71, Motor3=792, Motor4=0
+2024-05-08 11:19:16 Total steps calculated: Motor1=52, Motor2=-16, Motor3=14, Motor4=0
+2024-05-08 11:19:16 Total steps calculated: Motor1=522, Motor2=-44, Motor3=-28, Motor4=0
+2024-05-08 11:19:17 Total steps calculated: Motor1=-57, Motor2=20, Motor3=-31, Motor4=0
+2024-05-08 11:19:18 Total steps calculated: Motor1=3, Motor2=3, Motor3=-53, Motor4=0
+2024-05-08 11:19:18 Total steps calculated: Motor1=57, Motor2=-7, Motor3=23, Motor4=0
+2024-05-08 11:19:18 Total steps calculated: Motor1=51, Motor2=-7, Motor3=34, Motor4=0
+2024-05-08 11:19:18 Total steps calculated: Motor1=366, Motor2=29, Motor3=688, Motor4=0
+2024-05-08 11:19:20 Total steps calculated: Motor1=-149, Motor2=144, Motor3=718, Motor4=0
+2024-05-08 11:19:20 Total steps calculated: Motor1=53, Motor2=-2, Motor3=26, Motor4=0
+2024-05-08 11:19:20 Total steps calculated: Motor1=56, Motor2=-4, Motor3=19, Motor4=0
+2024-05-08 11:19:21 Total steps calculated: Motor1=492, Motor2=-24, Motor3=7, Motor4=0
+2024-05-08 11:19:21 Total steps calculated: Motor1=-65, Motor2=2, Motor3=-35, Motor4=0
+2024-05-08 11:19:21 Total steps calculated: Motor1=-55, Motor2=0, Motor3=-36, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=-11, Motor2=-11, Motor3=-53, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=-53, Motor2=-2, Motor3=-23, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=61, Motor2=4, Motor3=27, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=57, Motor2=6, Motor3=36, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=55, Motor2=7, Motor3=46, Motor4=0
+2024-05-08 11:19:22 Total steps calculated: Motor1=-2209, Motor2=813, Motor3=-2844, Motor4=0

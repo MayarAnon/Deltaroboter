@@ -84,11 +84,11 @@ void parseRobotState(const char *payloadStr) {
     // Parsing des Greifermodus und Konvertierung zu Enum
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
     Gripper gripperModeValue = parseGripperMode(gripperModeStr);
-
+    /*
     // Neues Parsing für das Motion Profile
     cJSON *motionProfileItem = cJSON_GetObjectItemCaseSensitive(json, "motionProfile");
     MotionProfile motionProfileValue = parseMotionProfile(motionProfileItem->valuestring);
-
+    */
     // Parsing eines Integer-Werts für die Geschwindigkeit der Motoren
     cJSON *motorsSpeed = cJSON_GetObjectItemCaseSensitive(json, "motorsSpeed");
     int motorsSpeedValue = motorsSpeed->valueint;
@@ -108,7 +108,7 @@ void parseRobotState(const char *payloadStr) {
     }
 
     homingFlag = homingValue;
-    currentMotionProfil = motionProfileValue;
+    //currentMotionProfil = motionProfileValue;
     speedSetting = motorsSpeedValue;   // Setzt die globale Geschwindigkeitseinstellung
     currentGripper = gripperModeValue; // Setzt den aktuellen Greifermodus
     
