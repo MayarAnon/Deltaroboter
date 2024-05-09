@@ -6,6 +6,7 @@ export const settingAtom = atom({
     manualMode: "buttons",
     gripper: "vacuumGripper",
     color: "#1e293b",
+    darkmode:false,
     motionProfil : "TrapezProfil",
     workSpaceRadius: 200,
     workSpaceHeight: 200

@@ -20,7 +20,9 @@ const SettingsPage = () => {
     const savedSettings = localStorage.getItem("settings");
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
-      console.log(settings);
+      if (settings.darkMode) {
+        document.body.classList.add("dark-mode");
+      }
     }
   }, []);
   // Lokalen Zustand verwenden, um die temporäre Geschwindigkeit zu speichern
@@ -58,7 +60,6 @@ const SettingsPage = () => {
     [settings]
   );
 
-  
   const handleManualModeChange = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -90,7 +91,7 @@ const SettingsPage = () => {
     const adjustedSettings = {
       gripperMode: settings.gripper,
       motorSpeed: settings.speed,
-      motionProfil : settings.motionProfil,
+      motionProfil: settings.motionProfil,
     };
 
     axios
@@ -145,12 +146,15 @@ const SettingsPage = () => {
   };
 
   const handleDeleteLogs = () => {
-    axios.delete('http://deltarobot:3010/deleteLogs')
-      .then(response => {
-        alert('Erfolg: ' + response.data.message);
+    axios
+      .delete("http://deltarobot:3010/deleteLogs")
+      .then((response) => {
+        alert("Erfolg: " + response.data.message);
       })
-      .catch(error => {
-        alert('Fehler: ' + (error.response?.data?.error || 'Unbekannter Fehler'));
+      .catch((error) => {
+        alert(
+          "Fehler: " + (error.response?.data?.error || "Unbekannter Fehler")
+        );
       });
   };
 
@@ -166,8 +170,19 @@ const SettingsPage = () => {
       document.body.classList.add("dark-mode2");
     } else if (darkMode < 10 || darkMode > 13) {
       document.body.classList.remove("dark-mode2");
-
       document.body.classList.toggle("dark-mode");
+      // Überprüfen, ob der Dark-Modus aktiv ist und entsprechend aktualisieren
+      if (document.body.classList.contains("dark-mode")) {
+        setSettings((prevSettings) => ({
+          ...prevSettings,
+          darkMode: true,
+        }));
+      } else {
+        setSettings((prevSettings) => ({
+          ...prevSettings,
+          darkMode: false,
+        }));
+      }
     }
     setDarkMode(darkMode + 1);
   };
@@ -269,7 +284,7 @@ const SettingsPage = () => {
               </button>
             </a>
           </div>
-          
+
           <div className="mb-2">
             <button
               onClick={deleteloghandleOpenModal}
@@ -296,7 +311,7 @@ const SettingsPage = () => {
           <label htmlFor="darkModeToggle" className="mr-14">
             Dark mode:
           </label>
-          <BB8Toggle  onClick={toggleDarkMode} />
+          <BB8Toggle onClick={toggleDarkMode} />
         </div>
       </div>
       <RobotStateDisplay></RobotStateDisplay>
