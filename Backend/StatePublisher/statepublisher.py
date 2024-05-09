@@ -10,7 +10,8 @@ TOPICS = [
     "current/angles",
     "gripper/feedback",
     "gripper/mode",
-    "motors/speed"
+    "motors/speed",
+    "motors/motionProfil"
 ]
 
 # Initialisiere den Zustand des Roboters
@@ -20,6 +21,7 @@ robot_state = {
     "currentAngles": [0.0, 0.0, 0.0],
     "gripperFeedback": False,
     "gripperMode": "parallelGripper",
+    "motionProfil" : "TrapezProfil",
     "motorsSpeed": 50
 }
 
@@ -43,6 +45,11 @@ def on_message(client, userdata, msg):
             robot_state['currentAngles'] = data
         elif msg.topic == 'gripper/feedback':
             robot_state['gripperFeedback'] = data
+        elif msg.topic == 'motors/motionProfil':
+            if data in ["RectangleProfil", "TrapezProfil","SigmoidProfil"]:
+                robot_state['motionProfil'] = data
+            else:
+                raise ValueError(f"Received invalid motionProfil: {data}")
         elif msg.topic == 'gripper/mode':
             if data in ["parallelGripper", "complientGripper", "magnetGripper", "vacuumGripper"]:
                 robot_state['gripperMode'] = data

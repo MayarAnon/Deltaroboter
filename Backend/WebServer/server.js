@@ -2,6 +2,8 @@ const express = require('express');
 const WebSocket = require('ws');
 const http = require('http');
 const fs = require('fs');
+const archiver = require('archiver');
+const fsextra = require('fs-extra');
 const path = require('path');
 const cors = require('cors');
 const MqttClient = require("./mqttClient");
@@ -124,6 +126,11 @@ app.post('/updateSettings', async (req, res) => {
     if (settings.motorSpeed !== undefined) { // Einschließlich 0 als gültiger Wert
       await mqttClient.publish('motors/speed', settings.motorSpeed.toString());
     }
+    if (settings.motionProfil) {
+      const motionProfilJson = JSON.stringify(settings.motionProfil);
+      await mqttClient.publish('motors/motionProfil', motionProfilJson);
+    }
+    
 
     res.status(200).json({ message: 'Einstellungen erfolgreich aktualisiert und publiziert' });
   } catch (error) {
@@ -237,6 +244,69 @@ app.get('/downloadApiGuide', (req, res) => {
     }
   });
 });
+
+
+// Pfad zum Log-Verzeichnis
+const logFolder = path.join(__dirname, '../../log');
+
+// Endpunkt zum Herunterladen des Log-Verzeichnisses
+app.get('/downloadLogs', async (req, res) => {
+  try {
+    // Überprüfen, ob der Log-Ordner existiert
+    const exists = await fsextra.pathExists(logFolder);
+    if (!exists) {
+      console.log('Log-Verzeichnis nicht gefunden:', logFolder);
+      return res.status(404).json({ error: 'Log-Verzeichnis nicht gefunden' });
+    }
+
+    // Content-Type und Header für den Download setzen
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="logs.zip"');
+
+    // Archiver-Instanz erstellen und mit der Response verbinden
+    const archive = archiver('zip', {
+      zlib: { level: 9 } // Setzt die Komprimierungsstufe
+    });
+
+    archive.on('error', function(err) {
+      console.error('Archiver Fehler:', err);
+      throw err; // wirft den Fehler, der dann im Catch-Block gefangen wird
+    });
+
+    archive.pipe(res);
+
+    // Verzeichnis zum Archiv hinzufügen
+    archive.directory(logFolder, false);
+
+    // Archivierung abschließen
+    archive.finalize();
+  } catch (error) {
+    console.error('Fehler beim Erstellen des Zip-Archivs:', error);
+    res.status(500).json({ error: 'Fehler beim Herunterladen der Logs' });
+  }
+});
+
+// Endpunkt zum Löschen des Log-Verzeichnisses
+app.delete('/deleteLogs', async (req, res) => {
+  try {
+    // Überprüfen, ob der Log-Ordner existiert
+    const exists = await fsextra.pathExists(logFolder);
+    if (!exists) {
+      console.log('Log-Verzeichnis nicht gefunden:', logFolder);
+      return res.status(404).json({ error: 'Log-Verzeichnis nicht gefunden' });
+    }
+
+    // Löschen des Log-Verzeichnisses
+    await fsextra.remove(logFolder);
+
+    // Bestätigung senden, dass das Verzeichnis gelöscht wurde
+    res.status(200).json({ message: 'Log-Verzeichnis erfolgreich gelöscht.' });
+  } catch (error) {
+    console.error('Fehler beim Löschen des Log-Verzeichnisses:', error);
+    res.status(500).json({ error: 'Fehler beim Löschen der Logs' });
+  }
+});
+
 
 
 

@@ -37,6 +37,7 @@ const SettingsPage = () => {
       speed: parseInt(e.target.value, 10),
     }));
   };
+
   const handleGripper = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -47,6 +48,17 @@ const SettingsPage = () => {
     [settings]
   );
 
+  const handleMotionProfil = useCallback(
+    (e) => {
+      setSettings((prevSettings) => ({
+        ...prevSettings,
+        motionProfil: e.target.value,
+      }));
+    },
+    [settings]
+  );
+
+  
   const handleManualModeChange = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -78,6 +90,7 @@ const SettingsPage = () => {
     const adjustedSettings = {
       gripperMode: settings.gripper,
       motorSpeed: settings.speed,
+      motionProfil : settings.motionProfil,
     };
 
     axios
@@ -107,6 +120,7 @@ const SettingsPage = () => {
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenLog, setIsModalOpenLog] = useState(false);
 
   const calibratehandleOpenModal = () => {
     setIsModalOpen(true);
@@ -120,6 +134,29 @@ const SettingsPage = () => {
     // Bestätigungslogik hier
     postHomingSignal();
     setIsModalOpen(false);
+  };
+
+  const deleteloghandleOpenModal = () => {
+    setIsModalOpenLog(true);
+  };
+
+  const deleteloghandleCloseModal = () => {
+    setIsModalOpenLog(false);
+  };
+
+  const handleDeleteLogs = () => {
+    axios.delete('http://deltarobot:3010/deleteLogs')
+      .then(response => {
+        alert('Erfolg: ' + response.data.message);
+      })
+      .catch(error => {
+        alert('Fehler: ' + (error.response?.data?.error || 'Unbekannter Fehler'));
+      });
+  };
+
+  const deleteloghandleConfirm = () => {
+    handleDeleteLogs();
+    setIsModalOpenLog(false);
   };
 
   //managet darkmode und regenbogen-mode ;)
@@ -146,6 +183,13 @@ const SettingsPage = () => {
           onClose={calibratehandleCloseModal}
           onConfirm={calibratehandleConfirm}
           text={"Calibrate Deltarobot"}
+        />
+        <ConfirmationModal
+          color={settings.color}
+          isOpen={isModalOpenLog}
+          onClose={deleteloghandleCloseModal}
+          onConfirm={deleteloghandleConfirm}
+          text={"Delete Log-Files"}
         />
         <div className="mb-4">
           <label>Speed: {settings.speed}%</label>
@@ -188,9 +232,22 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
+          <label>Motion Profil:</label>
+          <select
+            value={settings.motionProfil}
+            onChange={handleMotionProfil}
+            className="ml-2 p-2 bg-black text-white rounded"
+          >
+            <option value="RectangleProfil">RectangleProfil</option>
+            <option value="TrapezProfil">TrapezProfil</option>
+            <option value="SigmoidProfil">SigmoidProfil</option>
+          </select>
+        </div>
+        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
+        <div className="mb-4">
           <button
             onClick={calibratehandleOpenModal}
-            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+            className="px-4 py-2 bg-green-600 hover:bg-red-700 text-white rounded"
           >
             Calibrate Deltarobot
           </button>
@@ -202,6 +259,25 @@ const SettingsPage = () => {
               Download API Guide
             </button>
           </a>
+        </div>
+        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
+        <div className="flex justify-start space-x-4 ">
+          <div className="mb-2">
+            <a href="http://deltarobot:3010/downloadLogs" target="_blank">
+              <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+                Download Log-Files
+              </button>
+            </a>
+          </div>
+          
+          <div className="mb-2">
+            <button
+              onClick={deleteloghandleOpenModal}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
+            >
+              Delete Log Files
+            </button>
+          </div>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div>
