@@ -102,11 +102,6 @@ app.post('/gcode', (req, res) => {
 });
 // Endpunkt zum übermitteln von den Einstellungen
 app.post('/updateSettings', async (req, res) => {
-  //   // Beispiel für die Verwendung der Funktion
-  // const settings = {
-  //   gripperMode: "parallelGripper",
-  //   motorSpeed: 75
-  // };
 
   const settings = req.body;
   if (!settings) {
@@ -304,6 +299,34 @@ app.delete('/deleteLogs', async (req, res) => {
   } catch (error) {
     console.error('Fehler beim Löschen des Log-Verzeichnisses:', error);
     res.status(500).json({ error: 'Fehler beim Löschen der Logs' });
+  }
+});
+
+// Endpunkt zur Steuerung des Magneten
+app.post('/magnet/control', async (req, res) => {
+  const { action } = req.body;
+
+  // Überprüfen, ob der Aktionsparameter korrekt ist
+  if (!action || (action !== 'enable' && action !== 'disable')) {
+    return res.status(400).json({ error: 'Ungültiger oder fehlender Aktionsparameter. Erwartet "enable" oder "disable".' });
+  }
+
+  try {
+    if (!mqttClient || !mqttClient.connected) {
+      throw new Error("MQTT-Client ist nicht verbunden");
+    }
+
+    // Publizieren des Magnetzustandes auf einem MQTT-Topic
+    const topic = 'magnet/control';
+    // Direktes Senden der Aktion als Boolean erleichtert die Verarbeitung auf der Empfängerseite
+    const message = JSON.stringify({ enable: action === 'enable' });
+
+    await mqttClient.publish(topic, message);
+    
+    res.status(200).json({ message: `Magnet ${action} signalisiert.` });
+  } catch (error) {
+    console.error(`Fehler beim Publizieren des Magnetzustandes:`, error);
+    res.status(500).json({ error: 'Fehler beim Publizieren des Magnetzustandes' });
   }
 });
 

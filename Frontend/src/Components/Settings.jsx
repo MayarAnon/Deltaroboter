@@ -132,7 +132,6 @@ const SettingsPage = () => {
   };
 
   const calibratehandleConfirm = () => {
-    // Bestätigungslogik hier
     postHomingSignal();
     setIsModalOpen(false);
   };
@@ -186,6 +185,47 @@ const SettingsPage = () => {
     }
     setDarkMode(darkMode + 1);
   };
+
+  const handleMouseDown = () => {
+    // Definition des Request-Body
+    const requestBody = {
+      action: "enable",
+    };
+
+    // Senden des POST-Requests an den Server
+    fetch("/magnet/control", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Magnet activated:", data.message);
+      })
+      .catch((error) => {
+        console.error("Error activating magnet:", error);
+      });
+  };
+
+  const handleMouseUp = () => {
+    const requestBody = {
+      action: "disable",
+    };
+
+    fetch("/magnet/control", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestBody),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Magnet deactivated:", data.message);
+      })
+      .catch((error) => {
+        console.error("Error deactivating magnet:", error);
+      });
+  };
+
   return (
     <>
       <div
@@ -232,18 +272,32 @@ const SettingsPage = () => {
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
-        <div className="mb-4">
-          <label>Grippersystem:</label>
-          <select
-            value={settings.gripper}
-            onChange={handleGripper}
-            className="ml-2 p-2 bg-black text-white rounded"
-          >
-            <option value="vacuumGripper">vacuum Gripper</option>
-            <option value="complientGripper">complient Gripper</option>
-            <option value="parallelGripper">parellel Gripper</option>
-            <option value="magnetGripper">Magnet Gripper</option>
-          </select>
+        <div className="flex justify-start space-x-4 ">
+          <label className="hidden lg:block ">Grippersystem:</label>
+          <div className="mb-4">
+            <select
+              value={settings.gripper}
+              onChange={handleGripper}
+              className="ml-2 p-2 bg-black text-white rounded"
+            >
+              <option value="vacuumGripper">vacuum Gripper</option>
+              <option value="complientGripper">complient Gripper</option>
+              <option value="parallelGripper">parellel Gripper</option>
+              <option value="magnetGripper">Magnet Gripper</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <button
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
+              onMouseDown={handleMouseDown}
+              onMouseUp={handleMouseUp}
+              onTouchStart={handleMouseDown}
+              onTouchEnd={handleMouseUp}
+            >
+              Toggle Magnet
+            </button>
+          </div>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
