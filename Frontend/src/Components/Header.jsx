@@ -115,7 +115,7 @@ const Header = () => {
           Deltaroboter
           <button className=" inline-block ml-4 " onClick={toggle}>
             <img
-              src="Delta.png"
+              src="DHBW_Icon.png"
               className="hidden smm:block object-contain object-center w-10 h-10 "
               alt="DeltaPic"
             />

@@ -35,6 +35,22 @@ int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int tota
     }
 }
 
+// Funktion zur Berechnung der Pulsweite für zwei hintereinander folgende Sigmoid-Kurven
+int calculateSigmoidPulsewidth(int maxPulsewidth, int currentStep, int totalSteps) {
+    int startPulsewidth =  530;
+    int midPoint = totalSteps / 2;  // Mittelpunkt, teilt die Schritte in zwei Hälften
+    float k = 10.0 / midPoint;  // Skalierungsfaktor für die Steilheit der S-Kurve
+    float t0 = midPoint / 2.0;  // Mittelpunkt der S-Kurve für jede Phase
+
+    if (currentStep <= midPoint) {
+        // Erste Hälfte: Anstieg von startPulsewidth zu maxPulsewidth
+        return startPulsewidth + (int)((maxPulsewidth - startPulsewidth) / (1.0 + exp(-k * (currentStep - t0))));
+    } else {
+        // Zweite Hälfte: Abfall von maxPulsewidth zu startPulsewidth
+        return maxPulsewidth - (int)((maxPulsewidth - startPulsewidth) / (1.0 + exp(-k * (currentStep - midPoint - t0))));
+    }
+}
+
 // Verarbeitet die Interpolation erzeugt eine entsprechende JSON-Nachricht und publisht diese an MotorControll.
 // Parameter:
 //   - Coordinate* coordinates: Array von Koordinaten für die Interpolation.
@@ -72,7 +88,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         // Anpassung der Pulsbreite für ein Trapezprofil
         if (currentMotionProfil == TrapezProfil && InterpolationSteps > INTERPOLATIONSTEPCUTOF) {
             pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
-        } else {
+        }else if(currentMotionProfil == SigmoidProfil && InterpolationSteps > INTERPOLATIONSTEPCUTOF){
+            pulsewidth = calculateSigmoidPulsewidth(maxSpeed, i, InterpolationSteps);
+        }else {
             pulsewidth = maxSpeed;
         }
         float theta1, theta2, theta3;
@@ -115,7 +133,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             int maxSteps = fmax(fmax(abs(steps[i].Motor1), abs(steps[i].Motor2)), fmax(abs(steps[i].Motor3), abs(steps[i].Motor4)));
 
             // Point to Point Verfahren 2 Nachrichten und maxStep größer 50 und Trapezprofil
-            if (InterpolationSteps == 2 && maxSteps > MINIMUMP2PCUTOF && currentMotionProfil == TrapezProfil) {
+            if (InterpolationSteps == 2 && maxSteps > MINIMUMP2PCUTOF && (currentMotionProfil == TrapezProfil || currentMotionProfil == SigmoidProfil)) {
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
                 int devision = P2PINTERPOLATIONSTEPS;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
@@ -140,8 +158,13 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                         totalSteps[j] += currentPulses[j];
                     }
 
-                    // Berechnen der Pulsweite für diese Nachricht gemäß Trapezprofil
-                    int messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, devision);
+                    // Berechnen der Pulsweite für diese Nachricht gemäß Trapezprofil oder Sigmoid
+                    int messagePulsewidth = 530;
+                    if (currentMotionProfil == TrapezProfil) {
+                        messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, devision);
+                    }else if(currentMotionProfil == SigmoidProfil){
+                        messagePulsewidth = calculateSigmoidPulsewidth(maxSpeed, i, devision);
+                    }
 
                     // Berechnet die maximale Anzahl von Schritten für das Stopen des Programmes für die Ausführungszeit
                     int maxSteps = fmax(fmax(abs(currentPulses[0]), abs(currentPulses[1])), fmax(abs(currentPulses[2]), abs(currentPulses[3])));

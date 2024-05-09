@@ -34,6 +34,7 @@ Gripper parseGripperMode(const char* mode) {
 MotionProfile parseMotionProfile(const char* profile) {
     if (strcmp(profile, "RectangleProfil") == 0) return RectangleProfil;
     else if (strcmp(profile, "TrapezProfil") == 0) return TrapezProfil;
+    else if (strcmp(profile, "SigmoidProfil") == 0) return SigmoidProfil;
     else {
         fprintf(stderr, "Unknown motion profile: %s\n", profile);
         return UnknownProfil; // Verwendung des neuen Enum-Wertes für unbekannte Profile

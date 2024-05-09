@@ -240,6 +240,7 @@ const SettingsPage = () => {
           >
             <option value="RectangleProfil">RectangleProfil</option>
             <option value="TrapezProfil">TrapezProfil</option>
+            <option value="SigmoidProfil">SigmoidProfil</option>
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}

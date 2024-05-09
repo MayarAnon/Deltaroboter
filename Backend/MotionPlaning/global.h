@@ -31,6 +31,7 @@ typedef enum {
 typedef enum {
     RectangleProfil,
     TrapezProfil,
+    SigmoidProfil,
     UnknownProfil = -1  // Hinzugefügter Wert für unbekannte Profile
 } MotionProfile;
 

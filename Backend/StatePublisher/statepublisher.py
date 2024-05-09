@@ -46,7 +46,7 @@ def on_message(client, userdata, msg):
         elif msg.topic == 'gripper/feedback':
             robot_state['gripperFeedback'] = data
         elif msg.topic == 'motors/motionProfil':
-            if data in ["RectangleProfil", "TrapezProfil"]:
+            if data in ["RectangleProfil", "TrapezProfil","SigmoidProfil"]:
                 robot_state['motionProfil'] = data
             else:
                 raise ValueError(f"Received invalid motionProfil: {data}")
