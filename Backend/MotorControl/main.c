@@ -15,18 +15,34 @@
 volatile sig_atomic_t keepRunning = 1;
 pthread_t sequenceThread;
 sem_t queueSemaphore;
-void intHandler(int dummy) {
+void handle_signal(int sig) {
+    printf("MotorControl: Caught signal %d, stopping...\n", sig);
     keepRunning = 0;
 }
+void setup_signal_handling() {
+    struct sigaction sa;
+    sa.sa_handler = handle_signal;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;  // Keine Flags gesetzt
+
+    if (sigaction(SIGINT, &sa, NULL) < 0) {
+    perror("MotorControl: Unable to set SIGINT handler");
+    exit(1);
+    }
+    if (sigaction(SIGTERM, &sa, NULL) < 0) {
+        perror("MotorControl: Unable to set SIGTERM handler");
+        exit(1);
+    }
+}
 void cleanup_resources() {
+    printf("MotorControl: Cleaning up resources...\n");
+    // GPIO Bibliothek beenden
+    gpioTerminate();
+    
     pthread_join(sequenceThread, NULL);
     // MQTT Ressourcen trennen und freigeben
     MQTTAsync_disconnect(client, NULL);
     MQTTAsync_destroy(&client);
-
-    // GPIO Bibliothek beenden
-    gpioTerminate();
-
     // Freigeben der dynamisch zugewiesenen Speicherbereiche
     free(globalConfig.address);
     free(globalConfig.clientId);
@@ -42,8 +58,8 @@ void cleanup_resources() {
 int main() {
     globalConfig = load_config("config.json");
     
-    signal(SIGINT, intHandler);
-   
+    
+    
     initQueue(&messageQueue);
     sem_init(&queueSemaphore, 0, 0);
 
@@ -53,7 +69,7 @@ int main() {
 
     initialize_motors();
     initialize_mqtt();
-    
+    setup_signal_handling();
      while (keepRunning && !emergency_stop_triggered) {
         sleep(1);  // Hauptthread führt minimale Arbeit aus
     }

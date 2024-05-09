@@ -4,7 +4,7 @@ import time
 import json
 import logging
 import threading
-
+import signal
 import logging
 from datetime import datetime
 
@@ -120,7 +120,21 @@ def stop_homing_process():
     global is_homing_active
     is_homing_active = False
     client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process stopped by user.')
+def signal_handler(signum, frame):
+    """
+    Diese Funktion wird aufgerufen, wenn das Programm ein SIGINT oder SIGTERM Signal erhält.
+    Es sorgt für die saubere Beendigung des Programms.
+    """
+    logging.info(f"{current_time} Cleaning up resources...")
+    stop_homing_process()
+    client.loop_stop()
+    GPIO.cleanup()
+    logging.info(f"{current_time} Shutdown complete.")
+    exit(0)
 
+# Registriere den Signalhandler für SIGINT und SIGTERM
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 # MQTT-Client-Setup
 client = mqtt.Client()
@@ -133,7 +147,8 @@ setup_end_switch_monitoring()
 
 try:
     client.loop_forever()  # Dieser Aufruf blockiert, bis eine Ausnahme auftritt oder der Client manuell gestoppt wird.
+except Exception as e:
+    logging.error(f"{current_time} Exception occurred: {str(e)}")
 finally:
-    logging.info(f"{current_time} Cleaning up resources...")
-    client.loop_stop()  # Stoppt den Loop, wenn der Prozess beendet oder unterbrochen wird
-    GPIO.cleanup()      # Räumt die GPIO-Einstellungen auf
+    client.loop_stop()
+    GPIO.cleanup()

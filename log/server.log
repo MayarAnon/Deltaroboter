@@ -1,184 +1,133 @@
-2024-05-09 01:32:53 nohup: ignoring input
-2024-05-09 01:32:56 Server und WebSocket laufen auf Port 3010
-2024-05-09 01:32:56 MQTT-Client verbunden und bereit.
-2024-05-09 01:32:58 WebSocket client verbunden.
-2024-05-09 01:32:58 WebSocket client verbunden.
-2024-05-09 01:33:05 WebSocket client verbunden.
-2024-05-09 01:33:30 WebSocket client verbunden.
-2024-05-09 01:37:22 WebSocket client getrennt.
-2024-05-09 01:38:50 nohup: ignoring input
-2024-05-09 01:38:52 Server und WebSocket laufen auf Port 3010
-2024-05-09 01:38:52 MQTT-Client verbunden und bereit.
-2024-05-09 01:38:52 WebSocket client verbunden.
-2024-05-09 01:38:55 WebSocket client verbunden.
-2024-05-09 01:38:55 WebSocket client verbunden.
-2024-05-09 01:38:55 WebSocket client verbunden.
-2024-05-09 01:38:56 WebSocket client verbunden.
-2024-05-09 01:39:00 WebSocket client getrennt.
-2024-05-09 01:39:00 WebSocket client getrennt.
-2024-05-09 01:39:00 WebSocket client getrennt.
-2024-05-09 01:39:00 WebSocket client getrennt.
-2024-05-09 01:39:22 WebSocket client verbunden.
-2024-05-09 01:39:24 WebSocket client getrennt.
-2024-05-09 01:39:24 WebSocket client getrennt.
-2024-05-09 01:39:25 WebSocket client verbunden.
-2024-05-09 01:40:10 WebSocket client getrennt.
-2024-05-09 01:40:27 WebSocket client verbunden.
-2024-05-09 01:40:40 WebSocket client verbunden.
-2024-05-09 01:40:40 WebSocket client verbunden.
-2024-05-09 01:40:42 WebSocket client getrennt.
-2024-05-09 01:40:42 WebSocket client getrennt.
-2024-05-09 01:40:43 WebSocket client verbunden.
-2024-05-09 01:40:43 (node:75421) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
-2024-05-09 01:40:43 (Use `node --trace-warnings ...` to show where the warning was created)
-2024-05-09 01:41:53 WebSocket client verbunden.
-2024-05-09 01:42:29 WebSocket client getrennt.
-2024-05-09 01:42:31 WebSocket client verbunden.
-2024-05-09 01:43:07 WebSocket client verbunden.
-2024-05-09 01:43:07 WebSocket client getrennt.
-2024-05-09 01:43:07 WebSocket client getrennt.
-2024-05-09 01:43:10 WebSocket client verbunden.
-2024-05-09 01:43:20 WebSocket client verbunden.
-2024-05-09 01:43:21 WebSocket client getrennt.
-2024-05-09 01:43:21 WebSocket client getrennt.
-2024-05-09 01:43:23 WebSocket client verbunden.
-2024-05-09 01:43:35 WebSocket client verbunden.
-2024-05-09 01:43:35 WebSocket client getrennt.
-2024-05-09 01:43:35 WebSocket client getrennt.
-2024-05-09 01:43:37 WebSocket client verbunden.
-2024-05-09 01:44:40 WebSocket client getrennt.
-2024-05-09 01:44:42 WebSocket client verbunden.
-2024-05-09 01:45:56 WebSocket client verbunden.
-2024-05-09 01:46:24 WebSocket client getrennt.
-2024-05-09 01:46:26 WebSocket client verbunden.
-2024-05-09 01:46:27 WebSocket client getrennt.
-2024-05-09 01:46:28 WebSocket client verbunden.
-2024-05-09 01:46:36 WebSocket client getrennt.
-2024-05-09 01:46:38 WebSocket client verbunden.
-2024-05-09 01:48:31 WebSocket client getrennt.
-2024-05-09 01:48:31 WebSocket client getrennt.
-2024-05-09 01:48:31 WebSocket client getrennt.
-2024-05-09 01:48:32 WebSocket client verbunden.
-2024-05-09 01:51:25 WebSocket client verbunden.
-2024-05-09 01:51:28 WebSocket client verbunden.
-2024-05-09 01:51:29 WebSocket client getrennt.
-2024-05-09 01:51:29 WebSocket client getrennt.
-2024-05-09 01:51:29 WebSocket client getrennt.
-2024-05-09 01:51:32 WebSocket client verbunden.
-2024-05-09 01:52:55 WebSocket client getrennt.
-2024-05-09 01:52:56 WebSocket client verbunden.
-2024-05-09 01:53:06 WebSocket client getrennt.
-2024-05-09 01:53:06 WebSocket client verbunden.
-2024-05-09 01:53:37 WebSocket client getrennt.
-2024-05-09 01:53:37 WebSocket client verbunden.
-2024-05-09 01:53:40 WebSocket client getrennt.
-2024-05-09 01:53:41 WebSocket client verbunden.
-2024-05-09 01:53:58 WebSocket client getrennt.
-2024-05-09 01:53:58 WebSocket client verbunden.
-2024-05-09 01:54:15 WebSocket client getrennt.
-2024-05-09 01:54:16 WebSocket client verbunden.
-2024-05-09 01:54:45 WebSocket client getrennt.
-2024-05-09 01:54:46 WebSocket client verbunden.
-2024-05-09 01:55:28 WebSocket client verbunden.
-2024-05-09 01:55:28 WebSocket client getrennt.
-2024-05-09 01:55:28 WebSocket client getrennt.
-2024-05-09 01:55:30 WebSocket client verbunden.
-2024-05-09 01:55:58 WebSocket client verbunden.
-2024-05-09 01:56:00 WebSocket client getrennt.
-2024-05-09 01:56:00 WebSocket client getrennt.
-2024-05-09 01:56:02 WebSocket client verbunden.
-2024-05-09 01:58:11 WebSocket client verbunden.
-2024-05-09 01:58:11 WebSocket client getrennt.
-2024-05-09 01:58:11 WebSocket client getrennt.
-2024-05-09 01:58:13 WebSocket client verbunden.
-2024-05-09 01:59:18 WebSocket client verbunden.
-2024-05-09 01:59:23 WebSocket client verbunden.
-2024-05-09 02:05:56 WebSocket client verbunden.
-2024-05-09 02:06:15 WebSocket client verbunden.
-2024-05-09 02:06:31 WebSocket client verbunden.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:32 WebSocket client getrennt.
-2024-05-09 02:06:35 WebSocket client verbunden.
-2024-05-09 02:06:39 WebSocket client verbunden.
-2024-05-09 02:06:42 WebSocket client verbunden.
-2024-05-09 02:07:02 WebSocket client verbunden.
-2024-05-09 02:07:06 WebSocket client verbunden.
-2024-05-09 02:07:15 WebSocket client getrennt.
-2024-05-09 02:07:15 WebSocket client getrennt.
-2024-05-09 02:07:15 WebSocket client getrennt.
-2024-05-09 02:07:15 WebSocket client getrennt.
-2024-05-09 02:07:15 WebSocket client getrennt.
-2024-05-09 02:07:16 WebSocket client verbunden.
-2024-05-09 02:08:20 WebSocket client verbunden.
-2024-05-09 02:08:57 WebSocket client verbunden.
-2024-05-09 02:08:59 WebSocket client getrennt.
-2024-05-09 02:08:59 WebSocket client getrennt.
-2024-05-09 02:08:59 WebSocket client getrennt.
-2024-05-09 02:09:01 WebSocket client verbunden.
-2024-05-09 02:14:53 WebSocket client verbunden.
-2024-05-09 02:14:54 WebSocket client verbunden.
-2024-05-09 02:14:57 WebSocket client getrennt.
-2024-05-09 02:14:57 WebSocket client getrennt.
-2024-05-09 02:14:57 WebSocket client getrennt.
-2024-05-09 02:14:59 WebSocket client verbunden.
-2024-05-09 02:15:44 WebSocket client verbunden.
-2024-05-09 02:15:51 WebSocket client getrennt.
-2024-05-09 02:15:51 WebSocket client getrennt.
-2024-05-09 02:15:53 WebSocket client verbunden.
-2024-05-09 02:16:50 nohup: ignoring input
-2024-05-09 02:16:53 Server und WebSocket laufen auf Port 3010
-2024-05-09 02:16:53 MQTT-Client verbunden und bereit.
-2024-05-09 02:16:57 WebSocket client verbunden.
-2024-05-09 02:16:58 WebSocket client verbunden.
-2024-05-09 02:17:02 WebSocket client verbunden.
-2024-05-09 02:18:27 nohup: ignoring input
-2024-05-09 02:18:29 Server und WebSocket laufen auf Port 3010
-2024-05-09 02:18:29 MQTT-Client verbunden und bereit.
-2024-05-09 02:18:31 WebSocket client verbunden.
-2024-05-09 02:18:34 WebSocket client verbunden.
-2024-05-09 02:18:34 WebSocket client verbunden.
-2024-05-09 02:18:52 WebSocket client verbunden.
-2024-05-09 02:18:53 WebSocket client getrennt.
-2024-05-09 02:18:53 WebSocket client getrennt.
-2024-05-09 02:18:53 WebSocket client getrennt.
-2024-05-09 02:18:55 WebSocket client verbunden.
-2024-05-09 02:20:08 WebSocket client verbunden.
-2024-05-09 02:20:39 WebSocket client verbunden.
-2024-05-09 02:20:44 WebSocket client getrennt.
-2024-05-09 02:20:47 WebSocket client verbunden.
-2024-05-09 02:21:05 nohup: ignoring input
-2024-05-09 02:21:07 Server und WebSocket laufen auf Port 3010
-2024-05-09 02:21:07 WebSocket client verbunden.
-2024-05-09 02:21:07 MQTT-Client verbunden und bereit.
-2024-05-09 02:21:07 WebSocket client verbunden.
-2024-05-09 02:21:07 WebSocket client verbunden.
-2024-05-09 02:21:07 WebSocket client verbunden.
-2024-05-09 02:22:05 WebSocket client verbunden.
-2024-05-09 02:24:44 nohup: ignoring input
-2024-05-09 02:24:48 Server und WebSocket laufen auf Port 3010
-2024-05-09 02:24:48 MQTT-Client verbunden und bereit.
-2024-05-09 02:24:50 WebSocket client verbunden.
-2024-05-09 02:25:23 WebSocket client verbunden.
-2024-05-09 02:25:51 WebSocket client getrennt.
-2024-05-09 02:25:54 WebSocket client verbunden.
-2024-05-09 02:26:19 WebSocket client verbunden.
-2024-05-09 02:27:00 nohup: ignoring input
-2024-05-09 02:27:02 Server und WebSocket laufen auf Port 3010
-2024-05-09 02:27:03 MQTT-Client verbunden und bereit.
-2024-05-09 02:27:03 WebSocket client verbunden.
-2024-05-09 02:27:05 WebSocket client verbunden.
-2024-05-09 02:27:05 WebSocket client verbunden.
-2024-05-09 02:27:25 WebSocket client verbunden.
-2024-05-09 02:27:44 WebSocket client verbunden.
-2024-05-09 02:28:23 WebSocket client verbunden.
-2024-05-09 02:28:25 WebSocket client getrennt.
-2024-05-09 02:28:25 WebSocket client getrennt.
-2024-05-09 02:28:25 WebSocket client getrennt.
-2024-05-09 02:28:25 WebSocket client verbunden.
-2024-05-09 02:28:27 WebSocket client verbunden.
-2024-05-09 02:28:29 WebSocket client verbunden.
-2024-05-09 02:29:15 WebSocket client getrennt.
+2024-05-09 17:27:48 WebSocket client verbunden.
+2024-05-09 17:28:07 WebSocket client getrennt.
+2024-05-09 17:28:08 WebSocket client verbunden.
+2024-05-09 17:28:12 WebSocket client verbunden.
+2024-05-09 17:30:20 nohup: ignoring input
+2024-05-09 17:30:23 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:30:23 MQTT-Client verbunden und bereit.
+2024-05-09 17:30:23 WebSocket client verbunden.
+2024-05-09 17:30:23 WebSocket client verbunden.
+2024-05-09 17:30:23 WebSocket client verbunden.
+2024-05-09 17:30:24 WebSocket client verbunden.
+2024-05-09 17:30:37 WebSocket client getrennt.
+2024-05-09 17:30:37 WebSocket client verbunden.
+2024-05-09 17:35:13 nohup: ignoring input
+2024-05-09 17:35:15 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:35:15 WebSocket client verbunden.
+2024-05-09 17:35:15 TypeError: Cannot read properties of undefined (reading 'on')
+2024-05-09 17:35:15     at WebSocketServer.connection (/home/pi/Deltaroboter/Backend/WebServer/server.js:318:14)
+2024-05-09 17:35:15     at WebSocketServer.emit (node:events:517:28)
+2024-05-09 17:35:15     at WebSocketServer.completeUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:435:5)
+2024-05-09 17:35:15     at WebSocketServer.handleUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:343:10)
+2024-05-09 17:35:15     at Server.upgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:119:16)
+2024-05-09 17:35:15     at Server.emit (node:events:517:28)
+2024-05-09 17:35:15     at onParserExecuteCommon (node:_http_server:931:14)
+2024-05-09 17:35:15     at onParserExecute (node:_http_server:825:3)
+2024-05-09 17:36:18 nohup: ignoring input
+2024-05-09 17:36:20 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:36:20 WebSocket client verbunden.
+2024-05-09 17:36:20 TypeError: Cannot read properties of undefined (reading 'on')
+2024-05-09 17:36:20     at WebSocketServer.connection (/home/pi/Deltaroboter/Backend/WebServer/server.js:318:14)
+2024-05-09 17:36:20     at WebSocketServer.emit (node:events:517:28)
+2024-05-09 17:36:20     at WebSocketServer.completeUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:435:5)
+2024-05-09 17:36:20     at WebSocketServer.handleUpgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:343:10)
+2024-05-09 17:36:20     at Server.upgrade (/home/pi/Deltaroboter/Backend/WebServer/node_modules/ws/lib/websocket-server.js:119:16)
+2024-05-09 17:36:20     at Server.emit (node:events:517:28)
+2024-05-09 17:36:20     at onParserExecuteCommon (node:_http_server:931:14)
+2024-05-09 17:36:20     at onParserExecute (node:_http_server:825:3)
+2024-05-09 17:36:44 nohup: ignoring input
+2024-05-09 17:36:46 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:36:47 MQTT-Client verbunden und bereit.
+2024-05-09 17:36:47 WebSocket client verbunden.
+2024-05-09 17:36:47 WebSocket client verbunden.
+2024-05-09 17:36:48 WebSocket client verbunden.
+2024-05-09 17:37:07 nohup: ignoring input
+2024-05-09 17:37:10 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:37:10 MQTT-Client verbunden und bereit.
+2024-05-09 17:37:10 WebSocket client verbunden.
+2024-05-09 17:37:10 WebSocket client verbunden.
+2024-05-09 17:37:10 WebSocket client verbunden.
+2024-05-09 17:37:14 WebSocket client verbunden.
+2024-05-09 17:37:21 nohup: ignoring input
+2024-05-09 17:37:24 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:37:24 MQTT-Client verbunden und bereit.
+2024-05-09 17:37:24 WebSocket client verbunden.
+2024-05-09 17:37:24 WebSocket client verbunden.
+2024-05-09 17:37:24 WebSocket client verbunden.
+2024-05-09 17:37:24 WebSocket client verbunden.
+2024-05-09 17:37:34 nohup: ignoring input
+2024-05-09 17:39:21 nohup: ignoring input
+2024-05-09 17:39:25 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:39:25 MQTT-Client verbunden und bereit.
+2024-05-09 17:39:26 WebSocket client verbunden.
+2024-05-09 17:39:27 WebSocket client verbunden.
+2024-05-09 17:39:28 WebSocket client verbunden.
+2024-05-09 17:39:34 nohup: ignoring input
+2024-05-09 17:39:36 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:39:36 WebSocket client verbunden.
+2024-05-09 17:39:36 MQTT-Client verbunden und bereit.
+2024-05-09 17:39:36 WebSocket client verbunden.
+2024-05-09 17:39:36 WebSocket client verbunden.
+2024-05-09 17:39:39 WebSocket client verbunden.
+2024-05-09 17:40:11 nohup: ignoring input
+2024-05-09 17:40:14 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:40:14 MQTT-Client verbunden und bereit.
+2024-05-09 17:40:14 WebSocket client verbunden.
+2024-05-09 17:40:15 WebSocket client verbunden.
+2024-05-09 17:46:07 nohup: ignoring input
+2024-05-09 17:46:09 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:46:09 MQTT-Client verbunden und bereit.
+2024-05-09 17:46:09 WebSocket client verbunden.
+2024-05-09 17:46:11 WebSocket client verbunden.
+2024-05-09 17:46:13 WebSocket client verbunden.
+2024-05-09 17:49:49 nohup: ignoring input
+2024-05-09 17:49:51 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:49:51 WebSocket client verbunden.
+2024-05-09 17:49:51 MQTT-Client verbunden und bereit.
+2024-05-09 17:49:52 WebSocket client verbunden.
+2024-05-09 17:49:52 WebSocket client verbunden.
+2024-05-09 17:49:52 WebSocket client verbunden.
+2024-05-09 17:50:11 nohup: ignoring input
+2024-05-09 17:50:13 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:50:13 MQTT-Client verbunden und bereit.
+2024-05-09 17:50:13 WebSocket client verbunden.
+2024-05-09 17:50:13 WebSocket client verbunden.
+2024-05-09 17:50:13 WebSocket client verbunden.
+2024-05-09 17:50:13 WebSocket client verbunden.
+2024-05-09 17:58:29 nohup: ignoring input
+2024-05-09 17:58:31 Server und WebSocket laufen auf Port 3010
+2024-05-09 17:58:31 MQTT-Client verbunden und bereit.
+2024-05-09 17:58:32 WebSocket client verbunden.
+2024-05-09 17:58:32 WebSocket client verbunden.
+2024-05-09 17:58:32 WebSocket client verbunden.
+2024-05-09 17:58:32 WebSocket client verbunden.
+2024-05-09 18:00:13 nohup: ignoring input
+2024-05-09 18:00:15 Server und WebSocket laufen auf Port 3010
+2024-05-09 18:00:15 WebSocket client verbunden.
+2024-05-09 18:00:15 WebSocket client verbunden.
+2024-05-09 18:00:15 WebSocket client verbunden.
+2024-05-09 18:00:15 MQTT-Client verbunden und bereit.
+2024-05-09 18:00:16 WebSocket client verbunden.
+2024-05-09 18:01:13 nohup: ignoring input
+2024-05-09 18:01:15 Server und WebSocket laufen auf Port 3010
+2024-05-09 18:01:15 MQTT-Client verbunden und bereit.
+2024-05-09 18:01:15 WebSocket client verbunden.
+2024-05-09 18:01:15 WebSocket client verbunden.
+2024-05-09 18:01:15 WebSocket client verbunden.
+2024-05-09 18:01:15 WebSocket client verbunden.
+2024-05-09 18:01:15 WebSocket client verbunden.
+2024-05-09 18:01:20 nohup: ignoring input
+2024-05-09 18:01:27 nohup: ignoring input
+2024-05-09 18:01:29 Server und WebSocket laufen auf Port 3010
+2024-05-09 18:01:29 WebSocket client verbunden.
+2024-05-09 18:01:29 MQTT-Client verbunden und bereit.
+2024-05-09 18:01:29 WebSocket client verbunden.
+2024-05-09 18:01:31 WebSocket client verbunden.
+2024-05-09 18:01:31 WebSocket client verbunden.
+2024-05-09 18:01:33 WebSocket client verbunden.
+2024-05-09 18:01:33 WebSocket client verbunden.
+2024-05-09 18:01:46 WebSocket client getrennt.
+2024-05-09 18:01:53 WebSocket client getrennt.
+2024-05-09 18:01:53 WebSocket client getrennt.
+2024-05-09 18:01:53 WebSocket client getrennt.
+2024-05-09 18:02:27 WebSocket client verbunden.
