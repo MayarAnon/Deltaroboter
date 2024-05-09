@@ -56,17 +56,22 @@ start_services
 
 # Trap zum Stoppen der Dienste
 cleanup() {
-    echo "Beende alle Dienste..."
+    echo "Beende alle Dienste mit SIGTERM..."
     for pid in "${pids[@]}"; do
-        kill -9 "$pid" >/dev/null 2>&1
+        kill -TERM "$pid" >/dev/null 2>&1
+    done
+    sleep 2  # Gib etwas Zeit, um die Prozesse sauber zu beenden
+    echo "Überprüfe, ob Prozesse noch laufen, und sende SIGKILL..."
+    for pid in "${pids[@]}"; do
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -KILL "$pid"
+        fi
     done
     echo "Alle Dienste wurden gestoppt."
     exit 0
 }
 
 trap 'cleanup' SIGINT SIGTERM EXIT
-
-
 
 # Starte die Dienste in einer Endlosschleife
 while true; do

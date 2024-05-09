@@ -5,6 +5,13 @@ import paho.mqtt.client as mqtt
 import json
 import time
 import threading
+import signal
+import logging
+from datetime import datetime
+
+# Aktuelle Zeit in gewünschtem Format erhalten
+current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename='../../log/gripperControl.log', level=logging.INFO)
 
 # Definiere GPIO-Pins
 ParallelGripper = 12  # PWM Output
@@ -38,7 +45,7 @@ class GripperControl:
         if rc == 0:
             self.client.subscribe("gripper/control")
         else:
-            print("Connection failed.")
+            logging.info(f"{current_time} Connection failed.")
 
     def on_message(self, client, userdata, message):
         if message.topic == "gripper/control":
@@ -82,16 +89,27 @@ class GripperControl:
             time.sleep(delay)
             self.client.publish("gripper/feedback", "true")
         threading.Thread(target=feedback_thread).start()
+    # Cleanup-Funktion definieren
+    def cleanup(self):
+        logging.info(f"{current_time} Cleaning up resources...")
+        self.client.loop_stop()
+        self.pwm.stop()
+        GPIO.cleanup()
+
+    def signal_handler(self, signum, frame):
+        self.cleanup()
+        logging.info(f"{current_time} Signal {signum} received, exiting.")
+        exit(0)
 
     def run(self):
-        self.client.loop_start()  # Startet den Client in einem eigenen Thread
+        self.client.loop_start()
+        signal.signal(signal.SIGTERM, self.signal_handler)
+        signal.signal(signal.SIGINT, self.signal_handler)
         try:
             while True:
-                time.sleep(1)  # Reduziere CPU-Last im Hauptthread
-        except KeyboardInterrupt:
-            self.client.loop_stop()  # Stoppt den MQTT Client sauber
-            self.pwm.stop()
-            GPIO.cleanup()
+                time.sleep(1)
+        finally:
+            self.cleanup()
 
 if __name__ == '__main__':
     setup_gpio()

@@ -5,7 +5,13 @@ import json
 import logging
 import threading
 
-logging.basicConfig(level=logging.DEBUG)
+import logging
+from datetime import datetime
+
+# Aktuelle Zeit in gewünschtem Format erhalten
+current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename='../../log/homing.log', level=logging.INFO)
+
 
 # Konstanten für die GPIO-Pins der Endschalter
 ENDSCHALTER_PINS = [0, 5, 6, 13]
@@ -27,7 +33,7 @@ for pin in ENDSCHALTER_PINS:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    logging.info(f"{current_time} Connected with result code " + str(rc))
     client.subscribe(MQTT_TOPIC_CONTROL)
 
 def send_motor_commands(pulses, timing):
@@ -98,12 +104,12 @@ def on_message(client, userdata, msg):
     if msg.topic == MQTT_TOPIC_CONTROL:
         command = msg.payload.decode()
         if command == 'true':
-            print("Start homing")
+            logging.info(f"{current_time} Start homing")
             global is_homing_active
             if not is_homing_active:
                 threading.Thread(target=start_homing_process).start()
         elif command == 'false':
-            print("Stop homing")
+            logging.info(f"{current_time} Stop homing")
             stop_homing_process()
 
 def stop_homing_process():
@@ -128,5 +134,6 @@ setup_end_switch_monitoring()
 try:
     client.loop_forever()  # Dieser Aufruf blockiert, bis eine Ausnahme auftritt oder der Client manuell gestoppt wird.
 finally:
+    logging.info(f"{current_time} Cleaning up resources...")
     client.loop_stop()  # Stoppt den Loop, wenn der Prozess beendet oder unterbrochen wird
     GPIO.cleanup()      # Räumt die GPIO-Einstellungen auf
