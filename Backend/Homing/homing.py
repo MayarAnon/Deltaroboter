@@ -119,7 +119,6 @@ def stop_homing_process():
     """
     global is_homing_active
     is_homing_active = False
-    client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process stopped by user.')
 def signal_handler(signum, frame):
     """
     Diese Funktion wird aufgerufen, wenn das Programm ein SIGINT oder SIGTERM Signal erhält.

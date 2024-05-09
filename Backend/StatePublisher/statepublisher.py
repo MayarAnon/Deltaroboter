@@ -2,6 +2,11 @@ import logging
 import json
 import paho.mqtt.client as mqtt
 from datetime import datetime
+import signal
+import sys
+
+
+
 # Konfiguration des Loggings
 logging.basicConfig(
     filename='../../log/statepublisher.log',
@@ -68,23 +73,35 @@ def on_message(client, userdata, msg):
         
         # Veröffentliche den aktuellen Robotstate
         client.publish("robot/state", json.dumps(robot_state))
+    
     except json.JSONDecodeError:
-        logging.error("Error decoding JSON")
+        # Logge den fehlerhaften JSON-String zusammen mit dem Topic
+        logging.error(f"Error decoding JSON from topic '{msg.topic}': {msg.payload.decode('utf-8')}")
     except ValueError as e:
-        logging.error(e)
+        logging.error(f"Value error: {e} - Topic: '{msg.topic}'")
     except Exception as e:
-        logging.error(f"Unexpected error: {str(e)}")
+        logging.error(f"Unexpected error: {str(e)} - Topic: '{msg.topic}'")
 # Initialisiere und starte den MQTT-Client
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 
 client.connect(MQTT_BROKER, MQTT_PORT, 60)
+
+def handle_signals(signum, frame):
+    logging.info(f"Program interrupted by signal {signum}")
+    sys.exit(0)  # Trigger the finally block
+
+def setup_signal_handlers():
+    signal.signal(signal.SIGINT, handle_signals)  # Handle Ctrl+C
+    signal.signal(signal.SIGTERM, handle_signals) # Handle kill or system shutdown
+setup_signal_handlers()
 try:
     client.loop_forever()
 except KeyboardInterrupt:
-    logging.info("Program interrupted by user")
+    logging.info("Program manually interrupted by user")
 finally:
+    logging.info("MQTT client disconnected and loop stopped.")
     client.disconnect()
     client.loop_stop()
-    logging.info("MQTT client disconnected and loop stopped.")
+    
