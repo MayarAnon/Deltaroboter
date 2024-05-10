@@ -168,138 +168,30 @@ void processLine(const char* line) {
     }
     else if (strcmp(command, "M100") == 0) {
         if(currentGripper == parallel){
-            int sValue = 0;
-            int numParams = sscanf(line, "%*s S%d", &sValue);
-
-            if (numParams < 1) {
-                fprintf(stderr, "Failed to read sleep time for M100 command\n");
-                return;
-            } else {
-                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
-                // JSON-String vorbereiten 
-                char jsonString[100];  // Buffer für String
-                snprintf(jsonString, sizeof(jsonString),
-                        "{\n"
-                        "\"parallelGripper\": %d,\n"
-                        "\"compliantGripper\": 0,\n"
-                        "\"magnetGripper\": 0,\n"
-                        "\"vacuumGripper\": 0\n"
-                        "}", sValue);
-
-                // Print den JSON string
-                //printf("%s\n", jsonString);
-                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
-                
-                int releseTimer = 0;
-                while(!timeFlagGripper && releseTimer<10){
-                    usleep(1000000);
-                    releseTimer = releseTimer + 1;
-                }
-                
-                //currentGripperValue updaten
-                currentGripperValue = sValue;
-            }   
+                processGripperCommand("M100", line); // Befehl und Parameter
+        }else{
+            printf("wrong Gripper Typ \n");
         }
     }
     else if (strcmp(command, "M200") == 0) {
-        //Prüfen ob der Aktuelle Gripper der compliantGripper ist 
         if(currentGripper == complient){
-            int sValue = 0;
-            int numParams = sscanf(line, "%*s S%d", &sValue);
-
-            if (numParams < 1) {
-                fprintf(stderr, "Failed to read sleep time for M100 command\n");
-                return;
-            } else {
-                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
-                // JSON-String vorbereiten
-                char jsonString[100];  // Buffer für String
-                snprintf(jsonString, sizeof(jsonString),
-                        "{\n"
-                        "\"parallelGripper\": 0,\n"
-                        "\"compliantGripper\": %d,\n"
-                        "\"magnetGripper\": 0,\n"
-                        "\"vacuumGripper\": 0\n"
-                        "}", sValue);
-
-                // Print den JSON string
-                printf("%s\n", jsonString);
-                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
-                int releseTimer = 0;
-                while(!timeFlagGripper && releseTimer<10){
-                    usleep(1000000);
-                    releseTimer = releseTimer + 1;
-                }
-                
-                //currentGripperValue updaten
-                currentGripperValue = sValue;
-            }
+                processGripperCommand("M200", line); // Befehl und Parameter
+        }else{
+            printf("wrong Gripper Typ \n");
         }
     }
     else if (strcmp(command, "M300") == 0) {
         if(currentGripper == magnet){
-            int sValue = 0;
-            int numParams = sscanf(line, "%*s S%d", &sValue);
-
-            if (numParams < 1) {
-                fprintf(stderr, "Failed to read sleep time for M100 command\n");
-                return;
-            } else {
-                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
-                // JSON-String vorbereiten
-                char jsonString[100];   // Buffer für String
-                snprintf(jsonString, sizeof(jsonString),
-                        "{\n"
-                        "\"parallelGripper\": 0,\n"
-                        "\"compliantGripper\": 0,\n"
-                        "\"magnetGripper\": %d,\n"
-                        "\"vacuumGripper\": 0\n"
-                        "}", sValue);
-
-                // Print den JSON string
-                printf("%s\n", jsonString);
-                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
-                int releseTimer = 0;
-                while(!timeFlagGripper && releseTimer<10){
-                    usleep(1000000);
-                    releseTimer = releseTimer + 1;
-                }
-                //currentGripperValue updaten
-                currentGripperValue = sValue;
-            }
+                processGripperCommand("M300", line); // Befehl und Parameter
+        }else{
+            printf("wrong Gripper Typ \n");
         }
     }
     else if (strcmp(command, "M400") == 0) {
         if(currentGripper == vaccum){
-            int sValue = 0;
-            int numParams = sscanf(line, "%*s S%d", &sValue);
-
-            if (numParams < 1) {
-                fprintf(stderr, "Failed to read sleep time for M100 command\n");
-                return;
-            } else {
-                // JSON-String vorbereiten
-                timeFlagGripper = false; //wird von GripperControl per MQTT auf True gesetzt
-                char jsonString[100];  // Buffer für String
-                snprintf(jsonString, sizeof(jsonString),
-                        "{\n"
-                        "\"parallelGripper\": 0,\n"
-                        "\"compliantGripper\": 0,\n"
-                        "\"magnetGripper\": 0,\n"
-                        "\"vacuumGripper\": %d\n"
-                        "}", sValue);
-
-                // Print den JSON string
-                printf("%s\n", jsonString);
-                publishMessage(GRIPPERCONTROLLTOPIC,jsonString);
-                int releseTimer = 0;
-                while(!timeFlagGripper && releseTimer<10){
-                    usleep(1000000);
-                    releseTimer = releseTimer + 1;
-                }
-                //currentGripperValue updaten
-                currentGripperValue = sValue;
-            }
+                processGripperCommand("M400", line); // Befehl und Parameter
+        }else{
+            printf("wrong Gripper Typ \n");
         }
     }
     else if (strcmp(command, ";") == 0) {

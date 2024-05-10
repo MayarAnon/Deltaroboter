@@ -257,3 +257,61 @@ void publishCurrentState(Coordinate pos, Angles ang) {
     publishMessage("current/coordinates", coordString);
     publishMessage("current/angles", anglesString);
 }
+
+void processGripperCommand(char* command, const char* line) {
+    int sValue = 0;
+    int numParams = sscanf(line, "%*s S%d", &sValue);
+    bool validValue = false;
+
+    // Integrierte Validierung basierend auf dem aktuellen Greifertyp
+    switch (currentGripper) {
+        case parallel:
+            validValue = (sValue >= 0 && sValue <= 100);
+            break;
+        case complient:
+            validValue = (sValue == 1 || sValue == 0 || sValue == -1);
+            break;
+        case magnet:
+            validValue = (sValue == 1 || sValue == 0);
+            break;
+        case vaccum:
+            validValue = (sValue == 1 || sValue == 0 || sValue == -1);
+            break;
+        default:
+            validValue = false;  // Sicherstellen, dass kein ungültiger Greifertyp verwendet wird
+            break;
+    }
+
+    if (numParams < 1 || !validValue) {
+        fprintf(stderr, "Invalid parameter for command %s\n", command);
+        return;
+    }
+
+    // Erstellen des JSON-Strings basierend auf dem aktuellen Greifer
+    char jsonString[100];
+    snprintf(jsonString, sizeof(jsonString),
+             "{\n"
+             "\"parallelGripper\": %d,\n"
+             "\"complientGripper\": %d,\n"
+             "\"magnetGripper\": %d,\n"
+             "\"vacuumGripper\": %d\n"
+             "}",
+             (currentGripper == parallel) * sValue,
+             (currentGripper == complient) * sValue,
+             (currentGripper == magnet) * sValue,
+             (currentGripper == vaccum) * sValue);
+
+
+    timeFlagGripper = false;
+    publishMessage(GRIPPERCONTROLLTOPIC, jsonString); // Nachricht senden
+
+    // Warten auf eine Zustandsaktualisierung oder Timeout
+    int releaseTimer = 0;
+    while (!timeFlagGripper && releaseTimer < 10) {
+        printf("Timerflag %d releaseTimer %d", timeFlagGripper,releaseTimer);
+        fflush(stdout);
+        usleep(1000000); // 1 Sekunde warten
+        releaseTimer++;
+    }
+    currentGripperValue = sValue; // Aktualisieren des aktuellen Greiferwertes
+}
