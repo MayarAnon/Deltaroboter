@@ -83,8 +83,10 @@ class GripperControl:
         elif "magneticGripperAttachment" in data:
             if data["magneticGripperAttachment"] == "enable":
                 GPIO.output(GripperMagnetRelais, GPIO.HIGH)
+                logging.info(f"{current_time} magneticGripperAttachment enabled")
             elif data["magneticGripperAttachment"] == "disable":
                 GPIO.output(GripperMagnetRelais, GPIO.LOW)
+                logging.info(f"{current_time} magneticGripperAttachment disabled")
     
     def send_feedback(self, delay):
         def feedback_thread():
