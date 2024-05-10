@@ -40,26 +40,26 @@ void processLine(const char* line) {
         //Parameter aus string lesen 
         Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
         for(const char *p = line; *p; ++p) {
-        sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+        sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
         }
         
         coordinates[0] = currentPosition;
-        coordinates[1] = (Coordinate){x,y,z,phi};
+        coordinates[1] = (Coordinate){params.x,params.y,params.z,params.phi};
 
-        processInterpolationAndCreateJSON(coordinates,2, f);
+        processInterpolationAndCreateJSON(coordinates,2, params.f);
     
     }
     else if (strcmp(command, "G1") == 0) {
         //Parameter aus string lesen 
         for(const char *p = line; *p; ++p) {
-        sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+        sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
         }
         
-        float diffX = fabs(x - currentPosition.x);
-        float diffY = fabs(y - currentPosition.y);
-        float diffZ = fabs(z - currentPosition.z);
+        float diffX = fabs(params.x - currentPosition.x);
+        float diffY = fabs(params.y - currentPosition.y);
+        float diffZ = fabs(params.z - currentPosition.z);
 
-        Coordinate targetPosition = {x,y,z,phi};
+        Coordinate targetPosition = {params.x,params.y,params.z,params.phi};
         
         float maxDiff = fmax(diffX, fmax(diffY, diffZ));
 
@@ -74,7 +74,7 @@ void processLine(const char* line) {
             currentPosition.z = coordinates[i].z;
         }
         */
-        processInterpolationAndCreateJSON(coordinates,InterpolationSteps,f);
+        processInterpolationAndCreateJSON(coordinates,InterpolationSteps,params.f);
         
         
     }
@@ -90,7 +90,6 @@ void processLine(const char* line) {
         }
         
 
-        double angle, radius = 0;
         Coordinate center; 
         Coordinate end;
         //Parameter X: X-Achse Y: Y-Achse Z: Z-Achese A: Rotationsachse Endeffektor F: Speed
@@ -98,44 +97,44 @@ void processLine(const char* line) {
         case XY_PLANE:
             
             for(const char *p = line; *p; ++p) {
-            sscanf(p, "X%f", &x) || sscanf(p, "Y%f", &y) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
             }
-            center = (Coordinate){currentPosition.x + i,currentPosition.y + j,currentPosition.z,currentPosition.phi};
-            end = (Coordinate){x,y,currentPosition.z,phi};
+            center = (Coordinate){currentPosition.x + params.i,currentPosition.y + params.j,currentPosition.z,currentPosition.phi};
+            end = (Coordinate){params.x,params.y,currentPosition.z,params.phi};
             int numSteps = 0;
             
 
             break;
         case YZ_PLANE:
             for(const char *p = line; *p; ++p) {
-            sscanf(p, "Y%f", &y) || sscanf(p, "Z%f", &z) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
             }
-            center = (Coordinate){currentPosition.x ,currentPosition.y + i,currentPosition.z + j,currentPosition.phi};
-            end = (Coordinate){currentPosition.x,y,z,phi};
+            center = (Coordinate){currentPosition.x ,currentPosition.y + params.i,currentPosition.z + params.j,currentPosition.phi};
+            end = (Coordinate){currentPosition.x,params.y,params.z,params.phi};
             break;
         case ZX_PLANE:
             
             for(const char *p = line; *p; ++p) {
-            sscanf(p, "Z%f", &z) || sscanf(p, "X%f", &x) || sscanf(p, "I%f", &i) || sscanf(p, "J%f", &j) || sscanf(p, "R%f", &r)|| sscanf(p, "A%f", &phi) || sscanf(p, "F%f", &f);
+            sscanf(p, "Z%f", &params.z) || sscanf(p, "X%f", &params.x) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
             }
-            center = (Coordinate){currentPosition.x + j,currentPosition.y ,currentPosition.z + i,currentPosition.phi};
-            end = (Coordinate){x,currentPosition.y,z,phi};
+            center = (Coordinate){currentPosition.x + params.j,currentPosition.y ,currentPosition.z + params.i,currentPosition.phi};
+            end = (Coordinate){params.x,currentPosition.y,params.z,params.phi};
             break;
         }
         
         int numSteps = 0;
         
-        Coordinate* coordinates = circularInterpolation(currentPosition, end, center,r, currentPlane,direction, &numSteps);
-        processInterpolationAndCreateJSON(coordinates,numSteps,f);
+        Coordinate* coordinates = circularInterpolation(currentPosition, end, center,params.r, currentPlane,direction, &numSteps);
+        processInterpolationAndCreateJSON(coordinates,numSteps,params.f);
     }
     else if (strcmp(command, "G4") == 0) {
-        int numParams = sscanf(line, "%*s P%f", &t);
+        int numParams = sscanf(line, "%*s P%f", &params.t);
 
         if (numParams < 1) {
             fprintf(stderr, "Failed to read sleep time for G4 command\n");
             return;
         } else {
-            usleep(t * 1000);  // Perform the sleep
+            usleep(params.t * 1000);  // Perform the sleep
         }
     }
     else if (strcmp(command, "G17") == 0) {
@@ -157,13 +156,17 @@ void processLine(const char* line) {
     }
     else if (strcmp(command, "G28") == 0) {
         Coordinate* targetPosition = (Coordinate*)malloc(2 * sizeof(Coordinate));
+
+        for(const char *p = line; *p; ++p) {
+            sscanf(p, "F%f", &params.f);
+        }
     
         targetPosition[0] = currentPosition;
         
         // Korrigiere die Definition des zweiten Elements des Arrays
         targetPosition[1] = (Coordinate){0.0, 0.0, -280, 0.0};
             
-        processInterpolationAndCreateJSON(targetPosition, 2, f);
+        processInterpolationAndCreateJSON(targetPosition, 2, params.f);
     
     }
     else if (strcmp(command, "M100") == 0) {
