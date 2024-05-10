@@ -1,29 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import hljs from 'highlight.js';
-import 'highlight.js/styles/monokai.css';
+import React, { useState, useEffect } from "react";
+import hljs from "highlight.js";
+import "highlight.js/styles/monokai.css";
 
-import { useRecoilState } from "recoil";
-import { settingAtom,gCodeStringAtom } from "../utils/atoms";
-
-// Unterfunktion zur Highlighting des G-Codes
+// Subfunction for highlighting the G-code
 const highlightCode = (code) => {
   return { __html: hljs.highlightAuto(code).value };
 };
 
-// Komponente zur Anzeige des hervorgehobenen Codes
+// Component for displaying the highlighted code when code review expands
 const HighlightedCode = ({ text }) => {
-  const [highlightedText, setHighlightedText] = useState({ __html: '' });
+  const [highlightedText, setHighlightedText] = useState({ __html: "" });
 
   useEffect(() => {
-    // Debounce Timer setzen
+    // Set debounce timer
     const timer = setTimeout(() => {
-      // Highlighting-Funktion aufrufen und das Ergebnis im Zustand speichern
+      // Call highlighting function and save the result in state
       setHighlightedText(highlightCode(text));
-    }, 100); // Verzögerung von 100ms
+    }, 100);
 
-    // Cleanup-Funktion, um den Timer bei Komponenten-Unmount oder bei erneuten Rendern zu löschen
+    // Cleanup function to clear the timer on component unmount or re-render
     return () => clearTimeout(timer);
-  }, [text]); // Abhängigkeit von `text`, um Effekt bei Änderungen auszulösen
+  }, [text]);
 
   return (
     <pre className="mt-4">
@@ -35,26 +32,4 @@ const HighlightedCode = ({ text }) => {
   );
 };
 
-const TextEditor = (props) => {
-  const { sharedString, setSharedString } = useRecoilState(gCodeStringAtom);
-  const [settings, setSettings] = useRecoilState(settingAtom);
-  const handleChange = (e) => {
-    setSharedString(e.target.value);
-  };
-
-  return (
-    <div style={{ backgroundColor: settings.color }} className="p-4 text-white rounded-xl mx-5 border-4 border-black">
-      <textarea
-        value={sharedString}
-        onChange={handleChange}
-        placeholder="Hier Ihren G-Code eingeben..."
-        className="w-full h-32 p-2 text-black rounded-md overflow-auto"
-        style={{ minHeight: '150px' }}
-      ></textarea>
-      <HighlightedCode text={sharedString} />
-    </div>
-  );
-};
-
-// Benannte Exports
-export { TextEditor, HighlightedCode };
+export {  HighlightedCode };

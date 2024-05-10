@@ -6,7 +6,7 @@ import "ace-builds/src-noconflict/theme-crimson_editor";
 import { useRecoilState } from "recoil";
 import { gCodeStringAtom, settingAtom } from "../utils/atoms";
 require("../utils/gcode_mode"); // Importing custom GCode mode for Ace Editor
-
+// GCodeEditor component: Handles the display and functionality of the G-Code editor
 const GCodeEditor = () => {
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
   const [settings, setSettings] = useRecoilState(settingAtom);
@@ -14,7 +14,7 @@ const GCodeEditor = () => {
 
   // Update GCode content
   useEffect(() => {
-      setGCode(sharedString.content);
+    setGCode(sharedString.content);
   }, []);
   // Handler for GCode changes in Ace Editor
   const handleGCodeChange = (newValue) => {
@@ -26,8 +26,8 @@ const GCodeEditor = () => {
       content: newValue,
     }));
   };
-   // Dynamically set the theme based on settings.darkMode
-   const editorTheme = settings.darkMode ? "terminal" : "crimson_editor";
+  // Dynamically set the theme based on settings.darkMode
+  const editorTheme = settings.darkMode ? "terminal" : "crimson_editor";
   return (
     <>
       <div className="gcode-editor">

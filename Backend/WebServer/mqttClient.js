@@ -1,4 +1,3 @@
-//smartfridge von HaRoMa
 //Stellt einen mqtt Client welcher sich mit dem Broker verbindet
 
 const mqtt = require("async-mqtt");

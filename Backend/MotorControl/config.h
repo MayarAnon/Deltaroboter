@@ -1,6 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-
+// Struktur für Config
 typedef struct Config {
     char* address;
     char* clientId;
@@ -15,7 +15,7 @@ typedef struct Config {
     int* enb_gpios;
     int motor_count;
 } Config;
-
+// Funktion zum Laden der Konfiguration aus einer JSON-Datei
 Config load_config(const char* filename);
 
 #endif

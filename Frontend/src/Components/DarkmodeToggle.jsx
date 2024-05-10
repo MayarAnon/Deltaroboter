@@ -1,32 +1,32 @@
-import React, { useState,useEffect } from 'react';
-import '../styles/BB8Toggle.css'; // Stellen Sie sicher, dass der CSS-Code in einer separaten Datei namens 'BB8Toggle.css' gespeichert ist.
+import React, { useState, useEffect } from "react";
+import "../styles/BB8Toggle.css";
 import { useRecoilState } from "recoil";
 import { settingAtom } from "../utils/atoms";
-
+// BB8Toggle component: Renders a toggle button with BB8-themed design
 function BB8Toggle({ onClick }) {
+  // State for settings and checked status
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [isChecked, setIsChecked] = useState(settings.darkMode);
-
+  // Effect to update isChecked when settings.darkMode changes
   useEffect(() => {
-    // Aktualisieren Sie `isChecked`, wenn sich `settings.darkMode` ändert.
     setIsChecked(settings.darkMode);
   }, [settings.darkMode]);
-
+  // Function to handle toggle button click
   const handleToggle = () => {
     setIsChecked(!isChecked);
     if (onClick) {
-        onClick();
-      }
+      onClick();
+    }
   };
 
   return (
     <label className="bb8-toggle">
-      <input 
-        className="bb8-toggle__checkbox" 
-        type="checkbox" 
-        checked={isChecked} 
+      <input
+        className="bb8-toggle__checkbox"
+        type="checkbox"
+        checked={isChecked}
         onChange={handleToggle}
-        style={{ display: 'none' }} // Die Checkbox wird im React-Stil versteckt.
+        style={{ display: "none" }} // Die Checkbox wird im React-Stil versteckt.
       />
       <div className="bb8-toggle__container">
         <div className="bb8-toggle__scenery">
@@ -46,7 +46,7 @@ function BB8Toggle({ onClick }) {
           <div className="bb8-toggle__cloud"></div>
           <div className="bb8-toggle__cloud"></div>
         </div>
-        <div className={`bb8 ${isChecked ? 'bb8--active' : ''}`}>
+        <div className={`bb8 ${isChecked ? "bb8--active" : ""}`}>
           <div className="bb8__head-container">
             <div className="bb8__antenna"></div>
             <div className="bb8__antenna"></div>

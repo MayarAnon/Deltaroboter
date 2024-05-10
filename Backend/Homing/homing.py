@@ -79,6 +79,10 @@ def start_homing_process():
         is_homing_active = False
 
 def check_end_switches():
+    """
+    Überwacht kontinuierlich die Zustände der Endschalter. Wenn der Homing-Prozess nicht aktiv ist und ein Endschalter aktiviert wird,
+    wird eine Nachricht gesendet, um die Motoren zu stoppen (fehler ist aufgetreten).
+    """
     while True:
         if not is_homing_active:
             for index, pin in enumerate(ENDSCHALTER_PINS):

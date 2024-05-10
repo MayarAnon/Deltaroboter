@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import dat from "dat.gui";
-import delta_calcInverse from "./IK";
+import delta_calcInverse from "../utils/IK";
 import { useRecoilValue } from "recoil";
 import { settingAtom } from "../utils/atoms";
 import RobotStateDisplay from "./Robotstate";
@@ -431,7 +431,6 @@ const DigitalTwin = () => {
     workspaceCylinder.rotation.x = Math.PI / 2; // Rotation around the X-axis to set the cylinder upright
     scene.add(workspaceCylinder);
 
-
     //************************************************************** Dat.gui Component ******************************************************************************** */
 
     const gui = new dat.GUI({ autoPlace: false });
@@ -837,45 +836,49 @@ const DigitalTwin = () => {
   // Main component for the digital twin model, including visual representation and controls
   return (
     <>
-    <div style={{ display: "flex", justifyContent: "center", height: "80vh" }}>
       <div
-        ref={mountRef}
-        style={{ width: "90%", height: "80vh", border: "2px solid black" }}
-      />
-      <div
-        id="gui-overlay-container"
-        style={{
-          position: "absolute",
-          top: "25",
-          right: "5vw",
-          width: "300px",
-          height: "20%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-end",
-        }}
+        style={{ display: "flex", justifyContent: "center", height: "80vh" }}
       >
-        <div id="gui-container"></div>
-        <div className="my-2"></div> {/* Divider */}
         <div
-          id="statusOverlay"
+          ref={mountRef}
+          style={{ width: "90%", height: "80vh", border: "2px solid black" }}
+        />
+        <div
+          id="gui-overlay-container"
           style={{
-            color: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            padding: "3px",
+            position: "absolute",
+            top: "25",
+            right: "5vw",
+            width: "300px",
+            height: "20%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
           }}
         >
-          Coordinates:{" "}
-          {robotState.currentCoordinates
-            .map((coord) => coord.toFixed(2))
-            .join(", ")}
-          <br />
-          Angles:{" "}
-          {robotState.currentAngles.map((angle) => angle.toFixed(2)).join(", ")}
+          <div id="gui-container"></div>
+          <div className="my-2"></div> {/* Divider */}
+          <div
+            id="statusOverlay"
+            style={{
+              color: "white",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              padding: "3px",
+            }}
+          >
+            Coordinates:{" "}
+            {robotState.currentCoordinates
+              .map((coord) => coord.toFixed(2))
+              .join(", ")}
+            <br />
+            Angles:{" "}
+            {robotState.currentAngles
+              .map((angle) => angle.toFixed(2))
+              .join(", ")}
+          </div>
         </div>
       </div>
-    </div>
-    <RobotStateDisplay></RobotStateDisplay>
+      <RobotStateDisplay></RobotStateDisplay>
     </>
   );
 };

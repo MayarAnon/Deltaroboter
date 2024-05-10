@@ -21,6 +21,9 @@ VacuumValveRelais = 1
 GripperMagnetRelais = 20  # Magnet Relais für die Greiferaufnahme
 # Setup der GPIO-Pins
 def setup_gpio():
+    """
+    Initialisiert die GPIO-Pins und Konfiguriert den Parallelgripper mit PWM.
+    """
     GPIO.setmode(GPIO.BCM)  # Verwende Broadcom Pin-Nummerierung
     GPIO.setup(ParallelGripper, GPIO.OUT)
     p = GPIO.PWM(ParallelGripper, 100)  # PWM mit 100Hz
@@ -32,6 +35,9 @@ def setup_gpio():
 # Klasse für die Steuerung des Greifers
 class GripperControl:
     def __init__(self, id, host, port):
+        """
+        Initialisiert den MQTT-Client und den PWM-Controller für den Parallelgripper.
+        """
         self.client = mqtt.Client(id)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
@@ -40,16 +46,27 @@ class GripperControl:
         self.pwm.start(0)
 
     def on_connect(self, client, userdata, flags, rc):
+        """
+        Wird aufgerufen, wenn eine Verbindung zum MQTT-Broker hergestellt wird.
+        Abonniert das Topic "gripper/control".
+        """
         if rc == 0:
             self.client.subscribe("gripper/control")
         else:
             logging.info(f"{current_time} Connection failed.")
 
     def on_message(self, client, userdata, message):
+        """
+        Wird aufgerufen, wenn eine Nachricht auf dem abonnierten Topic empfangen wird.
+        Verarbeitet die empfangene Nachricht und steuert den Greifer entsprechend.
+        """
         if message.topic == "gripper/control":
             self.handle_control_message(message.payload.decode())
 
     def handle_control_message(self, message):
+        """
+        Verarbeitet die empfangene Steuerungsnachricht und steuert den Greifer entsprechend.
+        """
         data = json.loads(message)
         if "parallelGripper" in data:
             pwmValue = int(data["parallelGripper"])
@@ -89,23 +106,35 @@ class GripperControl:
                 logging.info(f"{current_time} magneticGripperAttachment disabled")
     
     def send_feedback(self, delay):
+        """
+        Sendet ein Feedback-Signal nach einer Verzögerung.
+        """
         def feedback_thread():
             time.sleep(delay)
             self.client.publish("gripper/feedback", "true")
         threading.Thread(target=feedback_thread).start()
-    # Cleanup-Funktion definieren
+
     def cleanup(self):
+        """
+        Räumt die Ressourcen auf und beendet das Programm ordnungsgemäß.
+        """
         logging.info(f"{current_time} Cleaning up resources...")
         self.client.loop_stop()
         self.pwm.stop()
         GPIO.cleanup()
 
     def signal_handler(self, signum, frame):
+        """
+        Behandelt Signale wie SIGTERM oder SIGINT.
+        """
         self.cleanup()
         logging.info(f"{current_time} Signal {signum} received, exiting.")
         exit(0)
 
     def run(self):
+        """
+        Startet den MQTT-Client und wartet auf Nachrichten.
+        """
         self.client.loop_start()
         signal.signal(signal.SIGTERM, self.signal_handler)
         signal.signal(signal.SIGINT, self.signal_handler)

@@ -5,9 +5,11 @@
 #include "MQTTAsync.h"
 #include "cJSON.h"
 #include "queue.h"
+// Externe Variablen
 extern MQTTAsync client;
 extern Config globalConfig;
 extern Queue messageQueue;
+// Funktionen für MQTT-Client
 void initialize_mqtt(); 
 void onConnect(void* context, MQTTAsync_successData* response);
 void onConnectFailure(void* context, MQTTAsync_failureData* response);

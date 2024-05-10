@@ -1,15 +1,17 @@
-// queue.c
+
 #include "queue.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <semaphore.h>
 #include "utils.h"
+
+// Initialisierung der Warteschlange
 void initQueue(Queue* q) {
     q->head = NULL;
     q->tail = NULL;
     pthread_mutex_init(&q->lock, NULL);
 }
-
+// Element in die Warteschlange einfügen
 void enqueue(Queue* q, char* data) {
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) {
@@ -30,7 +32,7 @@ void enqueue(Queue* q, char* data) {
     pthread_mutex_unlock(&q->lock);
     sem_post(&queueSemaphore);
 }
-
+// Element aus der Warteschlange entfernen
 char* dequeue(Queue* q) {
     sem_wait(&queueSemaphore);
     pthread_mutex_lock(&q->lock);
@@ -48,14 +50,15 @@ char* dequeue(Queue* q) {
     free(temp);
     return data;
 }
+// Warteschlange leeren
 void clearQueue(Queue* q) {
     pthread_mutex_lock(&q->lock);
     Node* current = q->head;
     Node* next;
-
+    // Durchlaufe die gesamte Warteschlange und gib den Speicher frei
     while (current != NULL) {
         next = current->next;
-        free(current->data); // Gehe sicher, dass der Speicher für data auch freigegeben wird
+        free(current->data); // Speicher für 'data' freigeben
         free(current);
         current = next;
     }

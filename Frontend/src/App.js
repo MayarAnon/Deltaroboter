@@ -28,18 +28,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
-  //hier ist das aktuell Geladene Programm gespeichert
-  // const [items, setItems] = useState([]);
-
-  // useEffect(() => {
-  //   console.log(items);
-  // }, [items]);
-//  {/* <Route path="/pick-and-place" element={<PickPlaceMode
-//               color={Settings.color}
-//               items={items}
-//               setItems={setItems} // Übergeben Sie den setState direkt
-//               coordinates={coordinates}
-//             />} /> /*} */}

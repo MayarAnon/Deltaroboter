@@ -4,25 +4,27 @@ import LoadProgrammList from "./ProgrammList";
 import { useRecoilState } from "recoil";
 import { settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
 import GCodeEditor from "./GCodeEditor";
-
+// GCode component: Handles the display and functionality of the G-Code section
 const GCode = (p) => {
+  // State management for settings, G-Code mode, and shared G-Code string
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
-
+  // Function to update the G-Code mode
   const updateModeGCode = (modi) => {
     setGCodemode(modi);
     console.log(modi);
   };
+  // State for menu visibility
   const [isMenuHidden, setMenuHidden] = React.useState(true);
   const toggleMenu = () => {
     setMenuHidden(!isMenuHidden);
   };
-
+  // Function to save G-Code
   const saveGCode = () => {
     const address = "http://deltarobot:3010/gcode";
 
-    // Erfassen Sie den Programmnamen (name) und die Positionsdaten (items)
+    // Post request to save G-Code data
 
     axios
       .post(address, sharedString)
@@ -34,7 +36,7 @@ const GCode = (p) => {
         console.error("Fehler beim Senden der Daten:", error);
       });
   };
-
+  // Function to handle name change for saving G-Code
   const handleNameChange = (e) => {
     console.log(e.target.value);
     setSharedString((prevSettings) => ({

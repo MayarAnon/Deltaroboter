@@ -12,7 +12,7 @@ const Header = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [icon, setIcon] = useState(0);
   const navigate = useNavigate();
-
+  // Functions to navigate to different modes
   const ManualMode = () => {
     navigate("/");
   };
@@ -26,28 +26,26 @@ const Header = () => {
     navigate("/digital-twin");
   };
 
-  // Event-Handler-Funktion, um den Menüzustand zu ändern
+  // Function to toggle menu visibility
   const toggleMenu = () => {
     setMenuHidden(!isMenuHidden);
   };
-  //sendet stop signal an den endpoint
+  // Function to send motor stop signal to the endpoint
   const sendMotorStop = async () => {
     try {
       const response = await axios.post("/motors/stop", {
-        stop: true, // Korrekt formatiertes Objekt
+        stop: true, // Correctly formatted object
       });
-      console.log("Motors stoppen", response.data); // Ausgabe der Serverantwort
+      console.log("Motors stoppen", response.data); // Output server response
     } catch (error) {
       console.error(
         "Fehler beim Senden von MotorStop:",
-        error.response ? error.response.data : error.message // Verbesserte Fehlerausgabe
+        error.response ? error.response.data : error.message
       );
     }
   };
 
- 
-
-  //zum öffnen vom Modalfenster 2 mal auf das logo  klicken
+  // Function to toggle modal window by clicking the logo twice
   const toggle = () => {
     setIcon((prevIcon) => {
       const newIconValue = prevIcon + 1;
@@ -58,32 +56,33 @@ const Header = () => {
       return newIconValue;
     });
   };
-  //leitet den Nutzer zum debug-mode ;)
+  // Function to handle confirmation
   const handleConfirm = () => {
     navigate("/debug-mode");
     setIsModalOpen(false);
   };
+  // Function to close the modal
   const closeModal = () => {
     setIsModalOpen(false);
   };
-  //für berechnung der farbe vom header
+  // Function for calculating header color
   function lightenHexColor(hex, percent) {
-    // Zuerst die Hex-Farbe in R, G, B umwandeln
+    // Convert hex color to RGB
     let r = parseInt(hex.slice(1, 3), 16);
     let g = parseInt(hex.slice(3, 5), 16);
     let b = parseInt(hex.slice(5, 7), 16);
 
-    // Helligkeit anpassen
+    // Adjust brightness
     r = parseInt((r * (100 + percent)) / 100);
     g = parseInt((g * (100 + percent)) / 100);
     b = parseInt((b * (100 + percent)) / 100);
 
-    // Sicherstellen, dass die Werte im gültigen Bereich bleiben
+    // Ensure values stay within valid range
     r = Math.min(255, r);
     g = Math.min(255, g);
     b = Math.min(255, b);
 
-    // Zurück in Hex konvertieren
+    // Convert back to hex
     r = r.toString(16).padStart(2, "0");
     g = g.toString(16).padStart(2, "0");
     b = b.toString(16).padStart(2, "0");
@@ -247,7 +246,6 @@ const Header = () => {
                 alt="Stop"
               ></img>
             </button>
-            
           </div>
         </div>
       )}

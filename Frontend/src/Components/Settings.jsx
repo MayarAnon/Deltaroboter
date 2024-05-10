@@ -6,17 +6,19 @@ import { settingAtom } from "../utils/atoms";
 import axios from "axios";
 import RobotStateDisplay from "./Robotstate";
 import BB8Toggle from "./DarkmodeToggle";
+// SettingsPage: A component to manage and display various settings
 const SettingsPage = () => {
   const [settings, setSettings] = useRecoilState(settingAtom);
-
-  const [darkMode, setDarkMode] = React.useState(0); // Zustand für Dark Mode
+  const [tempSpeed, setTempSpeed] = useState(settings.speed);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpenLog, setIsModalOpenLog] = useState(false);
+  const [darkMode, setDarkMode] = React.useState(0);
+  // Effect to save settings to LocalStorage on change
   useEffect(() => {
-    // Speichern der Einstellungen im LocalStorage bei Änderung
     localStorage.setItem("settings", JSON.stringify(settings));
   }, [settings]);
-
+  // Effect to load settings from LocalStorage on component initialization
   useEffect(() => {
-    // Laden der Einstellungen aus dem LocalStorage beim Initialisieren der Komponente
     const savedSettings = localStorage.getItem("settings");
     if (savedSettings) {
       setSettings(JSON.parse(savedSettings));
@@ -25,21 +27,19 @@ const SettingsPage = () => {
       }
     }
   }, []);
-  // Lokalen Zustand verwenden, um die temporäre Geschwindigkeit zu speichern
-  const [tempSpeed, setTempSpeed] = useState(settings.speed);
 
+  // Handler for speed change
   const handleSpeedChange = (e) => {
-    setTempSpeed(e.target.value); // Aktualisiere nur den lokalen Zustand
+    setTempSpeed(e.target.value);
   };
-
+  // Handler for completing speed change,Update the global state when the mouse is released or the touch interaction ends
   const handleSpeedChangeComplete = (e) => {
-    // Aktualisiere den globalen Zustand, wenn die Maus losgelassen wird oder die Touch-Interaktion endet
     setSettings((prevSettings) => ({
       ...prevSettings,
       speed: parseInt(e.target.value, 10),
     }));
   };
-
+  // Handlers for gripper state changes using useCallback to prevent unnecessary re-renders
   const handleGripper = useCallback(
     (e) => {
       setSettings((prevSettings) => ({
@@ -84,7 +84,7 @@ const SettingsPage = () => {
     // Implementieren Sie die Logik, um die API-Anleitung anzuzeigen
     console.log("API Anleitung anzeigen");
   };
-
+  // Effect to update settings on the server
   useEffect(() => {
     const apiUrl = "http://deltarobot:3010/updateSettings";
 
@@ -106,8 +106,8 @@ const SettingsPage = () => {
       .catch((error) => {
         console.error("Fehler beim Aktualisieren der Einstellungen:", error);
       });
-  }, [settings]); // Abhängigkeit, sodass dieser Effekt nur ausgelöst wird, wenn sich `settings` ändert
-
+  }, [settings]);
+  // Function to send a homing signal to the robot
   const postHomingSignal = async () => {
     try {
       const response = await axios.post("http://deltarobot:3010/homing", {
@@ -119,9 +119,6 @@ const SettingsPage = () => {
       alert("Fehler beim Senden des Homing-Signals.");
     }
   };
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isModalOpenLog, setIsModalOpenLog] = useState(false);
 
   const calibratehandleOpenModal = () => {
     setIsModalOpen(true);
@@ -162,7 +159,7 @@ const SettingsPage = () => {
     setIsModalOpenLog(false);
   };
 
-  //managet darkmode und regenbogen-mode ;)
+  //manage darkmode and rainbow-mode ;)
   const toggleDarkMode = () => {
     if (darkMode >= 10 && darkMode <= 13) {
       setDarkMode(0);
@@ -170,7 +167,6 @@ const SettingsPage = () => {
     } else if (darkMode < 10 || darkMode > 13) {
       document.body.classList.remove("dark-mode2");
       document.body.classList.toggle("dark-mode");
-      // Überprüfen, ob der Dark-Modus aktiv ist und entsprechend aktualisieren
       if (document.body.classList.contains("dark-mode")) {
         setSettings((prevSettings) => ({
           ...prevSettings,
@@ -185,14 +181,11 @@ const SettingsPage = () => {
     }
     setDarkMode(darkMode + 1);
   };
-
+  // Handlers for magnet control
   const handleMouseDown = () => {
-    // Definition des Request-Body
     const requestBody = {
       action: "enable",
     };
-
-    // Senden des POST-Requests an den Server
     fetch("/magnet/control", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -273,27 +266,27 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="flex flex-col md:flex-row items-center justify-start md:space-x-4">
-    <label className="my-4 md:my-0">Grippersystem:</label>
-    <select
-        value={settings.gripper}
-        onChange={handleGripper}
-        className="ml-2 p-2 bg-black text-white rounded w-full md:w-auto"
-    >
-        <option value="vacuumGripper">Vacuum Gripper</option>
-        <option value="complientGripper">Compliant Gripper</option>
-        <option value="parallelGripper">Parallel Gripper</option>
-        <option value="magnetGripper">Magnet Gripper</option>
-    </select>
-    <button
-        className="custom-button w-full md:w-auto mt-4 md:mt-0 md:ml-4"
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onTouchStart={handleMouseDown}
-        onTouchEnd={handleMouseUp}
-    >
-        Deactivate Magnet
-    </button>
-</div>
+          <label className="my-4 md:my-0">Grippersystem:</label>
+          <select
+            value={settings.gripper}
+            onChange={handleGripper}
+            className="ml-2 p-2 bg-black text-white rounded w-full md:w-auto"
+          >
+            <option value="vacuumGripper">Vacuum Gripper</option>
+            <option value="complientGripper">Compliant Gripper</option>
+            <option value="parallelGripper">Parallel Gripper</option>
+            <option value="magnetGripper">Magnet Gripper</option>
+          </select>
+          <button
+            className="custom-button w-full md:w-auto mt-4 md:mt-0 md:ml-4"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onTouchStart={handleMouseDown}
+            onTouchEnd={handleMouseUp}
+          >
+            Deactivate Magnet
+          </button>
+        </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <label>Motion Profil:</label>
