@@ -272,33 +272,28 @@ const SettingsPage = () => {
           </select>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
-        <div className="flex justify-start space-x-4 ">
-          <label className="hidden lg:block ">Grippersystem:</label>
-          <div className="mb-4">
-            <select
-              value={settings.gripper}
-              onChange={handleGripper}
-              className="ml-2 p-2 bg-black text-white rounded"
-            >
-              <option value="vacuumGripper">vacuum Gripper</option>
-              <option value="complientGripper">complient Gripper</option>
-              <option value="parallelGripper">parellel Gripper</option>
-              <option value="magnetGripper">Magnet Gripper</option>
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <button
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded"
-              onMouseDown={handleMouseDown}
-              onMouseUp={handleMouseUp}
-              onTouchStart={handleMouseDown}
-              onTouchEnd={handleMouseUp}
-            >
-              Toggle Magnet
-            </button>
-          </div>
-        </div>
+        <div className="flex flex-col md:flex-row items-center justify-start md:space-x-4">
+    <label className="my-4 md:my-0">Grippersystem:</label>
+    <select
+        value={settings.gripper}
+        onChange={handleGripper}
+        className="ml-2 p-2 bg-black text-white rounded w-full md:w-auto"
+    >
+        <option value="vacuumGripper">Vacuum Gripper</option>
+        <option value="complientGripper">Compliant Gripper</option>
+        <option value="parallelGripper">Parallel Gripper</option>
+        <option value="magnetGripper">Magnet Gripper</option>
+    </select>
+    <button
+        className="custom-button w-full md:w-auto mt-4 md:mt-0 md:ml-4"
+        onMouseDown={handleMouseDown}
+        onMouseUp={handleMouseUp}
+        onTouchStart={handleMouseDown}
+        onTouchEnd={handleMouseUp}
+    >
+        Deactivate Magnet
+    </button>
+</div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <label>Motion Profil:</label>
