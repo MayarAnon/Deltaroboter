@@ -41,3 +41,7 @@ bool homingFlag = false;
 
 // `errorAccumulator1` bis `errorAccumulator4` dienen der Fehlerakkumulation für Regelungszwecke.
 double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0, errorAccumulator4 = 0.0;
+
+Parameter params ={0.0,0.0,-280.0,0.0,2,0.0,0.0,0.0,0.0};
+
+

@@ -35,6 +35,10 @@ typedef enum {
     UnknownProfil = -1  // Hinzugefügter Wert für unbekannte Profile
 } MotionProfile;
 
+typedef struct {
+    float x, y, z, phi, f, i, j, r, t;
+} Parameter;
+
 // Global MQTT Variables
 extern const char** globalTopics;
 extern int globalTopicCount;
@@ -53,6 +57,7 @@ extern bool timeFlagGripper;
 extern bool homingFlag;
 extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4;
 extern int currentGripperValue;
+extern Parameter params;
 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20

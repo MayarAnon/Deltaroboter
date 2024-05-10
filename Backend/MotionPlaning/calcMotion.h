@@ -21,4 +21,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 //   - Angles ang: Die aktuellen Winkel.
 void publishCurrentState(Coordinate pos, Angles ang); // Publishes the current state of the robot
 
+
+void processGripperCommand(char* command, const char* line);
+
 #endif 
