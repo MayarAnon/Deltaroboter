@@ -304,9 +304,8 @@ app.delete('/deleteLogs', async (req, res) => {
 
 // Endpunkt zur Steuerung des Magneten
 app.post('/magnet/control', async (req, res) => {
-  const { action } = req.body;
+  const { action } = req.body; // Erwartet "enable" oder "disable"
 
-  // Überprüfen, ob der Aktionsparameter korrekt ist
   if (!action || (action !== 'enable' && action !== 'disable')) {
     return res.status(400).json({ error: 'Ungültiger oder fehlender Aktionsparameter. Erwartet "enable" oder "disable".' });
   }
@@ -316,19 +315,19 @@ app.post('/magnet/control', async (req, res) => {
       throw new Error("MQTT-Client ist nicht verbunden");
     }
 
-    // Publizieren des Magnetzustandes auf einem MQTT-Topic
-    const topic = 'magnet/control';
-    // Direktes Senden der Aktion als Boolean erleichtert die Verarbeitung auf der Empfängerseite
-    const message = JSON.stringify({ enable: action === 'enable' });
+    // Publizieren des Magnetzustandes auf dem vorhandenen MQTT-Topic
+    const topic = 'gripper/control';
+    const message = JSON.stringify({ magneticGripperAttachment: action });
 
     await mqttClient.publish(topic, message);
-    
+
     res.status(200).json({ message: `Magnet ${action} signalisiert.` });
   } catch (error) {
     console.error(`Fehler beim Publizieren des Magnetzustandes:`, error);
     res.status(500).json({ error: 'Fehler beim Publizieren des Magnetzustandes' });
   }
 });
+
 
 
 

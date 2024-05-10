@@ -1,5 +1,3 @@
-# sudo apt-get install python3-rpi.gpio
-
 import RPi.GPIO as GPIO
 import paho.mqtt.client as mqtt
 import json
@@ -20,7 +18,7 @@ PumpRelais = 25
 VacuumRelais = 8
 PumpValveRelais = 7
 VacuumValveRelais = 1
-
+GripperMagnetRelais = 20  # Magnet Relais für die Greiferaufnahme
 # Setup der GPIO-Pins
 def setup_gpio():
     GPIO.setmode(GPIO.BCM)  # Verwende Broadcom Pin-Nummerierung
@@ -28,7 +26,7 @@ def setup_gpio():
     p = GPIO.PWM(ParallelGripper, 100)  # PWM mit 100Hz
     p.start(0)
 
-    for pin in [PumpRelais, VacuumRelais, MagnetRelais, PumpValveRelais, VacuumValveRelais]:
+    for pin in [PumpRelais, VacuumRelais, MagnetRelais, PumpValveRelais, VacuumValveRelais,GripperMagnetRelais]:
         GPIO.setup(pin, GPIO.OUT)
 
 # Klasse für die Steuerung des Greifers
@@ -82,7 +80,11 @@ class GripperControl:
             GPIO.output(MagnetRelais, GPIO.HIGH if value == 1 else GPIO.LOW)
             GPIO.output([VacuumRelais, PumpRelais], GPIO.LOW)
             self.send_feedback(1)
-
+        elif "magneticGripperAttachment" in data:
+            if data["magneticGripperAttachment"] == "enable":
+                GPIO.output(GripperMagnetRelais, GPIO.HIGH)
+            elif data["magneticGripperAttachment"] == "disable":
+                GPIO.output(GripperMagnetRelais, GPIO.LOW)
     
     def send_feedback(self, delay):
         def feedback_thread():
