@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import '../styles/BB8Toggle.css'; // Stellen Sie sicher, dass der CSS-Code in einer separaten Datei namens 'BB8Toggle.css' gespeichert ist.
+import { useRecoilState } from "recoil";
+import { settingAtom } from "../utils/atoms";
 
 function BB8Toggle({ onClick }) {
-  const [isChecked, setIsChecked] = useState(false);
+  const [settings, setSettings] = useRecoilState(settingAtom);
+  const [isChecked, setIsChecked] = useState(settings.darkMode);
+
+  useEffect(() => {
+    // Aktualisieren Sie `isChecked`, wenn sich `settings.darkMode` ändert.
+    setIsChecked(settings.darkMode);
+  }, [settings.darkMode]);
 
   const handleToggle = () => {
     setIsChecked(!isChecked);

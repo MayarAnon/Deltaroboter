@@ -6,7 +6,7 @@ import dat from "dat.gui";
 import delta_calcInverse from "./IK";
 import { useRecoilValue } from "recoil";
 import { settingAtom } from "../utils/atoms";
-
+import RobotStateDisplay from "./Robotstate";
 // Constants define the geometric properties of the base and the effector as well as the length of the arms
 const baseRadius = 100;
 const effectorRadius = 50;
@@ -836,6 +836,7 @@ const DigitalTwin = () => {
 
   // Main component for the digital twin model, including visual representation and controls
   return (
+    <>
     <div style={{ display: "flex", justifyContent: "center", height: "80vh" }}>
       <div
         ref={mountRef}
@@ -855,7 +856,7 @@ const DigitalTwin = () => {
         }}
       >
         <div id="gui-container"></div>
-        <div className="my-5"></div> {/* Divider */}
+        <div className="my-2"></div> {/* Divider */}
         <div
           id="statusOverlay"
           style={{
@@ -874,6 +875,8 @@ const DigitalTwin = () => {
         </div>
       </div>
     </div>
+    <RobotStateDisplay></RobotStateDisplay>
+    </>
   );
 };
 
