@@ -110,23 +110,33 @@ const DigitalTwin = () => {
   const settings = useRecoilValue(settingAtom);
   const mountRef = useRef(null); // Reference for the DOM element.
   const websocketRef = useRef(null);
-  const [cameraPosition, setCameraPosition] = useState(1); // 1 for the first POV, 2 for the second POV
+
+  const savedCameraPosition = localStorage.getItem("cameraPosition");
+  const savedSceneObjects = localStorage.getItem("sceneObjects");
+  // Set initial scene configuration from localStorage or use default values
+  const initialSceneObjects = savedSceneObjects
+    ? JSON.parse(savedSceneObjects)
+    : {
+        gridSize: 5000,
+        gridDivisions: 60,
+        gridVisible: true,
+        axesVisible: false,
+        endEffectorVisible: false,
+        baseVisible: false,
+        motorsVisible: false,
+      };
+  const initialCameraPosition = savedCameraPosition
+    ? parseInt(savedCameraPosition)
+    : 1;
+  const [cameraPosition, setCameraPosition] = useState(initialCameraPosition); // 1 for the first POV, 2 for the second POV
   const cameraPositionRef = useRef(cameraPosition);
   const cameraRef = useRef();
   // State for managed 3D objects in the scene
   const [objects, setObjects] = useState({});
   //parameters for scene configuration with the Controls-gui
-  const [sceneObjects, setSceneObjects] = useState({
-    gridSize: 5000,
-    gridDivisions: 60,
-    gridVisible: true,
-    axesVisible: false,
-    endEffectorVisible: false,
-    baseVisible: false,
-    motorsVisible: false,
-  });
+  const [sceneObjects, setSceneObjects] = useState(initialSceneObjects);
 
-  // Initial state of the robot, updated by the WS (workspace).
+  // Initial state of the robot, updated by the WS (websocket).
   const [robotState, setRobotState] = useState({
     currentCoordinates: [0, 0, -280],
     currentAngles: [-31.429121, -31.429121, -31.429121],
@@ -134,6 +144,11 @@ const DigitalTwin = () => {
   const loader = new GLTFLoader(); // Loader for 3D-Models.
   const [pathPoints, setPathPoints] = useState([]); //for path line
   const [motorsLoaded, setMotorsLoaded] = useState(false);
+  // Update the local storage whenever sceneObjects or cameraPosition changes
+  useEffect(() => {
+    localStorage.setItem("sceneObjects", JSON.stringify(sceneObjects));
+    localStorage.setItem("cameraPosition", cameraPosition.toString());
+  }, [sceneObjects, cameraPosition]);
 
   // Updates the Ref value each time the camera position changes
   useEffect(() => {
@@ -298,6 +313,12 @@ const DigitalTwin = () => {
         base = null;
       }
     };
+
+    if (sceneObjects.baseVisible && !objects.base) {
+      loadBase();
+    } else if (objects.base) {
+      objects.base.visible = sceneObjects.baseVisible;
+    }
     //***************************************************************add endeffector models(with gripper) and Proxy Model within the scene******************************************************************************* */
     // Proxy Model
     const effectorGeometry = new THREE.CylinderGeometry(
@@ -355,6 +376,12 @@ const DigitalTwin = () => {
         effector = null;
       }
     };
+
+    if (sceneObjects.endEffectorVisible && !objects.effector) {
+      loadEffector();
+    } else if (objects.effector) {
+      objects.effector.visible = sceneObjects.endEffectorVisible;
+    }
     //********************************************************* add motor models and Proxy Model within the scene************************************************************************************* */
     //Proxy Model
     const simpleMotorsArray = [];
@@ -416,12 +443,21 @@ const DigitalTwin = () => {
         delete motors[motorName];
       }
     };
+
+    if (sceneObjects.motorsVisible && !motorsLoaded) {
+      loadMotors();
+    } else if (objects.motors) {
+      Object.values(objects.motors).forEach(
+        (motor) => (motor.visible = sceneObjects.motorsVisible)
+      );
+    }
     //*******************************************************Add workspace cylinder************************************************************************************** */
     const workspaceGeometry = new THREE.CylinderGeometry(200, 200, 200, 32); // Radius, radius, height, number of segments
     const workspaceMaterial = new THREE.MeshBasicMaterial({
       color: 0x888888,
       transparent: true,
       opacity: 0.3,
+      depthWrite: false, // Verhindert das Schreiben in den Tiefenpuffer
     });
     const workspaceCylinder = new THREE.Mesh(
       workspaceGeometry,
@@ -429,6 +465,7 @@ const DigitalTwin = () => {
     );
     workspaceCylinder.position.z = -380; // Center between -280 and -480
     workspaceCylinder.rotation.x = Math.PI / 2; // Rotation around the X-axis to set the cylinder upright
+    workspaceCylinder.renderOrder = 999;
     scene.add(workspaceCylinder);
 
     //************************************************************** Dat.gui Component ******************************************************************************** */
@@ -493,6 +530,7 @@ const DigitalTwin = () => {
       .name("Show Grid")
       .onChange((value) => {
         gridHelperXY.visible = value;
+        setSceneObjects((prevState) => ({ ...prevState, gridVisible: value }));
       });
     // Toggle visibility of the axes helper in the scene
     gridFolder
@@ -596,6 +634,7 @@ const DigitalTwin = () => {
     //
     const animate = () => {
       requestAnimationFrame(animate);
+
       controls.update();
       renderer.render(scene, camera);
     };
@@ -791,27 +830,38 @@ const DigitalTwin = () => {
 
   // Updates the 3D scene based on changes in end effector coordinates
   useEffect(() => {
-    const updateScene = () => {
-      if (!objects.scene) return;
+    console.log("Updating positions to: ", objects);
+    if (!objects.scene || !objects.axesHelper) {
+      return;
+    } else {
       objects.axesHelper.position.x = robotState.currentCoordinates[0];
       objects.axesHelper.position.y = robotState.currentCoordinates[1];
       objects.axesHelper.position.z = robotState.currentCoordinates[2];
-      objects.effector.position.x = robotState.currentCoordinates[0];
-      objects.effector.position.y = robotState.currentCoordinates[1];
-      objects.effector.position.z = robotState.currentCoordinates[2];
-      objects.simpleEffector.position.x = robotState.currentCoordinates[0];
-      objects.simpleEffector.position.y = robotState.currentCoordinates[1];
-      objects.simpleEffector.position.z = robotState.currentCoordinates[2];
+      setObjects(objects);
       objects.renderer.render(objects.scene, objects.camera);
-    };
-    if (
-      !objects.scene ||
-      !objects.effector ||
-      !objects.base ||
-      !objects.simpleEffector
-    )
+    }
+    if (!objects.scene || !objects.simpleEffector) {
       return;
-    updateScene();
+    } else {
+      objects.simpleEffector.position.set(
+        robotState.currentCoordinates[0],
+        robotState.currentCoordinates[1],
+        robotState.currentCoordinates[2]
+      );
+      setObjects(objects);
+      objects.renderer.render(objects.scene, objects.camera);
+    }
+    if (!objects.scene || !objects.effector) {
+      return;
+    } else {
+      objects.effector.position.set(
+        robotState.currentCoordinates[0],
+        robotState.currentCoordinates[1],
+        robotState.currentCoordinates[2]
+      );
+      setObjects(objects);
+      objects.renderer.render(objects.scene, objects.camera);
+    }
   }, [robotState.currentCoordinates, objects]);
 
   //Updates the path points when coordinates change
