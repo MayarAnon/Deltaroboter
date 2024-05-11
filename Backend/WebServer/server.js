@@ -1,11 +1,11 @@
-const express = require('express');
-const WebSocket = require('ws');
-const http = require('http');
-const fs = require('fs');
-const archiver = require('archiver');
-const fsextra = require('fs-extra');
-const path = require('path');
-const cors = require('cors');
+const express = require("express");
+const WebSocket = require("ws");
+const http = require("http");
+const fs = require("fs");
+const archiver = require("archiver");
+const fsextra = require("fs-extra");
+const path = require("path");
+const cors = require("cors");
 const MqttClient = require("./mqttClient");
 const app = express();
 const port = 3010;
@@ -14,36 +14,38 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 // MQTT-Client instanziieren
-const serviceName = "Webserver"; 
+const serviceName = "Webserver";
 let mqttClient;
 async function setupMqttClient() {
   const mqtt = new MqttClient(serviceName);
   mqttClient = await mqtt;
-  await mqttClient.subscribe('robot/state');
+  await mqttClient.subscribe("robot/state");
 }
-setupMqttClient().then(() => {
-  console.log("MQTT-Client verbunden und bereit.");
-}).catch((error) => {
-  console.error("Fehler beim Verbinden mit MQTT:", error);
-});
+setupMqttClient()
+  .then(() => {
+    console.log("MQTT-Client verbunden und bereit.");
+  })
+  .catch((error) => {
+    console.error("Fehler beim Verbinden mit MQTT:", error);
+  });
 
 app.use(cors());
 app.use(express.json());
 
-const gcodeFolder = path.join(__dirname, '../../Backend/GCodeFiles');
+const gcodeFolder = path.join(__dirname, "../../Backend/GCodeFiles");
 
 // Endpunkt zum Laden der GCode-Dateien im Ordner
-app.get('/loadGCodeFiles', (req, res) => {
+app.get("/loadGCodeFiles", (req, res) => {
   const data = [];
 
-  fs.readdirSync(gcodeFolder).forEach(file => {
+  fs.readdirSync(gcodeFolder).forEach((file) => {
     const filePath = path.join(gcodeFolder, file);
 
     try {
       // Prüfen, ob die Datei eine GCode-Datei ist
-      if (path.extname(file).toLowerCase() === '.gcode') {
+      if (path.extname(file).toLowerCase() === ".gcode") {
         // Lese den Inhalt der Datei
-        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const fileContent = fs.readFileSync(filePath, "utf-8");
 
         // Füge den Inhalt der Datei in das Array hinzu
         data.push({ fileName: file, content: fileContent });
@@ -56,12 +58,12 @@ app.get('/loadGCodeFiles', (req, res) => {
   res.json(data);
 });
 // Endpunkt zum Löschen einer Datei mit einem bestimmten Namen
-app.delete('/deleteGCode', (req, res) => {
+app.delete("/deleteGCode", (req, res) => {
   // Erfassen Sie den Namen der zu löschenden Datei aus der Anfrage
   const fileNameToDelete = req.query.name;
   // Überprüfen Sie, ob ein Dateiname in der Anfrage vorhanden ist
   if (!fileNameToDelete) {
-    return res.status(400).json({ error: 'Dateiname nicht angegeben' });
+    return res.status(400).json({ error: "Dateiname nicht angegeben" });
   }
 
   // Erstellen Sie den vollständigen Dateipfad zur zu löschenden Datei
@@ -74,26 +76,30 @@ app.delete('/deleteGCode', (req, res) => {
     console.log(`Datei "${fileNameToDelete}" erfolgreich gelöscht.`);
     res.json({ message: `Datei "${fileNameToDelete}" erfolgreich gelöscht.` });
   } else {
-    res.status(404).json({ error: `Datei "${fileNameToDelete}" nicht gefunden` });
+    res
+      .status(404)
+      .json({ error: `Datei "${fileNameToDelete}" nicht gefunden` });
   }
 });
 // Endpunkt zum Speichern eines Programms
-app.post('/gcode', (req, res) => {
-  console.log('Anfrage zum Speichern eines Programms erhalten');
+app.post("/gcode", (req, res) => {
+  console.log("Anfrage zum Speichern eines Programms erhalten");
   const programData = req.body; // Die Daten werden im JSON-Format erwartet
 
   if (!programData || !programData.name || !programData.content) {
-    return res.status(400).json({ error: 'Ungültige Daten' });
+    return res.status(400).json({ error: "Ungültige Daten" });
   }
 
   const programName = programData.name;
-  const programFilePath = path.join(gcodeFolder , `${programName}`);
+  const programFilePath = path.join(gcodeFolder, `${programName}`);
 
   // Daten in eine JSON-Datei schreiben
-  fs.writeFile(programFilePath,programData.content, (err) => {
+  fs.writeFile(programFilePath, programData.content, (err) => {
     if (err) {
-      console.error('Fehler beim Schreiben der Datei:', err);
-      return res.status(500).json({ error: 'Fehler beim Speichern des Programms' });
+      console.error("Fehler beim Schreiben der Datei:", err);
+      return res
+        .status(500)
+        .json({ error: "Fehler beim Speichern des Programms" });
     }
 
     console.log(`Programm "${programName}" erfolgreich gespeichert.`);
@@ -101,11 +107,10 @@ app.post('/gcode', (req, res) => {
   });
 });
 // Endpunkt zum übermitteln von den Einstellungen
-app.post('/updateSettings', async (req, res) => {
-
+app.post("/updateSettings", async (req, res) => {
   const settings = req.body;
   if (!settings) {
-    return res.status(400).json({ error: 'Keine Einstellungen gesendet' });
+    return res.status(400).json({ error: "Keine Einstellungen gesendet" });
   }
 
   try {
@@ -116,155 +121,180 @@ app.post('/updateSettings', async (req, res) => {
     // Durchlaufen aller Einstellungen und Publizieren auf den entsprechenden Topics
     if (settings.gripperMode) {
       const gripperModeJson = JSON.stringify(settings.gripperMode);
-      await mqttClient.publish('gripper/mode', gripperModeJson);
+      await mqttClient.publish("gripper/mode", gripperModeJson);
     }
-    if (settings.motorSpeed !== undefined) { // Einschließlich 0 als gültiger Wert
-      await mqttClient.publish('motors/speed', settings.motorSpeed.toString());
+    if (settings.motorSpeed !== undefined) {
+      // Einschließlich 0 als gültiger Wert
+      await mqttClient.publish("motors/speed", settings.motorSpeed.toString());
     }
     if (settings.motionProfil) {
       const motionProfilJson = JSON.stringify(settings.motionProfil);
-      await mqttClient.publish('motors/motionProfil', motionProfilJson);
+      await mqttClient.publish("motors/motionProfil", motionProfilJson);
     }
-    
 
-    res.status(200).json({ message: 'Einstellungen erfolgreich aktualisiert und publiziert' });
+    res
+      .status(200)
+      .json({
+        message: "Einstellungen erfolgreich aktualisiert und publiziert",
+      });
   } catch (error) {
-    console.error('Fehler beim Publizieren der Einstellungen:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren der Einstellungen' });
+    console.error("Fehler beim Publizieren der Einstellungen:", error);
+    res
+      .status(500)
+      .json({ error: "Fehler beim Publizieren der Einstellungen" });
   }
 });
 // Endpunkt zum stoppen aller motoren
-app.post('/motors/stop', async (req, res) => {
+app.post("/motors/stop", async (req, res) => {
   const stopSignal = req.body.stop;
-  if (typeof stopSignal !== 'boolean') {
-    return res.status(400).json({ error: 'Ungültige Daten, erwartet true' });
+  if (typeof stopSignal !== "boolean") {
+    return res.status(400).json({ error: "Ungültige Daten, erwartet true" });
   }
 
   try {
-    await mqttClient.publish('motors/stop', JSON.stringify(stopSignal));
-    await mqttClient.publish('homing/control', JSON.stringify(false));
-    res.status(200).json({ message: 'Motorstopp signalisiert.' });
+    await mqttClient.publish("motors/stop", JSON.stringify(stopSignal));
+    await mqttClient.publish("homing/control", JSON.stringify(false));
+    res.status(200).json({ message: "Motorstopp signalisiert." });
   } catch (error) {
-    console.error('Fehler beim Publizieren des Motorstopps:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren des Motorstopps' });
+    console.error("Fehler beim Publizieren des Motorstopps:", error);
+    res.status(500).json({ error: "Fehler beim Publizieren des Motorstopps" });
   }
 });
 
-
 // Endpunkt für die Homing-Funktion
-app.post('/homing', async (req, res) => {
-  const homingSignal = req.body.active;  // Erwarte einen Schlüssel `active` in der Anfrage
+app.post("/homing", async (req, res) => {
+  const homingSignal = req.body.active; // Erwarte einen Schlüssel `active` in der Anfrage
 
-  if (typeof homingSignal !== 'boolean') {
-    return res.status(400).json({ error: 'Ungültige Daten, erwartet einen Boolean' });
+  if (typeof homingSignal !== "boolean") {
+    return res
+      .status(400)
+      .json({ error: "Ungültige Daten, erwartet einen Boolean" });
   }
 
   try {
     // Sendet immer `true` zum MQTT-Topic, unabhängig vom empfangenen Wert
-    await mqttClient.publish('homing/control', JSON.stringify(true));
-    res.status(200).json({ message: 'Homing signalisiert.' });
+    await mqttClient.publish("homing/control", JSON.stringify(true));
+    res.status(200).json({ message: "Homing signalisiert." });
   } catch (error) {
-    console.error('Fehler beim Publizieren des Homing-Signals:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren des Homing-Signals' });
+    console.error("Fehler beim Publizieren des Homing-Signals:", error);
+    res
+      .status(500)
+      .json({ error: "Fehler beim Publizieren des Homing-Signals" });
   }
 });
 
 // Endpunkt für die Übermittelung von den koordinaten fürs manualmode
-app.post('/manual/control/coordinates', async (req, res) => {
+app.post("/manual/control/coordinates", async (req, res) => {
   const coordinates = req.body.coordinates;
   if (!Array.isArray(coordinates) || coordinates.length !== 4) {
-    return res.status(400).json({ error: 'Ungültige Koordinaten, erwartet ein Array von 4 Elementen' });
+    return res
+      .status(400)
+      .json({
+        error: "Ungültige Koordinaten, erwartet ein Array von 4 Elementen",
+      });
   }
 
   try {
-    await mqttClient.publish('manual/control/coordinates', JSON.stringify(coordinates));
-    res.status(200).json({ message: 'Koordinaten erfolgreich aktualisiert.' });
+    await mqttClient.publish(
+      "manual/control/coordinates",
+      JSON.stringify(coordinates)
+    );
+    res.status(200).json({ message: "Koordinaten erfolgreich aktualisiert." });
   } catch (error) {
-    console.error('Fehler beim Publizieren der Koordinaten:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren der Koordinaten' });
+    console.error("Fehler beim Publizieren der Koordinaten:", error);
+    res.status(500).json({ error: "Fehler beim Publizieren der Koordinaten" });
   }
 });
 // Endpunkt für die Übermittelung von der Greifersteuerung fürs manualmode
-app.post('/manual/control/gripper', async (req, res) => {
+app.post("/manual/control/gripper", async (req, res) => {
   const gripperValue = req.body.gripper;
-  if (typeof gripperValue !== 'number') {
-    return res.status(400).json({ error: 'Ungültige Greiferstärke, erwartet eine Zahl' });
+  if (typeof gripperValue !== "number") {
+    return res
+      .status(400)
+      .json({ error: "Ungültige Greiferstärke, erwartet eine Zahl" });
   }
 
   try {
-    await mqttClient.publish('manual/control/gripper', gripperValue.toString());
-    res.status(200).json({ message: 'Greifersteuerung erfolgreich aktualisiert.' });
+    await mqttClient.publish("manual/control/gripper", gripperValue.toString());
+    res
+      .status(200)
+      .json({ message: "Greifersteuerung erfolgreich aktualisiert." });
   } catch (error) {
-    console.error('Fehler beim Publizieren der Greiferstärke:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren der Greiferstärke' });
+    console.error("Fehler beim Publizieren der Greiferstärke:", error);
+    res
+      .status(500)
+      .json({ error: "Fehler beim Publizieren der Greiferstärke" });
   }
 });
 // Endpunkt für die übermittelung des Namen des auszuführenden Programm
-app.post('/pickandplace/program', async (req, res) => {
+app.post("/pickandplace/program", async (req, res) => {
   const program = req.body.program;
-  if (typeof program !== 'string') {
-    return res.status(400).json({ error: 'Ungültiger Programmwert, erwartet eine Zeichenkette' });
+  if (typeof program !== "string") {
+    return res
+      .status(400)
+      .json({ error: "Ungültiger Programmwert, erwartet eine Zeichenkette" });
   }
 
   try {
-    await mqttClient.publish('pickandplace/program', program);
-    res.status(200).json({ message: 'Programm erfolgreich übermittelt.' });
+    await mqttClient.publish("pickandplace/program", program);
+    res.status(200).json({ message: "Programm erfolgreich übermittelt." });
   } catch (error) {
-    console.error('Fehler beim Publizieren des Programms:', error);
-    res.status(500).json({ error: 'Fehler beim Publizieren des Programms' });
+    console.error("Fehler beim Publizieren des Programms:", error);
+    res.status(500).json({ error: "Fehler beim Publizieren des Programms" });
   }
 });
 
 // Endpunkt zum Herunterladen der API-Anleitung
-app.get('/downloadApiGuide', (req, res) => {
-  const apiGuidePath = path.join(__dirname, 'API_Anleitung.pdf');
+app.get("/downloadApiGuide", (req, res) => {
+  const apiGuidePath = path.join(__dirname, "API_Anleitung.pdf");
 
   // Überprüfen, ob die API-Anleitung existiert
-  fs.exists(apiGuidePath, exists => {
+  fs.exists(apiGuidePath, (exists) => {
     if (exists) {
       // Setzt den Content-Type für PDF-Dateien
-      res.setHeader('Content-Type', 'application/pdf');
-      
+      res.setHeader("Content-Type", "application/pdf");
+
       // Stellt die API-Anleitung zum Download bereit
-      res.download(apiGuidePath, 'API-Anleitung.pdf', err => {
+      res.download(apiGuidePath, "API-Anleitung.pdf", (err) => {
         if (err) {
           // Fehler beim Senden der Datei
-          console.error('Fehler beim Herunterladen der API-Anleitung:', err);
-          res.status(500).json({ error: 'Fehler beim Herunterladen der API-Anleitung' });
+          console.error("Fehler beim Herunterladen der API-Anleitung:", err);
+          res
+            .status(500)
+            .json({ error: "Fehler beim Herunterladen der API-Anleitung" });
         }
       });
     } else {
       // Datei nicht gefunden
-      res.status(404).json({ error: 'API-Anleitung nicht gefunden' });
+      res.status(404).json({ error: "API-Anleitung nicht gefunden" });
     }
   });
 });
 
-
 // Pfad zum Log-Verzeichnis
-const logFolder = path.join(__dirname, '../../log');
+const logFolder = path.join(__dirname, "../../log");
 
 // Endpunkt zum Herunterladen des Log-Verzeichnisses
-app.get('/downloadLogs', async (req, res) => {
+app.get("/downloadLogs", async (req, res) => {
   try {
     // Überprüfen, ob der Log-Ordner existiert
     const exists = await fsextra.pathExists(logFolder);
     if (!exists) {
-      console.log('Log-Verzeichnis nicht gefunden:', logFolder);
-      return res.status(404).json({ error: 'Log-Verzeichnis nicht gefunden' });
+      console.log("Log-Verzeichnis nicht gefunden:", logFolder);
+      return res.status(404).json({ error: "Log-Verzeichnis nicht gefunden" });
     }
 
     // Content-Type und Header für den Download setzen
-    res.setHeader('Content-Type', 'application/zip');
-    res.setHeader('Content-Disposition', 'attachment; filename="logs.zip"');
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader("Content-Disposition", 'attachment; filename="logs.zip"');
 
     // Archiver-Instanz erstellen und mit der Response verbinden
-    const archive = archiver('zip', {
-      zlib: { level: 9 } // Setzt die Komprimierungsstufe
+    const archive = archiver("zip", {
+      zlib: { level: 9 }, // Setzt die Komprimierungsstufe
     });
 
-    archive.on('error', function(err) {
-      console.error('Archiver Fehler:', err);
+    archive.on("error", function (err) {
+      console.error("Archiver Fehler:", err);
       throw err; // wirft den Fehler, der dann im Catch-Block gefangen wird
     });
 
@@ -276,38 +306,43 @@ app.get('/downloadLogs', async (req, res) => {
     // Archivierung abschließen
     archive.finalize();
   } catch (error) {
-    console.error('Fehler beim Erstellen des Zip-Archivs:', error);
-    res.status(500).json({ error: 'Fehler beim Herunterladen der Logs' });
+    console.error("Fehler beim Erstellen des Zip-Archivs:", error);
+    res.status(500).json({ error: "Fehler beim Herunterladen der Logs" });
   }
 });
 
 // Endpunkt zum Löschen des Log-Verzeichnisses
-app.delete('/deleteLogs', async (req, res) => {
+app.delete("/deleteLogs", async (req, res) => {
   try {
     // Überprüfen, ob der Log-Ordner existiert
     const exists = await fsextra.pathExists(logFolder);
     if (!exists) {
-      console.log('Log-Verzeichnis nicht gefunden:', logFolder);
-      return res.status(404).json({ error: 'Log-Verzeichnis nicht gefunden' });
+      console.log("Log-Verzeichnis nicht gefunden:", logFolder);
+      return res.status(404).json({ error: "Log-Verzeichnis nicht gefunden" });
     }
 
     // Löschen des Log-Verzeichnisses
     await fsextra.remove(logFolder);
 
     // Bestätigung senden, dass das Verzeichnis gelöscht wurde
-    res.status(200).json({ message: 'Log-Verzeichnis erfolgreich gelöscht.' });
+    res.status(200).json({ message: "Log-Verzeichnis erfolgreich gelöscht." });
   } catch (error) {
-    console.error('Fehler beim Löschen des Log-Verzeichnisses:', error);
-    res.status(500).json({ error: 'Fehler beim Löschen der Logs' });
+    console.error("Fehler beim Löschen des Log-Verzeichnisses:", error);
+    res.status(500).json({ error: "Fehler beim Löschen der Logs" });
   }
 });
 
 // Endpunkt zur Steuerung des Magneten
-app.post('/magnet/control', async (req, res) => {
+app.post("/magnet/control", async (req, res) => {
   const { action } = req.body; // Erwartet "enable" oder "disable"
 
-  if (!action || (action !== 'enable' && action !== 'disable')) {
-    return res.status(400).json({ error: 'Ungültiger oder fehlender Aktionsparameter. Erwartet "enable" oder "disable".' });
+  if (!action || (action !== "enable" && action !== "disable")) {
+    return res
+      .status(400)
+      .json({
+        error:
+          'Ungültiger oder fehlender Aktionsparameter. Erwartet "enable" oder "disable".',
+      });
   }
 
   try {
@@ -316,7 +351,7 @@ app.post('/magnet/control', async (req, res) => {
     }
 
     // Publizieren des Magnetzustandes auf dem vorhandenen MQTT-Topic
-    const topic = 'gripper/control';
+    const topic = "gripper/control";
     const message = JSON.stringify({ magneticGripperAttachment: action });
 
     await mqttClient.publish(topic, message);
@@ -324,37 +359,39 @@ app.post('/magnet/control', async (req, res) => {
     res.status(200).json({ message: `Magnet ${action} signalisiert.` });
   } catch (error) {
     console.error(`Fehler beim Publizieren des Magnetzustandes:`, error);
-    res.status(500).json({ error: 'Fehler beim Publizieren des Magnetzustandes' });
+    res
+      .status(500)
+      .json({ error: "Fehler beim Publizieren des Magnetzustandes" });
   }
 });
 
-
-
-
-
-
 //websocket-mqtt-service
-wss.on('connection', function connection(ws) {
-  console.log('WebSocket client verbunden.');
-
-  mqttClient.on('message', (topic, message) => {
-    if (topic === 'robot/state') {
+wss.on("connection", function connection(ws) {
+  console.log("WebSocket client verbunden.");
+  if (!mqttClient || !mqttClient.connected) {
+    console.error(
+      "MQTT-Client ist zum Zeitpunkt der WebSocket-Verbindung nicht verfügbar."
+    );
+    ws.close(); //WebSocket schließen, wenn kein MQTT-Client verfügbar ist.
+    return;
+  }
+  mqttClient.on("message", (topic, message) => {
+    if (topic === "robot/state") {
       ws.send(message.toString()); // Senden der Nachricht an den verbundenen WebSocket-Client
     }
   });
 
-  ws.on('close', () => {
-    console.log('WebSocket client getrennt.');
+  ws.on("close", () => {
+    console.log("WebSocket client getrennt.");
   });
 
-  ws.on('error', (error) => {
-    console.error('WebSocket-Fehler:', error);
+  ws.on("error", (error) => {
+    console.error("WebSocket-Fehler:", error);
   });
 });
 
-
 // Statische Dateien bedienen
-app.use(express.static(path.join(__dirname,'../../Frontend' , 'build')));
+app.use(express.static(path.join(__dirname, "../../Frontend", "build")));
 
 // Anhören sowohl auf dem HTTP- als auch auf dem WebSocket-Server
 server.listen(port, () => {
@@ -372,8 +409,8 @@ function handleExit(options, err) {
   if (options.exit) process.exit();
 }
 
-process.on('exit', handleExit.bind(null, {cleanup: true}));
-process.on('SIGINT', handleExit.bind(null, {exit: true}));
-process.on('SIGUSR1', handleExit.bind(null, {exit: true}));
-process.on('SIGUSR2', handleExit.bind(null, {exit: true}));
-process.on('uncaughtException', handleExit.bind(null, {exit: true}));
+process.on("exit", handleExit.bind(null, { cleanup: true }));
+process.on("SIGINT", handleExit.bind(null, { exit: true }));
+process.on("SIGUSR1", handleExit.bind(null, { exit: true }));
+process.on("SIGUSR2", handleExit.bind(null, { exit: true }));
+process.on("uncaughtException", handleExit.bind(null, { exit: true }));
