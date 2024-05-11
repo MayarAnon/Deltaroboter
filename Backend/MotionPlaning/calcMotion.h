@@ -6,7 +6,9 @@
 #include "global.h"
 
 // Declares a function to calculate the pulse width for a trapezoidal profile.
-int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int totalSteps);
+int calculateTrapezoidalPulsewidth(int base, int step, int total, int accel);
+
+int calculateModifiedSigmoidPulsewidth(int basePulsewidth, int currentStep, int totalSteps, int maxAcceleration);
 
 // Verarbeitet die Interpolation erzeugt eine entsprechende JSON-Nachricht und publisht diese an MotorControll.
 // Parameter:

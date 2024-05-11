@@ -78,7 +78,7 @@ extern Parameter params;
 
 //Mqtt defines
 #define ADDRESS     "tcp://localhost:1883"
-#define CLIENTID    "MotionPlaningClient"
+#define CLIENTID    "MotionPlaning"
 #define QOS         1  // Set Quality of Service Level to 0 (At most once)
 
 //MotionProfil Defines
@@ -87,6 +87,8 @@ extern Parameter params;
 #define MINIMUMP2PCUTOF 10
 #define RISEPERCENTAGE 0.15
 #define CONSTSPEEDPERCENTAGE 0.7
-#define P2PINTERPOLATIONSTEPS 20
+
+#define START_PULSEWIDTH 530  // Definiert die Anfangspulsweite des Motors
+#define ACCELERATION 12
 
 #endif

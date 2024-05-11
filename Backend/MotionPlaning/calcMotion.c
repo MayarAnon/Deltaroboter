@@ -14,41 +14,58 @@
 
 void publishCurrentState(Coordinate pos, Angles ang);
 
-// Funktion zur Berechnung der Pulsweite für das Trapezprofil
-int calculateTrapezoidalPulsewidth(int basePulsewidth, int currentStep, int totalSteps) {
-    int rampUpSteps = totalSteps * RISEPERCENTAGE;   // 25% der Schritte für das Heruntermodulieren
-    int constantSteps = totalSteps * CONSTSPEEDPERCENTAGE;  // 50% der Schritte konstant
-    int rampDownSteps = totalSteps - rampUpSteps - constantSteps;  // 25% der Schritte für das Hochmodulieren
 
-    // Startet mit dem höchsten Wert (530) und moduliert herunter auf basePulsewidth
-    int startPulsewidth = 530;
-    
-    if (currentStep < rampUpSteps) {
-        // Ramp-down Phase (Modulierung herunter)
-        return startPulsewidth - (int)((startPulsewidth - basePulsewidth) * (currentStep / (float)rampUpSteps));
-    } else if (currentStep < (rampUpSteps + constantSteps)) {
-        // Konstante Phase
-        return basePulsewidth;
+// Funktion zur Berechnung der Pulsweite basierend auf dem aktuellen Schritt
+int calculateTrapezoidalPulsewidth(int base, int step, int total, int accel) {
+    int change = abs(START_PULSEWIDTH - base); // Berechnet die notwendige Änderung der Pulsweite
+    int stepsNeeded = change / accel; // Ermittelt, wie viele Schritte nötig sind, um die Änderung durchzuführen
+    int rampUp = (total > 2 * stepsNeeded) ? stepsNeeded : total / 2; // Bestimmt die Dauer der Beschleunigungsphase
+    int rampDown = total - rampUp; // Beginn der Verzögerungsphase
+
+    // Berechnet die Pulsweite basierend auf der aktuellen Phase des Bewegungsprofils
+    if (step < rampUp) {
+        // Beschleunigungsphase: Pulsweite verringert sich mit jedem Schritt
+        return START_PULSEWIDTH - step * accel;
+    } else if (step >= rampDown) {
+        // Verzögerungsphase: Pulsweite beginnt sich wieder zu erhöhen
+        return START_PULSEWIDTH - (total - step) * accel;
     } else {
-        // Ramp-up Phase (Modulierung hoch)
-        return basePulsewidth + (int)((startPulsewidth - basePulsewidth) * ((currentStep - rampUpSteps - constantSteps) / (float)rampDownSteps));
+        // Konstante Phase: Pulsweite bleibt auf dem Basiswert
+        return base;
     }
 }
 
-// Funktion zur Berechnung der Pulsweite für zwei hintereinander folgende Sigmoid-Kurven
-int calculateSigmoidPulsewidth(int maxPulsewidth, int currentStep, int totalSteps) {
-    int startPulsewidth =  530;
-    int midPoint = totalSteps / 2;  // Mittelpunkt, teilt die Schritte in zwei Hälften
-    float k = 10.0 / midPoint;  // Skalierungsfaktor für die Steilheit der S-Kurve
-    float t0 = midPoint / 2.0;  // Mittelpunkt der S-Kurve für jede Phase
 
-    if (currentStep <= midPoint) {
-        // Erste Hälfte: Anstieg von startPulsewidth zu maxPulsewidth
-        return startPulsewidth + (int)((maxPulsewidth - startPulsewidth) / (1.0 + exp(-k * (currentStep - t0))));
-    } else {
-        // Zweite Hälfte: Abfall von maxPulsewidth zu startPulsewidth
-        return maxPulsewidth - (int)((maxPulsewidth - startPulsewidth) / (1.0 + exp(-k * (currentStep - midPoint - t0))));
+// Funktion zur Berechnung der Pulsweite für zwei hintereinander folgende Sigmoid-Kurven
+int calculateModifiedSigmoidPulsewidth(int basePulsewidth, int currentStep, int totalSteps, int maxAcceleration) {
+    int change = abs(START_PULSEWIDTH - basePulsewidth);
+    int stepsNeeded = change / maxAcceleration;  // Berechnet, wie viele Schritte für die max. Beschleunigung benötigt werden
+    if (totalSteps < 2 * stepsNeeded) {
+        // Reduziere den Ziel-Pulsweiten-Wechsel, wenn nicht genug Schritte vorhanden sind
+        change = (totalSteps / 2) * maxAcceleration;
+        basePulsewidth = START_PULSEWIDTH - change;
+        stepsNeeded = totalSteps / 2;
     }
+    int rampUp = stepsNeeded;
+    int rampDown = totalSteps - stepsNeeded;
+    int constantPhaseStart = rampUp;
+    int constantPhaseEnd = rampDown;
+
+    float k = 10.0 / rampUp;  // Skalierungsfaktor für die Steilheit der S-Kurve
+    float t0 = rampUp / 2.0;  // Mittelpunkt der S-Kurve für die Beschleunigungsphase
+
+    if (currentStep < rampUp) {
+        // Beschleunigungsphase
+        return START_PULSEWIDTH - (int)((START_PULSEWIDTH - basePulsewidth) / (1.0 + exp(-k * (currentStep - t0))));
+    } else if (currentStep >= constantPhaseStart && currentStep < constantPhaseEnd) {
+        // Konstante Phase
+        return basePulsewidth;
+    } else if (currentStep >= constantPhaseEnd) {
+        // Verzögerungsphase
+        float t1 = (totalSteps - rampDown) / 2.0;
+        return basePulsewidth + (int)((START_PULSEWIDTH - basePulsewidth) / (1.0 + exp(-k * (currentStep - constantPhaseEnd - t1))));
+    }
+    return basePulsewidth;  // Sicheres Rückgabeverhalten, falls außerhalb der definierten Bereiche
 }
 
 // Verarbeitet die Interpolation erzeugt eine entsprechende JSON-Nachricht und publisht diese an MotorControll.
@@ -87,9 +104,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
 
         // Anpassung der Pulsbreite für ein Trapezprofil
         if (currentMotionProfil == TrapezProfil && InterpolationSteps > INTERPOLATIONSTEPCUTOF) {
-            pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps);
+            pulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, InterpolationSteps,ACCELERATION);
         }else if(currentMotionProfil == SigmoidProfil && InterpolationSteps > INTERPOLATIONSTEPCUTOF){
-            pulsewidth = calculateSigmoidPulsewidth(maxSpeed, i, InterpolationSteps);
+            pulsewidth = calculateModifiedSigmoidPulsewidth(maxSpeed, i, InterpolationSteps,ACCELERATION);
         }else {
             pulsewidth = maxSpeed;
         }
@@ -135,7 +152,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             // Point to Point Verfahren 2 Nachrichten und maxStep größer 50 und Trapezprofil
             if (InterpolationSteps == 2 && maxSteps > MINIMUMP2PCUTOF && (currentMotionProfil == TrapezProfil || currentMotionProfil == SigmoidProfil)) {
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
-                int devision = P2PINTERPOLATIONSTEPS;
+                //distanz Berechnen zwischen Punkten 
+                float distance = sqrt(pow(coordinates[1].x - coordinates[0].x, 2) + pow(coordinates[1].y - coordinates[0].y, 2) + pow(coordinates[1].z - coordinates[0].z, 2));
+                int devision = distance;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
                 int totalSteps[4] = {0, 0, 0, 0};  
 
@@ -161,9 +180,9 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                     // Berechnen der Pulsweite für diese Nachricht gemäß Trapezprofil oder Sigmoid
                     int messagePulsewidth = 530;
                     if (currentMotionProfil == TrapezProfil) {
-                        messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, devision);
+                        messagePulsewidth = calculateTrapezoidalPulsewidth(maxSpeed, i, devision,ACCELERATION);
                     }else if(currentMotionProfil == SigmoidProfil){
-                        messagePulsewidth = calculateSigmoidPulsewidth(maxSpeed, i, devision);
+                        messagePulsewidth = calculateModifiedSigmoidPulsewidth(maxSpeed, i, devision,ACCELERATION);
                     }
 
                     // Berechnet die maximale Anzahl von Schritten für das Stopen des Programmes für die Ausführungszeit

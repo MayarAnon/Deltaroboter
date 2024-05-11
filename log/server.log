@@ -468,3 +468,224 @@
 2024-05-11 10:45:25 MQTT-Client verbunden und bereit.
 2024-05-11 10:47:09 WebSocket client verbunden.
 2024-05-11 10:47:09 WebSocket client verbunden.
+2024-05-11 20:28:16 Server und WebSocket laufen auf Port 3010
+2024-05-11 20:28:16 MQTT-Client verbunden und bereit.
+2024-05-11 20:52:30 Server und WebSocket laufen auf Port 3010
+2024-05-11 20:52:30 MQTT-Client verbunden und bereit.
+2024-05-11 21:13:24 nohup: ignoring input
+2024-05-11 21:13:27 Server und WebSocket laufen auf Port 3010
+2024-05-11 21:13:27 MQTT-Client verbunden und bereit.
+2024-05-11 21:15:38 nohup: ignoring input
+2024-05-11 21:15:40 Server und WebSocket laufen auf Port 3010
+2024-05-11 21:15:41 MQTT-Client verbunden und bereit.
+2024-05-11 21:26:43 nohup: ignoring input
+2024-05-11 21:26:47 Server und WebSocket laufen auf Port 3010
+2024-05-11 21:26:47 MQTT-Client verbunden und bereit.
+2024-05-11 21:28:22 WebSocket client verbunden.
+2024-05-11 21:29:24 nohup: ignoring input
+2024-05-11 21:29:26 Server und WebSocket laufen auf Port 3010
+2024-05-11 21:29:26 MQTT-Client verbunden und bereit.
+2024-05-11 21:29:26 WebSocket client verbunden.
+2024-05-11 21:29:41 WebSocket client getrennt.
+2024-05-11 21:30:20 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 21:30:20 Programm "speed.gcode" erfolgreich gespeichert.
+2024-05-11 21:30:35 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 21:30:35 Programm "speed.gcode" erfolgreich gespeichert.
+2024-05-11 21:30:54 WebSocket client verbunden.
+2024-05-11 23:23:35 nohup: ignoring input
+2024-05-11 23:23:39 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:23:39 MQTT-Client verbunden und bereit.
+2024-05-11 23:23:40 WebSocket client verbunden.
+2024-05-11 23:23:40 WebSocket client verbunden.
+2024-05-11 23:23:40 WebSocket client verbunden.
+2024-05-11 23:23:44 WebSocket client verbunden.
+2024-05-11 23:23:44 WebSocket client verbunden.
+2024-05-11 23:23:45 WebSocket client verbunden.
+2024-05-11 23:24:57 WebSocket client getrennt.
+2024-05-11 23:25:03 WebSocket client verbunden.
+2024-05-11 23:25:03 WebSocket client verbunden.
+2024-05-11 23:25:14 WebSocket client verbunden.
+2024-05-11 23:25:17 WebSocket client getrennt.
+2024-05-11 23:25:17 WebSocket client getrennt.
+2024-05-11 23:25:18 WebSocket client verbunden.
+2024-05-11 23:25:18 WebSocket client verbunden.
+2024-05-11 23:25:18 (node:1165) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:25:18 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:25:27 WebSocket client getrennt.
+2024-05-11 23:25:27 WebSocket client getrennt.
+2024-05-11 23:25:27 WebSocket client verbunden.
+2024-05-11 23:25:27 WebSocket client verbunden.
+2024-05-11 23:25:55 Datei "Kreuz.gcode" erfolgreich gelöscht.
+2024-05-11 23:26:22 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:26:22 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:27:50 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:27:50 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:28:14 WebSocket client getrennt.
+2024-05-11 23:28:15 WebSocket client verbunden.
+2024-05-11 23:28:19 WebSocket client verbunden.
+2024-05-11 23:28:19 WebSocket client verbunden.
+2024-05-11 23:28:30 WebSocket client getrennt.
+2024-05-11 23:28:30 WebSocket client verbunden.
+2024-05-11 23:28:36 WebSocket client verbunden.
+2024-05-11 23:28:36 WebSocket client verbunden.
+2024-05-11 23:28:53 WebSocket client getrennt.
+2024-05-11 23:28:53 WebSocket client verbunden.
+2024-05-11 23:31:14 nohup: ignoring input
+2024-05-11 23:31:16 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:31:16 MQTT-Client verbunden und bereit.
+2024-05-11 23:31:16 WebSocket client verbunden.
+2024-05-11 23:31:16 WebSocket client verbunden.
+2024-05-11 23:31:16 WebSocket client verbunden.
+2024-05-11 23:31:16 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:31:21 (node:3321) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:31:21 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:31:21 WebSocket client verbunden.
+2024-05-11 23:32:15 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:32:15 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:32:49 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:32:49 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:33:43 nohup: ignoring input
+2024-05-11 23:33:45 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:33:45 MQTT-Client verbunden und bereit.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:45 WebSocket client verbunden.
+2024-05-11 23:33:46 WebSocket client verbunden.
+2024-05-11 23:33:46 WebSocket client verbunden.
+2024-05-11 23:33:46 WebSocket client verbunden.
+2024-05-11 23:33:48 WebSocket client verbunden.
+2024-05-11 23:33:48 (node:4766) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:33:48 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:33:48 WebSocket client verbunden.
+2024-05-11 23:33:50 WebSocket client verbunden.
+2024-05-11 23:33:50 WebSocket client verbunden.
+2024-05-11 23:33:57 WebSocket client verbunden.
+2024-05-11 23:33:57 WebSocket client getrennt.
+2024-05-11 23:35:04 nohup: ignoring input
+2024-05-11 23:35:06 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 MQTT-Client verbunden und bereit.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:06 WebSocket client verbunden.
+2024-05-11 23:35:07 WebSocket client verbunden.
+2024-05-11 23:35:09 WebSocket client verbunden.
+2024-05-11 23:35:12 WebSocket client verbunden.
+2024-05-11 23:35:12 WebSocket client verbunden.
+2024-05-11 23:35:12 (node:5501) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:35:12 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:35:12 WebSocket client verbunden.
+2024-05-11 23:35:12 WebSocket client verbunden.
+2024-05-11 23:35:12 WebSocket client verbunden.
+2024-05-11 23:35:15 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:35:15 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:36:17 nohup: ignoring input
+2024-05-11 23:36:19 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:36:19 MQTT-Client verbunden und bereit.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:19 WebSocket client verbunden.
+2024-05-11 23:36:21 WebSocket client verbunden.
+2024-05-11 23:36:21 (node:6171) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:36:21 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:36:23 WebSocket client verbunden.
+2024-05-11 23:36:24 WebSocket client verbunden.
+2024-05-11 23:36:27 WebSocket client verbunden.
+2024-05-11 23:38:22 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:38:22 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:38:22 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:38:22 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:45:49 nohup: ignoring input
+2024-05-11 23:45:52 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:45:52 MQTT-Client verbunden und bereit.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:52 WebSocket client verbunden.
+2024-05-11 23:45:53 WebSocket client verbunden.
+2024-05-11 23:45:53 WebSocket client verbunden.
+2024-05-11 23:45:55 WebSocket client verbunden.
+2024-05-11 23:45:55 (node:7510) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:45:55 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:45:56 WebSocket client verbunden.
+2024-05-11 23:45:57 WebSocket client verbunden.
+2024-05-11 23:46:01 WebSocket client verbunden.
+2024-05-11 23:46:26 nohup: ignoring input
+2024-05-11 23:46:28 Server und WebSocket laufen auf Port 3010
+2024-05-11 23:46:28 MQTT-Client verbunden und bereit.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:28 (node:7771) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-11 23:46:28 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-11 23:46:28 WebSocket client verbunden.
+2024-05-11 23:46:32 WebSocket client verbunden.
+2024-05-11 23:46:34 WebSocket client verbunden.
+2024-05-11 23:48:24 WebSocket client verbunden.
+2024-05-11 23:48:24 WebSocket client verbunden.
+2024-05-11 23:49:26 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:49:26 Anfrage zum Speichern eines Programms erhalten
+2024-05-11 23:49:26 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:49:26 Programm "Kreuz.gcode" erfolgreich gespeichert.
+2024-05-11 23:49:35 WebSocket client getrennt.
+2024-05-11 23:49:35 WebSocket client verbunden.
+2024-05-11 23:52:51 WebSocket client verbunden.
+2024-05-11 23:52:51 WebSocket client verbunden.
+2024-05-11 23:52:54 WebSocket client getrennt.
+2024-05-11 23:52:54 WebSocket client verbunden.
+2024-05-12 00:02:39 WebSocket client getrennt.
+2024-05-12 00:02:39 WebSocket client getrennt.
+2024-05-12 00:02:39 WebSocket client getrennt.
+2024-05-12 00:02:39 WebSocket client getrennt.
+2024-05-12 00:02:39 WebSocket client getrennt.
+2024-05-12 00:08:22 WebSocket client verbunden.
+2024-05-12 00:08:55 nohup: ignoring input
+2024-05-12 00:08:57 Server und WebSocket laufen auf Port 3010
+2024-05-12 00:08:57 MQTT-Client verbunden und bereit.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:57 WebSocket client verbunden.
+2024-05-12 00:08:58 WebSocket client verbunden.
+2024-05-12 00:08:58 WebSocket client verbunden.
+2024-05-12 00:08:58 WebSocket client verbunden.
+2024-05-12 00:08:58 WebSocket client verbunden.
+2024-05-12 00:08:59 WebSocket client verbunden.
+2024-05-12 00:08:59 (node:10554) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
+2024-05-12 00:08:59 (Use `node --trace-warnings ...` to show where the warning was created)
+2024-05-12 00:09:02 WebSocket client verbunden.
