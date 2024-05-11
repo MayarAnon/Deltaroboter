@@ -463,3 +463,8 @@
 2024-05-10 19:04:13 Anfrage zum Speichern eines Programms erhalten
 2024-05-10 19:04:13 Programm "p2ptest1.gcode" erfolgreich gespeichert.
 2024-05-10 19:04:53 Datei "p2ptest1.gcode" erfolgreich gelöscht.
+2024-05-11 10:45:22 nohup: ignoring input
+2024-05-11 10:45:25 Server und WebSocket laufen auf Port 3010
+2024-05-11 10:45:25 MQTT-Client verbunden und bereit.
+2024-05-11 10:47:09 WebSocket client verbunden.
+2024-05-11 10:47:09 WebSocket client verbunden.

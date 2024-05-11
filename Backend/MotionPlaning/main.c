@@ -132,6 +132,7 @@ void readFile(const char* filename) {
         return;
     }
     printf("Programm wird ausgeführt. \n");
+    params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
     while ((read = getline(&line, &len, file)) != -1) {
         if (stopFlag) {
             printf("load Program wurde Abgebrochen");
