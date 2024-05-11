@@ -18,16 +18,17 @@
 // Verarbeitet eine einzelne Zeile des G-Code-Befehls.
 // Parameter:
 //   - const char* line: Die Zeile des G-Codes, die verarbeitet werden soll.
-void processLine(const char* line) {
+void processLine(char* line) {
     char command[4];
-    float x, y,z,phi, i, j, f,t,r;
     int numParams;
 
-    // Initialisiere Parameter mit Standardwerten
-    x = y  = i = j = phi = t = r = 0.0;
-    f = 75;
-    z = -280.0;
-
+    // Überspringe die GCode-Nummern am Anfang, falls vorhanden.
+    char* copyOfLine = line;
+    if (sscanf(copyOfLine, "N%d", &(int){0}) == 1) {
+        while (*copyOfLine && !isspace(*copyOfLine)) copyOfLine++;  // Überspringe die Nummer
+        while (*copyOfLine && isspace(*copyOfLine)) copyOfLine++;  // Überspringe Leerzeichen
+    }
+    strcpy(line, copyOfLine);  // Überschreibe das Original mit dem bereinigten String
     
     // Extrahiere den Befehlstyp aus der Zeile
     numParams = sscanf(line, "%s", command);
@@ -36,7 +37,7 @@ void processLine(const char* line) {
         return;
     }
 
-    if (strcmp(command, "G0") == 0) {
+    if (strcmp(command, "G0") == 0 || strcmp(command, "G00") == 0) {
         //Parameter aus string lesen 
         Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
         for(const char *p = line; *p; ++p) {
@@ -49,7 +50,7 @@ void processLine(const char* line) {
         processInterpolationAndCreateJSON(coordinates,2, params.f);
     
     }
-    else if (strcmp(command, "G1") == 0) {
+    else if (strcmp(command, "G1") == 0 || strcmp(command, "G01") == 0) {
         //Parameter aus string lesen 
         for(const char *p = line; *p; ++p) {
         sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
@@ -79,19 +80,21 @@ void processLine(const char* line) {
         
     }
     // Verarbeitet Kreisbewegungen gemäß den G-Code-Befehlen G2 (Kreis im Uhrzeigersinn) und G3 (Kreis gegen den Uhrzeigersinn).
-    else if (strcmp(command, "G2") == 0 ||  strcmp(command, "G3" ) == 0) {
+    else if (strcmp(command, "G2") == 0 ||  strcmp(command, "G3" ) == 0 || strcmp(command, "G02") == 0 || strcmp(command, "G03") == 0) {
         // Bestimme die Drehrichtung basierend auf dem G-Code-Befehl
         int direction = 0;
-        if(strcmp(command, "G2") == 0){
+        if(strcmp(command, "G2") == 0 || strcmp(command, "G02") == 0){
             direction = 1; // Uhrzeigersinn
         }
-        else if(strcmp(command, "G3") == 0){
+        else if(strcmp(command, "G3") == 0 || strcmp(command, "G03") == 0){
             direction = -1; // Gegen den Uhrzeigersinn
         }
         
 
         Coordinate center; 
         Coordinate end;
+
+        params.i = params.j = params.r = 0.0;
         //Parameter X: X-Achse Y: Y-Achse Z: Z-Achese A: Rotationsachse Endeffektor F: Speed
         switch(currentPlane) {
         case XY_PLANE:
@@ -123,11 +126,21 @@ void processLine(const char* line) {
         }
         
         int numSteps = 0;
-        
+        /*
+        printf("currentPosition(%f,%f,%F)\n",currentPosition.x,currentPosition.y,currentPosition.z);
+        printf("center(%f,%f,%F)\n",center.x,center.y,center.z);
+        printf("end(%f,%f,%F)\n",end.x,end.y,end.z);
+        printf("radius: %f \n",params.r);
+        */
         Coordinate* coordinates = circularInterpolation(currentPosition, end, center,params.r, currentPlane,direction, &numSteps);
+        /*
+        for(int i=0;i<numSteps;i++){
+            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 400);
+        }
+        */
         processInterpolationAndCreateJSON(coordinates,numSteps,params.f);
     }
-    else if (strcmp(command, "G4") == 0) {
+    else if (strcmp(command, "G4") == 0 || strcmp(command, "G04") == 0) {
         int numParams = sscanf(line, "%*s P%f", &params.t);
 
         if (numParams < 1) {
