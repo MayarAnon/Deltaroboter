@@ -43,7 +43,7 @@ class GripperControl:
         self.client.on_message = self.on_message
         self.client.connect(host, port, 60)
         self.pwm = GPIO.PWM(ParallelGripper, 100)
-        self.pwm.start(0)
+        self.pwm.start(0) #anfänglicher Duty Cycle
 
     def on_connect(self, client, userdata, flags, rc):
         """
@@ -69,7 +69,8 @@ class GripperControl:
         """
         data = json.loads(message)
         if "parallelGripper" in data:
-            pwmValue = int(data["parallelGripper"])
+            input_pwm = int(data["parallelGripper"])
+            pwmValue = 10 + 0.8 * input_pwm #skallierung von 0-100 auf DutyCycle von 10% bis 90%
             self.pwm.ChangeDutyCycle(pwmValue)
             GPIO.output(VacuumRelais, GPIO.LOW)
             GPIO.output(PumpRelais, GPIO.LOW)
