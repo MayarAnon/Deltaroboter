@@ -229,6 +229,15 @@ const DigitalTwin = () => {
     } else {
       camera.position.set(0, 0, -1);
     }
+    const handleResize = () => {
+      // Update camera aspect ratio and renderer size
+      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+    };
+  
+    // Add event listener for window resize
+    window.addEventListener('resize', handleResize);
     //********************************************************************add light************************************************************************** */
     const light = new THREE.AmbientLight(0x404040); // weiches Licht
     scene.add(light);
@@ -640,6 +649,7 @@ const DigitalTwin = () => {
     };
     animate();
     return () => {
+      window.removeEventListener('resize', handleResize);
       renderer.dispose();
       controls.dispose();
       gui.destroy();
