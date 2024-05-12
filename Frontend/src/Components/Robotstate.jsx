@@ -58,7 +58,7 @@ const RobotStateDisplay = () => {
     >
       <button
         onClick={toggleVisibility}
-        className="bg-blue-600 p-2 rounded-md mb-2"
+        className="px-4 ml-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold"
       >
         {isVisible ? "Hide Robot State" : "Show Robot State"}
       </button>
@@ -71,7 +71,7 @@ const RobotStateDisplay = () => {
               <div className="ml-5 mb-2">
                 {robotState.currentCoordinates && (
                   <div className="text-md mb-2">
-                    <p>Current Coordinates:</p>
+                    <p>Current Coordinates [M1,M2,M3,GripperAngle]:</p>
                     {robotState.currentCoordinates
                       .map((coord) => coord.toFixed(2))
                       .join(", ")}
@@ -79,7 +79,7 @@ const RobotStateDisplay = () => {
                 )}
                 {robotState.currentAngles && (
                   <div className="text-md mb-2">
-                    <p>Current Angles:</p>
+                    <p>Current Angles [M1,M2,M3]:</p>
                     {robotState.currentAngles
                       .map((angle) => angle.toFixed(2))
                       .join(", ")}
