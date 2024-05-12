@@ -689,3 +689,38 @@
 2024-05-12 00:08:59 (node:10554) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 message listeners added to [MqttClient]. Use emitter.setMaxListeners() to increase limit
 2024-05-12 00:08:59 (Use `node --trace-warnings ...` to show where the warning was created)
 2024-05-12 00:09:02 WebSocket client verbunden.
+2024-05-12 00:20:30 nohup: ignoring input
+2024-05-12 00:20:32 Server und WebSocket laufen auf Port 3010
+2024-05-12 00:20:32 MQTT-Client verbunden und bereit.
+2024-05-12 00:21:15 WebSocket client verbunden.
+2024-05-12 00:21:37 WebSocket client verbunden.
+2024-05-12 00:21:37 WebSocket client verbunden.
+2024-05-12 00:21:51 WebSocket client verbunden.
+2024-05-12 00:21:51 WebSocket client getrennt.
+2024-05-12 00:21:55 WebSocket client verbunden.
+2024-05-12 00:21:55 WebSocket client verbunden.
+2024-05-12 00:25:39 Anfrage zum Speichern eines Programms erhalten
+2024-05-12 00:25:39 Programm "Nicolaus.gcode" erfolgreich gespeichert.
+2024-05-12 00:26:38 Anfrage zum Speichern eines Programms erhalten
+2024-05-12 00:26:38 Programm "Nicolaus.gcode" erfolgreich gespeichert.
+2024-05-12 00:27:17 Anfrage zum Speichern eines Programms erhalten
+2024-05-12 00:27:17 Programm "Nicolaus.gcode" erfolgreich gespeichert.
+2024-05-12 00:30:18 Anfrage zum Speichern eines Programms erhalten
+2024-05-12 00:30:18 Programm "Nicolaus.gcode" erfolgreich gespeichert.
+2024-05-12 00:57:53 WebSocket client getrennt.
+2024-05-12 00:57:58 WebSocket client verbunden.
+2024-05-12 00:57:58 WebSocket client verbunden.
+2024-05-12 01:00:41 WebSocket client getrennt.
+2024-05-12 01:01:12 nohup: ignoring input
+2024-05-12 01:01:14 Server und WebSocket laufen auf Port 3010
+2024-05-12 01:01:14 MQTT-Client verbunden und bereit.
+2024-05-12 01:03:42 nohup: ignoring input
+2024-05-12 01:03:44 Server und WebSocket laufen auf Port 3010
+2024-05-12 01:03:44 MQTT-Client verbunden und bereit.
+2024-05-12 15:29:06 nohup: ignoring input
+2024-05-12 15:29:09 Server und WebSocket laufen auf Port 3010
+2024-05-12 15:29:09 MQTT-Client verbunden und bereit.
+2024-05-12 15:31:09 Anfrage zum Speichern eines Programms erhalten
+2024-05-12 15:31:09 Programm "verticalCircleTest.gcode" erfolgreich gespeichert.
+2024-05-12 15:31:47 WebSocket client verbunden.
+2024-05-12 15:31:47 WebSocket client verbunden.
