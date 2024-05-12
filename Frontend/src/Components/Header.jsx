@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilValue } from "recoil";
-import {serverAtom, settingAtom } from "../utils/atoms";
+import {settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 
 const Header = () => {
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const settings = useRecoilValue(settingAtom);
   const [isMenuHidden, setMenuHidden] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -2,13 +2,13 @@ import React, { useState, useCallback, useEffect } from "react";
 import InfoComponent from "./Info";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilState,useRecoilValue } from "recoil";
-import { settingAtom,serverAtom } from "../utils/atoms";
+import { settingAtom} from "../utils/atoms";
 import axios from "axios";
 import RobotStateDisplay from "./Robotstate";
 import BB8Toggle from "./DarkmodeToggle";
 // SettingsPage: A component to manage and display various settings
 const SettingsPage = () => {
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [tempSpeed, setTempSpeed] = useState(settings.speed);
   const [isModalOpen, setIsModalOpen] = useState(false);

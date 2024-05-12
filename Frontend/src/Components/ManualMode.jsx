@@ -8,13 +8,12 @@ import {
   zValueAtom,
   phiValueAtom,
   actuatorAtom,
-  settingAtom,
-  serverAtom,
+  settingAtom
 } from "../utils/atoms";
 // ManuellMode component responsible for manual control mode
 const ManuellMode = () => {
   const settings = useRecoilValue(settingAtom);
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const [xValue, setXValue] = useRecoilState(xValueAtom);
   const [yValue, setYValue] = useRecoilState(yValueAtom);
   const [zValue, setZValue] = useRecoilState(zValueAtom);

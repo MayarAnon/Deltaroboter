@@ -17,10 +17,6 @@ gCodeModeAtom: Stores the view mode of the G-code.
 */
 
 import { atom } from "recoil";
-export const serverAtom = atom({
-  key: "server",
-  default: "http://deltarobot:3010",
-});
 export const settingAtom = atom({
   key: "settingAtom",
   default: JSON.parse(localStorage.getItem("settings")) || {

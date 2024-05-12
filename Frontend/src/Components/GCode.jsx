@@ -3,7 +3,6 @@ import axios from "axios";
 import LoadProgrammList from "./ProgrammList";
 import { useRecoilState, useRecoilValue } from "recoil";
 import {
-  serverAtom,
   settingAtom,
   gCodeStringAtom,
   gCodeModeAtom,
@@ -12,7 +11,7 @@ import GCodeEditor from "./GCodeEditor";
 // GCode component: Handles the display and functionality of the G-Code section
 const GCode = (p) => {
   // State management for settings, G-Code mode, and shared G-Code string
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const settings = useRecoilValue(settingAtom);
   const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);

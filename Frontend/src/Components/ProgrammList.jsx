@@ -2,11 +2,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { HighlightedCode } from "./Texteditor";
 import { useRecoilState,useRecoilValue } from "recoil";
-import {serverAtom, settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
+import {settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
 import ConfirmationModal from "./ConfirmationModal";
 
 const LoadProgrammList = () => {
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const [programmlist, SetProgrammList] = useState([]);
   const settings = useRecoilValue(settingAtom);
   const [reloadTrigger, setReloadTrigger] = useState(0);
@@ -54,7 +54,7 @@ const LoadProgrammList = () => {
 };
 // Component to load individual programs
 const LoadProgramm = ({ color, name, content, onDelete }) => {
-  const server = useRecoilValue(serverAtom);
+  const server = process.env.REACT_APP_API_URL;
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
 
   const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
