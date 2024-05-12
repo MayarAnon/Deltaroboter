@@ -367,6 +367,11 @@ app.post("/magnet/control", async (req, res) => {
 
 //websocket-mqtt-service
 wss.on("connection", function connection(ws) {
+  const messageHandler = (topic, message) => {
+    if (topic === "robot/state") {
+      ws.send(message.toString());
+    }
+  };
   console.log("WebSocket client verbunden.");
   if (!mqttClient || !mqttClient.connected) {
     console.error(
@@ -375,18 +380,16 @@ wss.on("connection", function connection(ws) {
     ws.close(); //WebSocket schließen, wenn kein MQTT-Client verfügbar ist.
     return;
   }
-  mqttClient.on("message", (topic, message) => {
-    if (topic === "robot/state") {
-      ws.send(message.toString()); // Senden der Nachricht an den verbundenen WebSocket-Client
-    }
-  });
+  mqttClient.on("message", messageHandler);
 
   ws.on("close", () => {
     console.log("WebSocket client getrennt.");
+    mqttClient.removeListener("message", messageHandler);
   });
 
   ws.on("error", (error) => {
     console.error("WebSocket-Fehler:", error);
+    mqttClient.removeListener("message", messageHandler);
   });
 });
 
