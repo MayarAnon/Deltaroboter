@@ -70,9 +70,6 @@ void processLine(char* line) {
         /*
         for(int i=0;i<InterpolationSteps;i++){
             printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
-            currentPosition.x = coordinates[i].x;
-            currentPosition.y = coordinates[i].y;
-            currentPosition.z = coordinates[i].z;
         }
         */
         processInterpolationAndCreateJSON(coordinates,InterpolationSteps,params.f);
