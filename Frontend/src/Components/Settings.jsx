@@ -80,9 +80,9 @@ const SettingsPage = () => {
     [settings]
   );
 
-  const showApiGuide = () => {
-    // Implementieren Sie die Logik, um die API-Anleitung anzuzeigen
-    console.log("API Anleitung anzeigen");
+  const showGuide = () => {
+    // Implementieren Sie die Logik, um das Handbuch anzuzeigen
+    console.log("Handbuch anzeigen");
   };
   // Effect to update settings on the server
   useEffect(() => {
@@ -311,9 +311,9 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
-          <a href="http://deltarobot:3010/downloadApiGuide" target="_blank">
+          <a href="http://deltarobot:3010/downloadGuide" target="_blank">
             <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-              Download API Guide
+              Download Guide
             </button>
           </a>
         </div>
