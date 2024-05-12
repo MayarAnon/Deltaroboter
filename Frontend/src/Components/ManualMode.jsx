@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Slider from "./Slider";
 import axios from "axios";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useRecoilValue } from "recoil";
 import {
   xValueAtom,
   yValueAtom,
@@ -9,10 +9,12 @@ import {
   phiValueAtom,
   actuatorAtom,
   settingAtom,
+  serverAtom,
 } from "../utils/atoms";
 // ManuellMode component responsible for manual control mode
 const ManuellMode = () => {
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const settings = useRecoilValue(settingAtom);
+  const server = useRecoilValue(serverAtom);
   const [xValue, setXValue] = useRecoilState(xValueAtom);
   const [yValue, setYValue] = useRecoilState(yValueAtom);
   const [zValue, setZValue] = useRecoilState(zValueAtom);
@@ -99,9 +101,12 @@ const ManuellMode = () => {
       Math.round(parseFloat(phiValue) * 10) / 10,
     ];
     try {
-      const response = await axios.post("/manual/control/coordinates", {
-        coordinates,
-      });
+      const response = await axios.post(
+        `${server}/manual/control/coordinates`,
+        {
+          coordinates,
+        }
+      );
       console.log("Koordinaten gesendet:", coordinates);
     } catch (error) {
       console.error(
@@ -113,12 +118,9 @@ const ManuellMode = () => {
   // Function to send gripper signals to the server
   const sendGripperSignals = async (gripperValue) => {
     try {
-      const response = await axios.post(
-        "http://deltarobot:3010/manual/control/gripper",
-        {
-          gripper: gripperValue,
-        }
-      );
+      const response = await axios.post(`${server}/manual/control/gripper`, {
+        gripper: gripperValue,
+      });
       console.log("Greiferstärke gesendet:", gripperValue);
     } catch (error) {
       console.error(
@@ -164,6 +166,18 @@ const ManuellMode = () => {
   const calculateLimit = (value, radius) => {
     return Math.sqrt(radius * radius - value * value);
   };
+
+  //useEffect to load colormode from localstorage
+  useEffect(() => {
+    let savedSettings = localStorage.getItem("settings");
+    if (savedSettings) {
+      savedSettings = JSON.parse(savedSettings);
+      if (savedSettings.darkMode) {
+        console.log(savedSettings.darkMode);
+        document.body.classList.add("dark-mode");
+      }
+    }
+  }, []);
 
   return (
     <>

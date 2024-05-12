@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import "../styles/BB8Toggle.css";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { settingAtom } from "../utils/atoms";
 // BB8Toggle component: Renders a toggle button with BB8-themed design
 function BB8Toggle({ onClick }) {
   // State for settings and checked status
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const settings= useRecoilValue(settingAtom);
   const [isChecked, setIsChecked] = useState(settings.darkMode);
   // Effect to update isChecked when settings.darkMode changes
   useEffect(() => {

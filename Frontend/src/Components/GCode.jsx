@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import axios from "axios";
 import LoadProgrammList from "./ProgrammList";
-import { useRecoilState } from "recoil";
-import { settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  serverAtom,
+  settingAtom,
+  gCodeStringAtom,
+  gCodeModeAtom,
+} from "../utils/atoms";
 import GCodeEditor from "./GCodeEditor";
 // GCode component: Handles the display and functionality of the G-Code section
 const GCode = (p) => {
   // State management for settings, G-Code mode, and shared G-Code string
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const server = useRecoilValue(serverAtom);
+  const settings = useRecoilValue(settingAtom);
   const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
   // Function to update the G-Code mode
@@ -22,7 +28,7 @@ const GCode = (p) => {
   };
   // Function to save G-Code
   const saveGCode = () => {
-    const address = "http://deltarobot:3010/gcode";
+    const address = `${server}/gcode`;
 
     // Post request to save G-Code data
 
@@ -44,7 +50,17 @@ const GCode = (p) => {
       name: e.target.value,
     }));
   };
-
+  //useEffect to load colormode from localstorage
+  useEffect(() => {
+    let savedSettings = localStorage.getItem("settings");
+    if (savedSettings) {
+      savedSettings = JSON.parse(savedSettings);
+      if (savedSettings.darkMode) {
+        console.log(savedSettings.darkMode);
+        document.body.classList.add("dark-mode");
+      }
+    }
+  }, []);
   return (
     <>
       <div

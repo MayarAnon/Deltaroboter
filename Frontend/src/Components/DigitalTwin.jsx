@@ -231,13 +231,17 @@ const DigitalTwin = () => {
     }
     const handleResize = () => {
       // Update camera aspect ratio and renderer size
-      camera.aspect = mountRef.current.clientWidth / mountRef.current.clientHeight;
+      camera.aspect =
+        mountRef.current.clientWidth / mountRef.current.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(mountRef.current.clientWidth, mountRef.current.clientHeight);
+      renderer.setSize(
+        mountRef.current.clientWidth,
+        mountRef.current.clientHeight
+      );
     };
-  
+
     // Add event listener for window resize
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
     //********************************************************************add light************************************************************************** */
     const light = new THREE.AmbientLight(0x404040); // weiches Licht
     scene.add(light);
@@ -649,7 +653,7 @@ const DigitalTwin = () => {
     };
     animate();
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
       renderer.dispose();
       controls.dispose();
       gui.destroy();
@@ -893,6 +897,17 @@ const DigitalTwin = () => {
     }
   }, [pathPoints, objects.line]);
 
+  //useEffect to load colormode from localstorage
+  useEffect(() => {
+    let savedSettings = localStorage.getItem("settings");
+    if (savedSettings) {
+      savedSettings = JSON.parse(savedSettings);
+      if (savedSettings.darkMode) {
+        console.log(savedSettings.darkMode);
+        document.body.classList.add("dark-mode");
+      }
+    }
+  }, []);
   // Main component for the digital twin model, including visual representation and controls
   return (
     <>

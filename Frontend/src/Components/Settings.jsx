@@ -1,13 +1,14 @@
 import React, { useState, useCallback, useEffect } from "react";
 import InfoComponent from "./Info";
 import ConfirmationModal from "./ConfirmationModal";
-import { useRecoilState } from "recoil";
-import { settingAtom } from "../utils/atoms";
+import { useRecoilState,useRecoilValue } from "recoil";
+import { settingAtom,serverAtom } from "../utils/atoms";
 import axios from "axios";
 import RobotStateDisplay from "./Robotstate";
 import BB8Toggle from "./DarkmodeToggle";
 // SettingsPage: A component to manage and display various settings
 const SettingsPage = () => {
+  const server = useRecoilValue(serverAtom);
   const [settings, setSettings] = useRecoilState(settingAtom);
   const [tempSpeed, setTempSpeed] = useState(settings.speed);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +87,7 @@ const SettingsPage = () => {
   };
   // Effect to update settings on the server
   useEffect(() => {
-    const apiUrl = "http://deltarobot:3010/updateSettings";
+    const apiUrl = `${server}/updateSettings`;
 
     const adjustedSettings = {
       gripperMode: settings.gripper,
@@ -110,7 +111,7 @@ const SettingsPage = () => {
   // Function to send a homing signal to the robot
   const postHomingSignal = async () => {
     try {
-      const response = await axios.post("http://deltarobot:3010/homing", {
+      const response = await axios.post(`${server}/homing`, {
         active: true, // Hier senden wir immer `true` an den Server
       });
       console.log("Homing signalisiert: " + response.data.message);
@@ -143,7 +144,7 @@ const SettingsPage = () => {
 
   const handleDeleteLogs = () => {
     axios
-      .delete("http://deltarobot:3010/deleteLogs")
+      .delete(`${server}/deleteLogs`)
       .then((response) => {
         alert("Erfolg: " + response.data.message);
       })

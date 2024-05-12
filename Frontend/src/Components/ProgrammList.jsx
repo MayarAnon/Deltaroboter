@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { HighlightedCode } from "./Texteditor";
-import { useRecoilState } from "recoil";
-import { settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
+import { useRecoilState,useRecoilValue } from "recoil";
+import {serverAtom, settingAtom, gCodeStringAtom, gCodeModeAtom } from "../utils/atoms";
 import ConfirmationModal from "./ConfirmationModal";
 
 const LoadProgrammList = () => {
+  const server = useRecoilValue(serverAtom);
   const [programmlist, SetProgrammList] = useState([]);
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const settings = useRecoilValue(settingAtom);
   const [reloadTrigger, setReloadTrigger] = useState(0);
   useEffect(() => {
     // Here we call the Express endpoint when the component mounts
     axios
-      .get("http://deltarobot:3010/loadGCodeFiles")
+      .get(`${server}/loadGCodeFiles`)
       .then((response) => {
         // Saving the received data into the component's state
         console.log(response.data);
@@ -53,6 +54,7 @@ const LoadProgrammList = () => {
 };
 // Component to load individual programs
 const LoadProgramm = ({ color, name, content, onDelete }) => {
+  const server = useRecoilValue(serverAtom);
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
 
   const [GCodemode, setGCodemode] = useRecoilState(gCodeModeAtom);
@@ -73,7 +75,7 @@ const LoadProgramm = ({ color, name, content, onDelete }) => {
   };
   // Function to delete the program
   const handleDelete = () => {
-    const address = `http://deltarobot:3010/deleteGCode?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
+    const address = `${server}/deleteGCode?name=${name}`; // Hier name durch den tatsächlichen Dateinamen ersetzen
 
     axios
       .delete(address)
@@ -86,7 +88,7 @@ const LoadProgramm = ({ color, name, content, onDelete }) => {
       });
   };
   const handleRun = () => {
-    const address = `http://deltarobot:3010/pickandplace/program`;
+    const address = `${server}/pickandplace/program`;
 
     // Creating the data object to be sent
     const programData = {

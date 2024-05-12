@@ -3,13 +3,13 @@ import AceEditor from "react-ace";
 import "../styles/aceEditorStyles.css";
 import "ace-builds/src-noconflict/theme-terminal";
 import "ace-builds/src-noconflict/theme-crimson_editor";
-import { useRecoilState } from "recoil";
+import { useRecoilState,useRecoilValue } from "recoil";
 import { gCodeStringAtom, settingAtom } from "../utils/atoms";
 require("../utils/gcode_mode"); // Importing custom GCode mode for Ace Editor
 // GCodeEditor component: Handles the display and functionality of the G-Code editor
 const GCodeEditor = () => {
   const [sharedString, setSharedString] = useRecoilState(gCodeStringAtom);
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const settings = useRecoilValue(settingAtom);
   const [gCode, setGCode] = useState("");
 
   // Update GCode content

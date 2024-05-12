@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
-import { useRecoilState } from "recoil";
-import { settingAtom } from "../utils/atoms";
+import { useRecoilValue } from "recoil";
+import {serverAtom, settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 
 const Header = () => {
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const server = useRecoilValue(serverAtom);
+  const settings = useRecoilValue(settingAtom);
   const [isMenuHidden, setMenuHidden] = React.useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [icon, setIcon] = useState(0);
@@ -33,7 +34,7 @@ const Header = () => {
   // Function to send motor stop signal to the endpoint
   const sendMotorStop = async () => {
     try {
-      const response = await axios.post("/motors/stop", {
+      const response = await axios.post(`${server}/motors/stop`, {
         stop: true, // Correctly formatted object
       });
       console.log("Motors stoppen", response.data); // Output server response

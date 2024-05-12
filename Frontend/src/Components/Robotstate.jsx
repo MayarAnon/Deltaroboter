@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useRecoilState } from "recoil";
+import { useRecoilValue } from "recoil";
 import { settingAtom } from "../utils/atoms";
 // RobotStateDisplay: Displays the current state of the robot, including coordinates, angles, and other data
 
 const RobotStateDisplay = () => {
-  const [settings, setSettings] = useRecoilState(settingAtom);
+  const settings = useRecoilValue(settingAtom);
   const [robotState, setRobotState] = useState(() => {
     const savedState = localStorage.getItem("robotState");
     return savedState ? JSON.parse(savedState) : {};
