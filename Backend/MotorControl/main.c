@@ -15,15 +15,20 @@
 volatile sig_atomic_t keepRunning = 1;
 pthread_t sequenceThread;
 sem_t queueSemaphore;
+
+// This function handles the signal received by the process.
+// When a signal is caught, it stops the motor control by setting keepRunning to 0.
 void handle_signal(int sig) {
     printf("MotorControl: Caught signal %d, stopping...\n", sig);
     keepRunning = 0;
 }
+// This function sets up signal handling for SIGINT and SIGTERM.
+// It configures the sigaction struct to use the handle_signal function as the handler for these signals.
 void setup_signal_handling() {
     struct sigaction sa;
     sa.sa_handler = handle_signal;
     sigemptyset(&sa.sa_mask);
-    sa.sa_flags = 0;  // Keine Flags gesetzt
+    sa.sa_flags = 0; 
 
     if (sigaction(SIGINT, &sa, NULL) < 0) {
     perror("MotorControl: Unable to set SIGINT handler");
@@ -34,9 +39,12 @@ void setup_signal_handling() {
         exit(1);
     }
 }
+// This function cleans up resources used by the motor control system.
+// It terminates the GPIO, waits for the sequence thread to finish,
+// disconnects and destroys the MQTT client, frees dynamically allocated memory,
+// and destroys the semaphore.
 void cleanup_resources() {
     printf("MotorControl: Cleaning up resources...\n");
-    // GPIO Bibliothek beenden
     gpioTerminate();
     
     pthread_join(sequenceThread, NULL);
