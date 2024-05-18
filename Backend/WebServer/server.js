@@ -32,6 +32,13 @@ setupMqttClient()
 app.use(cors({
   origin: '*'
 }));
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV === 'production') {
+      res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' http://192.168.0.43:80; style-src 'self' 'sha256-NOysBCqoEZQ4w+cB7d5fekIXPgoo1DEVyHhO0OEBfD4='; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://192.168.0.43:80 ws://192.168.0.43:80; img-src 'self' http://192.168.0.43:80 data:;");
+  }
+  next();
+});
+
 app.use(express.json());
 
 const gcodeFolder = path.join(__dirname, "../../Backend/GCodeFiles");
