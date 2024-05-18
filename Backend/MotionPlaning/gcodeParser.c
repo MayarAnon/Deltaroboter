@@ -56,15 +56,15 @@ void processLine(char* line) {
         sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
         }
         
-        float diffX = fabs(params.x - currentPosition.x);
-        float diffY = fabs(params.y - currentPosition.y);
-        float diffZ = fabs(params.z - currentPosition.z);
+        float diffX = params.x - currentPosition.x;
+        float diffY = params.y - currentPosition.y;
+        float diffZ = params.z - currentPosition.z;
 
         Coordinate targetPosition = {params.x,params.y,params.z,params.phi};
         
-        float maxDiff = fmax(diffX, fmax(diffY, diffZ));
+        float distance = sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
-        int InterpolationSteps = (int)maxDiff < 2 ? 2 : (int)maxDiff;
+        int InterpolationSteps = (int)distance < 2 ? 2 : (int)distance;
     
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
         /*

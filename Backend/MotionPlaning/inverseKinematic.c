@@ -48,6 +48,17 @@ int delta_calcAngleYZ(float x0, float y0, float z0, float *theta) {
 //   - int: Status der Berechnung (0=OK, -1=nicht existierende Position)
 int delta_calcInverse(float x0, float y0, float z0, float *theta1, float *theta2, float *theta3) {
     *theta1 = *theta2 = *theta3 = 0; // Initialisierung der Winkel auf 0
+    //Checken ob im Arbeitsraum: 
+    int radius_squared = 200 * 200;  // Quadrat des Radius für Vergleich, um die Wurzelberechnung zu vermeiden
+
+    // Überprüfe, ob x und y im Kreis liegen
+    if ((x0 * x0 + y0 * y0) > radius_squared) {
+        return -1;
+    }
+    // Überprüfe, ob z im gültigen Bereich liegt
+    if (z0 > -280 || z0 < -480) {
+        return -1;
+    }
     int status = delta_calcAngleYZ(x0, y0, z0, theta1);
     if (status == 0) status = delta_calcAngleYZ(x0 * cos120 + y0 * sin120, y0 * cos120 - x0 * sin120, z0, theta2); // Rotation um +120° für theta2
     if (status == 0) status = delta_calcAngleYZ(x0 * cos120 - y0 * sin120, y0 * cos120 + x0 * sin120, z0, theta3); // Rotation um -120° für theta3
