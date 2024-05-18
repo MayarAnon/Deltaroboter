@@ -177,7 +177,29 @@ const ManuellMode = () => {
       }
     }
   }, []);
+   // Effect to update settings on the server
+   useEffect(() => {
+    const apiUrl = `${server}/updateSettings`;
 
+    const adjustedSettings = {
+      gripperMode: settings.gripper,
+      motorSpeed: settings.speed,
+      motionProfil: settings.motionProfil,
+    };
+
+    axios
+      .post(apiUrl, adjustedSettings)
+      .then((response) => {
+        console.log(
+          "Einstellungen erfolgreich aktualisiert:",
+          adjustedSettings,
+          response.data
+        );
+      })
+      .catch((error) => {
+        console.error("Fehler beim Aktualisieren der Einstellungen:", error);
+      });
+  }, []);
   return (
     <>
       <div className="flex flex-wrap justify-center mx-2 mt-10 sm:mt-15 gap-4">

@@ -29,7 +29,9 @@ setupMqttClient()
     console.error("Fehler beim Verbinden mit MQTT:", error);
   });
 
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
 app.use(express.json());
 
 const gcodeFolder = path.join(__dirname, "../../Backend/GCodeFiles");
@@ -396,6 +398,10 @@ wss.on("connection", function connection(ws) {
 // Statische Dateien bedienen
 app.use(express.static(path.join(__dirname, "../../Frontend", "build")));
 
+// Alle nicht spezifizierten Routen auf index.html umleiten
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, "../../Frontend", "build", "index.html"));
+});
 // Anhören sowohl auf dem HTTP- als auch auf dem WebSocket-Server
 server.listen(port, () => {
   console.log(`Server und WebSocket laufen auf Port ${port}`);

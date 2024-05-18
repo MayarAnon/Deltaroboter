@@ -5,6 +5,15 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+    <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' http://deltarobot:3010;
+    style-src 'self' 'sha256-NOysBCqoEZQ4w+cB7d5fekIXPgoo1DEVyHhO0OEBfD4=';
+    font-src 'self' https://fonts.gstatic.com;
+    connect-src 'self' http://deltarobot:3010 ws://deltarobot:3010;
+    img-src 'self' http://deltarobot:3010 data:;
+    ">  
+
     <meta
       name="description"
       content="Web site created using create-react-app"

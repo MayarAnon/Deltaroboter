@@ -14,7 +14,7 @@ logging.basicConfig(filename='../../log/homing.log', level=logging.INFO)
 
 
 # Konstanten für die GPIO-Pins der Endschalter
-ENDSCHALTER_PINS = [0, 5, 6, 13]
+ENDSCHALTER_PINS = [0, 5, 6]
 
 # MQTT-Konfiguration
 MQTT_BROKER = 'localhost'
@@ -55,9 +55,10 @@ def start_homing_process():
     """
     global is_homing_active
     is_homing_active = True
+    pulses = [-10, -10, -100]
+    timing = [200, 200, 5]
     try:
-        pulses = [-10, -10, -10,-20]
-        timing = [2000, 2000, 5]
+       
         while is_homing_active:
             all_homed = True
             for index, pin in enumerate(ENDSCHALTER_PINS):
@@ -72,9 +73,10 @@ def start_homing_process():
             send_motor_commands(pulses, timing)
 
             if all_homed:
+                is_homing_active = False
+                client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process completed successfully.')
                 break
-            time.sleep(0.005)  # Wartezeit zwischen den Überprüfungen
-        client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process completed successfully.')
+            time.sleep(0.04)  # Wartezeit zwischen den Überprüfungen
     finally:
         is_homing_active = False
 
@@ -85,12 +87,13 @@ def check_end_switches():
     """
     while True:
         if not is_homing_active:
+            logging.info(f"{current_time} homing not active")
             for index, pin in enumerate(ENDSCHALTER_PINS):
                 if GPIO.input(pin):
-                    
+                    logging.info(f"{current_time} motor stop")
                     client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
                     break
-        time.sleep(0.05)  # Kurze Verzögerung, um das Polling zu begrenzen
+        time.sleep(0.004)  # Kurze Verzögerung, um das Polling zu begrenzen
 
 def setup_end_switch_monitoring():
     threading.Thread(target=check_end_switches, daemon=True).start()

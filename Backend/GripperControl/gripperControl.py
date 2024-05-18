@@ -68,6 +68,7 @@ class GripperControl:
         Verarbeitet die empfangene Steuerungsnachricht und steuert den Greifer entsprechend.
         """
         data = json.loads(message)
+        logging.info(data)
         if "parallelGripper" in data:
             input_pwm = int(data["parallelGripper"])
             pwmValue = 10 + 0.8 * input_pwm #skallierung von 0-100 auf DutyCycle von 10% bis 90%
@@ -76,8 +77,8 @@ class GripperControl:
             GPIO.output(PumpRelais, GPIO.LOW)
             self.send_feedback(2)
 
-        elif "complientGripper" in data or "vacuumGripper" in data:
-            value = int(data.get("complientGripper", 0))
+        elif "complientGripper" in data:
+            value = int(data["complientGripper"])
             if value == 1:
                 GPIO.output(PumpRelais, GPIO.HIGH)
                 GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
@@ -92,7 +93,22 @@ class GripperControl:
                 self.send_feedback(5)
             else:
                 GPIO.output([VacuumRelais, VacuumValveRelais, PumpRelais, PumpValveRelais], GPIO.LOW)
-
+        elif "vacuumGripper" in data:
+            value = int(data["vacuumGripper"])
+            if value == 1:
+                GPIO.output(PumpRelais, GPIO.HIGH)
+                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
+                time.sleep(0.1)
+                GPIO.output(PumpValveRelais, GPIO.HIGH)
+                self.send_feedback(5)
+            elif value == -1:
+                GPIO.output(VacuumRelais, GPIO.HIGH)
+                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)
+                time.sleep(0.1)
+                GPIO.output(VacuumValveRelais, GPIO.HIGH)
+                self.send_feedback(5)
+            else:
+                GPIO.output([VacuumRelais, VacuumValveRelais, PumpRelais, PumpValveRelais], GPIO.LOW)
         elif "magnetGripper" in data:
             value = int(data["magnetGripper"])
             GPIO.output(MagnetRelais, GPIO.HIGH if value == 1 else GPIO.LOW)
