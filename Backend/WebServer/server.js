@@ -8,7 +8,7 @@ const path = require("path");
 const cors = require("cors");
 const MqttClient = require("./mqttClient");
 const app = express();
-const port = 3010;
+const port = 80;
 // HTTP-Server auf dem Express-App basiert, für WebSockets erforderlich
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });

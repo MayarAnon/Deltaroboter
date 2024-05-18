@@ -14,7 +14,7 @@ const RobotStateDisplay = () => {
 
   useEffect(() => {
     function connect() {
-      const websocket = new WebSocket("ws://deltarobot.local:3010");
+      const websocket = new WebSocket("ws://192.168.0.43:80");
 
       websocket.onopen = () => {
         console.log("WebSocket connected");

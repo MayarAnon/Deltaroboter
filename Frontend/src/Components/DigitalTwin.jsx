@@ -252,7 +252,7 @@ const DigitalTwin = () => {
     // Pfadlinie initialisieren
     const material = new THREE.LineBasicMaterial({
       color: 0xff0000,
-      linewidth: 10,
+      linewidth: 2,
     });
     const geometry = new THREE.BufferGeometry();
     const line = new THREE.Line(geometry, material);
@@ -790,7 +790,7 @@ const DigitalTwin = () => {
       }
 
       // Create a new WebSocket connection
-      websocketRef.current = new WebSocket("ws://deltarobot:3010");
+      websocketRef.current = new WebSocket("ws://192.168.0.43:80");
 
       // Event: WebSocket is opened
       websocketRef.current.onopen = () => {

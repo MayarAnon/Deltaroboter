@@ -312,7 +312,7 @@ const SettingsPage = () => {
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
-          <a href="http://deltarobot:3010/downloadGuide" target="_blank">
+          <a href={`${server}/downloadGuide`} target="_blank">
             <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
               Download Guide
             </button>
@@ -321,7 +321,7 @@ const SettingsPage = () => {
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="flex justify-start space-x-4 ">
           <div className="mb-2">
-            <a href="http://deltarobot:3010/downloadLogs" target="_blank">
+            <a href= {`${server}/downloadLogs`} target="_blank">
               <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
                 Download Log-Files
               </button>
