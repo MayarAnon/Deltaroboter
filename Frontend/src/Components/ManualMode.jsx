@@ -461,9 +461,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={xValue}
-              onChange={(e) =>
-                updateCoordinates(e.target.value, yValue, zValue, phiValue)
-              }
+              readOnly
               style={{ backgroundColor: settings.color }}
               className="text-white w-20  rounded ml-2"
             />
@@ -476,9 +474,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={yValue}
-              onChange={(e) =>
-                updateCoordinates(xValue, e.target.value, zValue, phiValue)
-              }
+              readOnly
               style={{ backgroundColor: settings.color }}
               className="text-white w-20  rounded ml-2"
             />
@@ -492,9 +488,7 @@ const ManuellMode = () => {
             <input
               type="number"
               value={zValue}
-              onChange={(e) =>
-                updateCoordinates(xValue, yValue, e.target.value, phiValue)
-              }
+              readOnly
               style={{ backgroundColor: settings.color }}
               className="text-white w-20  rounded ml-2"
             />

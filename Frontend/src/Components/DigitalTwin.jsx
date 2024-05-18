@@ -252,7 +252,7 @@ const DigitalTwin = () => {
     // Pfadlinie initialisieren
     const material = new THREE.LineBasicMaterial({
       color: 0xff0000,
-      linewidth: 2,
+      linewidth: 1,
     });
     const geometry = new THREE.BufferGeometry();
     const line = new THREE.Line(geometry, material);

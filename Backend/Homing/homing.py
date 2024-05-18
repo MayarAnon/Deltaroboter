@@ -87,7 +87,6 @@ def check_end_switches():
     """
     while True:
         if not is_homing_active:
-            logging.info(f"{current_time} homing not active")
             for index, pin in enumerate(ENDSCHALTER_PINS):
                 if GPIO.input(pin):
                     logging.info(f"{current_time} motor stop")
