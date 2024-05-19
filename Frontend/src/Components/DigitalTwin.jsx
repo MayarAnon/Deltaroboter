@@ -5,7 +5,7 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import dat from "dat.gui";
 import delta_calcInverse from "../utils/IK";
 import { useRecoilValue } from "recoil";
-import { settingAtom } from "../utils/atoms";
+import { settingAtom,robotStateAtom } from "../utils/atoms";
 import RobotStateDisplay from "./Robotstate";
 // Constants define the geometric properties of the base and the effector as well as the length of the arms
 const baseRadius = 100;
@@ -109,7 +109,6 @@ function calculateJointPositions(motorAngles) {
 const DigitalTwin = () => {
   const settings = useRecoilValue(settingAtom);
   const mountRef = useRef(null); // Reference for the DOM element.
-  const websocketRef = useRef(null);
 
   const savedCameraPosition = localStorage.getItem("cameraPosition");
   const savedSceneObjects = localStorage.getItem("sceneObjects");
@@ -137,10 +136,7 @@ const DigitalTwin = () => {
   const [sceneObjects, setSceneObjects] = useState(initialSceneObjects);
 
   // Initial state of the robot, updated by the WS (websocket).
-  const [robotState, setRobotState] = useState({
-    currentCoordinates: [0, 0, -280],
-    currentAngles: [-31.429121, -31.429121, -31.429121],
-  });
+  const [robotState, setRobotState] = useRecoilValue(robotStateAtom);
   const loader = new GLTFLoader(); // Loader for 3D-Models.
   const [pathPoints, setPathPoints] = useState([]); //for path line
   const [motorsLoaded, setMotorsLoaded] = useState(false);
@@ -167,22 +163,7 @@ const DigitalTwin = () => {
     }
   };
 
-  useEffect(() => {
-    const loadInitialRobotState = () => {
-      const savedState = localStorage.getItem('robotState');
-      if (savedState) {
-        setRobotState(JSON.parse(savedState));
-      }
-    };
-
-    loadInitialRobotState();
-    window.addEventListener('robotStateUpdated', loadInitialRobotState);
-
-    return () => {
-      window.removeEventListener('robotStateUpdated', loadInitialRobotState);
-    };
-  }, []);
-
+  
   //Reset angles and coordinates when the user clicks 'resetScene' in the Controls GUI
   const resetScene = () => {
     // Reset the coordinates and angles
