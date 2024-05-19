@@ -167,6 +167,22 @@ const DigitalTwin = () => {
     }
   };
 
+  useEffect(() => {
+    const loadInitialRobotState = () => {
+      const savedState = localStorage.getItem('robotState');
+      if (savedState) {
+        setRobotState(JSON.parse(savedState));
+      }
+    };
+
+    loadInitialRobotState();
+    window.addEventListener('robotStateUpdated', loadInitialRobotState);
+
+    return () => {
+      window.removeEventListener('robotStateUpdated', loadInitialRobotState);
+    };
+  }, []);
+
   //Reset angles and coordinates when the user clicks 'resetScene' in the Controls GUI
   const resetScene = () => {
     // Reset the coordinates and angles
@@ -781,66 +797,66 @@ const DigitalTwin = () => {
   }, [robotState, objects]);
 
   // Initializes and manages a WebSocket connection to receive real-time robot data
-  useEffect(() => {
-    // Function to establish a new WebSocket connection
-    const connectWebSocket = () => {
-      // Close any existing connections to avoid multiple connections
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
+  // useEffect(() => {
+  //   // Function to establish a new WebSocket connection
+  //   const connectWebSocket = () => {
+  //     // Close any existing connections to avoid multiple connections
+  //     if (websocketRef.current) {
+  //       websocketRef.current.close();
+  //     }
 
-      // Create a new WebSocket connection
-      websocketRef.current = new WebSocket("ws://192.168.0.43:80");
+  //     // Create a new WebSocket connection
+  //     websocketRef.current = new WebSocket("ws://192.168.0.43:80");
 
-      // Event: WebSocket is opened
-      websocketRef.current.onopen = () => {
-        console.log("WebSocket connected");
-      };
+  //     // Event: WebSocket is opened
+  //     websocketRef.current.onopen = () => {
+  //       console.log("WebSocket connected");
+  //     };
 
-      // Event: Message received
-      websocketRef.current.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setRobotState((prevState) => ({
-          ...prevState,
-          currentCoordinates: [
-            data.currentCoordinates[0],
-            data.currentCoordinates[1],
-            data.currentCoordinates[2],
-          ],
-          currentAngles: [
-            data.currentAngles[0],
-            data.currentAngles[1],
-            data.currentAngles[2],
-          ],
-        }));
-      };
+  //     // Event: Message received
+  //     websocketRef.current.onmessage = (event) => {
+  //       const data = JSON.parse(event.data);
+  //       setRobotState((prevState) => ({
+  //         ...prevState,
+  //         currentCoordinates: [
+  //           data.currentCoordinates[0],
+  //           data.currentCoordinates[1],
+  //           data.currentCoordinates[2],
+  //         ],
+  //         currentAngles: [
+  //           data.currentAngles[0],
+  //           data.currentAngles[1],
+  //           data.currentAngles[2],
+  //         ],
+  //       }));
+  //     };
 
-      // Event: Error
-      websocketRef.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
+  //     // Event: Error
+  //     websocketRef.current.onerror = (error) => {
+  //       console.error("WebSocket error:", error);
+  //     };
 
-      // Event: Connection closed
-      websocketRef.current.onclose = (event) => {
-        console.log("WebSocket disconnected", event.reason);
-        // Auto-reconnect after 5 seconds if not closed normally
-        if (![1000, 1005].includes(event.code)) {
-          // 1000: normal closure, 1005: no status rcvd
-          setTimeout(connectWebSocket, 5000);
-        }
-      };
-    };
+  //     // Event: Connection closed
+  //     websocketRef.current.onclose = (event) => {
+  //       console.log("WebSocket disconnected", event.reason);
+  //       // Auto-reconnect after 5 seconds if not closed normally
+  //       if (![1000, 1005].includes(event.code)) {
+  //         // 1000: normal closure, 1005: no status rcvd
+  //         setTimeout(connectWebSocket, 5000);
+  //       }
+  //     };
+  //   };
 
-    // Connect on initial component load
-    connectWebSocket();
+  //   // Connect on initial component load
+  //   connectWebSocket();
 
-    // Cleanup function
-    return () => {
-      if (websocketRef.current) {
-        websocketRef.current.close();
-      }
-    };
-  }, []);
+  //   // Cleanup function
+  //   return () => {
+  //     if (websocketRef.current) {
+  //       websocketRef.current.close();
+  //     }
+  //   };
+  // }, []);
 
   // Updates the 3D scene based on changes in end effector coordinates
   useEffect(() => {

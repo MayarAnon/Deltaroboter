@@ -1,51 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { useRecoilValue } from "recoil";
-import { settingAtom } from "../utils/atoms";
+import { settingAtom,robotStateAtom } from "../utils/atoms";
 // RobotStateDisplay: Displays the current state of the robot, including coordinates, angles, and other data
 
 const RobotStateDisplay = () => {
   const settings = useRecoilValue(settingAtom);
-  const [robotState, setRobotState] = useState(() => {
-    const savedState = localStorage.getItem("robotState");
-    return savedState ? JSON.parse(savedState) : {};
-  });
-  const [ws, setWs] = useState(null);
+  const robotState = useRecoilValue(robotStateAtom);
   const [isVisible, setIsVisible] = useState(false);
 
-  useEffect(() => {
-    function connect() {
-      const websocket = new WebSocket("ws://192.168.0.43:80");
-
-      websocket.onopen = () => {
-        console.log("WebSocket connected");
-      };
-
-      websocket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        setRobotState(data);
-        localStorage.setItem("robotState", JSON.stringify(data));
-      };
-
-      websocket.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-
-      websocket.onclose = (event) => {
-        console.log("WebSocket disconnected", event.reason);
-        setTimeout(connect, 5000);
-      };
-
-      setWs(websocket);
-    }
-
-    connect();
-
-    return () => {
-      if (ws) {
-        ws.close();
-      }
-    };
-  }, []);
+ 
   // Toggle the visibility of the robot state display
   const toggleVisibility = () => {
     setIsVisible(!isVisible);

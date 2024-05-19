@@ -74,7 +74,8 @@ def start_homing_process():
 
             if all_homed:
                 is_homing_active = False
-                client.publish(MQTT_TOPIC_FEEDBACK, 'Homing process completed successfully.')
+                client.publish(MQTT_TOPIC_FEEDBACK, 'ture')
+                client.publish(MQTT_TOPIC_FEEDBACK, 'false')
                 break
             time.sleep(0.04)  # Wartezeit zwischen den Überprüfungen
     finally:

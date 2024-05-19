@@ -67,3 +67,15 @@ export const gCodeModeAtom = atom({
   key: "gCodeModeAtom",
   default: 0,
 });
+
+export const robotStateAtom = atom({
+  key: "robotStateAtom",
+  default:{homing:true,
+    currentCoordinates:[0,0,-280,0],
+    currentAngles:[-31.429121,-31.429121,-31.429121],
+    gripperFeedback:false,
+    gripperMode:"parallelGripper",
+    motionProfil:"TrapezProfil",
+    motorsSpeed:50}
+});
+
