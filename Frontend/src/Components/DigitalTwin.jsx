@@ -174,6 +174,13 @@ const DigitalTwin = () => {
     });
 
     setPathPoints([]);
+    if (objects.line && pathPoints.length > 0) {
+      const geometry = new THREE.BufferGeometry();
+      objects.line.geometry.dispose(); // Clean up old geometry
+      objects.line.geometry = geometry; // Assign new geometry
+      objects.line.geometry.verticesNeedUpdate = true; // Set flag to force update
+    }
+    objects.renderer.render(objects.scene, objects.camera);
   };
   // Adopt coordinates from the Controls GUI and calculate motor angles using inverse kinematics – used only for offline control via the Controls
   const handleCoordinateChange = (index, value) => {
@@ -239,7 +246,7 @@ const DigitalTwin = () => {
         mountRef.current.clientHeight
       );
     };
-
+    
     // Add event listener for window resize
     window.addEventListener("resize", handleResize);
     //********************************************************************add light************************************************************************** */
@@ -713,21 +720,6 @@ const DigitalTwin = () => {
       arm.rotateX(Math.PI / 2);
       arm.userData.type = "arm";
       objects.scene.add(arm);
-      // let arm;
-      // loader.load(`/model/upperarm.glb`, (gltf) => {
-      //   arm = gltf.scene;
-      //   arm.scale.set(10, 10, 10);
-
-      //   arm.position.copy(motorPosition).lerp(jointPosition, 0.5);
-      //   arm.lookAt(jointPosition);
-
-      //   arm.rotateX(Math.PI / 2);
-      //   if (index === 0) arm.rotateY(Math.PI);
-      //   if (index === 1) arm.rotateY((Math.PI * 7) / 4);
-      //   if (index === 2) arm.rotateY((Math.PI * 7) / 4);
-      //   arm.userData.type = "arm";
-      //   objects.scene.add(arm);
-      // });
 
       // Lower arms
       const endEffectorPosition = new THREE.Vector3(
@@ -737,30 +729,6 @@ const DigitalTwin = () => {
           effectorRadius * Math.sin((index * 2 * Math.PI) / 3),
         digitalTwinState.currentCoordinates[2]
       );
-      // Lower arm model, bug: the orientation and alignment are cumbersome
-      // let lowerArm;
-      // loader.load(`/model/lowerarm.glb`, (gltf) => {
-      //   lowerArm = gltf.scene;
-      //   lowerArm.scale.set(10, 10, 10);
-
-      //   lowerArm.position.copy(jointPosition).lerp(endEffectorPosition, 0.5);
-
-      //   lowerArm.lookAt(endEffectorPosition);
-      //   lowerArm.rotateX(Math.PI / 2);
-      //   if(index===1)lowerArm.rotateY(Math.PI*4/3);
-      //   if(index===2)lowerArm.rotateY(Math.PI*2/3);
-      //   lowerArm.userData.type = "arm";
-      //   objects.scene.add(lowerArm);
-      // });
-
-      // Simple lower arm, works fine but arm length is fixed
-      // const lowerArmGeometry = new THREE.CylinderGeometry(5, 5, lowerArmLength, 32);
-      // const lowerArm = new THREE.Mesh(lowerArmGeometry, lowerArmMaterial);
-      // lowerArm.position.copy(jointPosition).lerp(endEffectorPosition, 0.5);
-      // lowerArm.lookAt(endEffectorPosition);
-      // lowerArm.rotateX(Math.PI / 2);
-      // lowerArm.userData.type = "arm";
-      // objects.scene.add(lowerArm);
 
       // Simple lower arm with dynamic length to cover bugs
       const midPoint = new THREE.Vector3()
@@ -783,7 +751,6 @@ const DigitalTwin = () => {
 
   // Updates the 3D scene based on changes in end effector coordinates
   useEffect(() => {
-    console.log("Updating positions to: ", objects);
     if (!objects.scene || !objects.axesHelper) {
       return;
     } else {
