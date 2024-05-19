@@ -71,6 +71,7 @@ extern Parameter params;
 #define MANUELCONTROLGRIPPERTOPIC "manual/control/gripper"
 #define STOPTOPIC "motors/stop"
 #define PULSECHECKER "motors/offset"
+#define ERRORTOPIC "Errors"
 
 //publish Topics
 #define MOTORCONTROLLTOPIC "motors/sequence"

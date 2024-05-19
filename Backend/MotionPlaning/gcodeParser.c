@@ -101,12 +101,12 @@ void processLine(char* line) {
         int InterpolationSteps = (int)distance < 2 ? 2 : (int)distance;
     
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
-        
+        /*
         for(int i=0;i<InterpolationSteps;i++){
             printf("(%f,%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z,coordinates[i].phi);
             fflush(stdout);
         }
-         
+        */
         processInterpolationAndCreateJSON(coordinates,InterpolationSteps,params.f);
         
         
@@ -276,7 +276,7 @@ void processLine(char* line) {
         Gripper gripper = unknown;
         
         if (sscanf(line, "%*s %s", grippertyp) == 1) {
-            printf("%s \n",grippertyp);
+            //printf("%s \n",grippertyp);
             // Direkte Prüfung des Gripper-Modus ohne separate Funktion
             if (strcmp(grippertyp, "parallelGripper") == 0) gripper = parallel;
             else if (strcmp(grippertyp, "complientGripper") == 0) gripper = complient;

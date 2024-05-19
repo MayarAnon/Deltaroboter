@@ -52,8 +52,15 @@ void* readFileThread(void* filename) {
 //   - char *payloadStr: Inhalt der Nachricht als String.
 void onMessage(char *topicName, char *payloadStr) {
     pthread_t thread_id; // Thread-Identifikator für Hintergrundoperationen.
-    
-    if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0 && !robotRequiersHoming) {
+
+    if(strcmp(topicName, ERRORTOPIC) == 0){
+        stopFlag = true;
+        robotRequiersHoming = true;
+        printf("ERROR: %s \n", payloadStr);
+        printf("Homing Required!\n");
+        fflush(stdout); 
+    }
+    else if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0 && !robotRequiersHoming) {
         manualModeCoordinates(payloadStr);
     }
     else if (strcmp(topicName, MANUELCONTROLGRIPPERTOPIC) == 0 && !robotRequiersHoming) {
@@ -62,9 +69,9 @@ void onMessage(char *topicName, char *payloadStr) {
     }
     else if (strcmp(topicName, STOPTOPIC) == 0) {
         if(strcmp("true", payloadStr) == 0){
-            printf("Stop Program \n");
-            fflush(stdout); 
             stopFlag = true; // Setzt das stopFlag, wenn die Nachricht "true" ist.
+            printf("Stop Program! \n");
+            fflush(stdout); 
         }
     }
     else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0 && !robotRequiersHoming) {
@@ -97,8 +104,6 @@ void handle_signal(int sig) {
 // Hauptfunktion des Programms. Initialisiert den MQTT-Client, subscribt zu bestimmten Topics
 // und tritt in eine Endlosschleife ein, um das Programm am Laufen zu halten.
 int main() {
-    
-    printf("MotionPlaning online\n");
     fflush(stdout); // Sorgt dafür, dass "Hallo" sofort ausgegeben wird
     
     // Initialisiert den MQTT-Client, subscribt zu den oben definierten Topics und setzt die Callback-Funktion.

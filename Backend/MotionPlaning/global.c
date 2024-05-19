@@ -3,7 +3,7 @@
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 
 // Definition der globalen Variablen
-const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC,PULSECHECKER};
+const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC,PULSECHECKER,ERRORTOPIC};
 const char** globalTopics = globalTopicsTemp; // Zuweisung des Pointers auf das Array
 int globalTopicCount = sizeof(globalTopicsTemp) / sizeof(globalTopicsTemp[0]);
 void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
