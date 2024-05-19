@@ -169,7 +169,7 @@ const DigitalTwin = () => {
   const resetScene = () => {
     // Reset the coordinates and angles
    setDigitalTwinState({
-      currentCoordinates: [0, 0, -280], // Original coordinates
+      currentCoordinates: [0, 0, -280,0], // Original coordinates
       currentAngles: [-31.429121, -31.429121, -31.429121], // Original angles
     });
 
@@ -180,7 +180,6 @@ const DigitalTwin = () => {
       objects.line.geometry = geometry; // Assign new geometry
       objects.line.geometry.verticesNeedUpdate = true; // Set flag to force update
     }
-    objects.renderer.render(objects.scene, objects.camera);
   };
   // Adopt coordinates from the Controls GUI and calculate motor angles using inverse kinematics – used only for offline control via the Controls
   const handleCoordinateChange = (index, value) => {
