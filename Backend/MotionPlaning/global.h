@@ -19,7 +19,8 @@ typedef enum {
     parallel,
     complient,
     magnet,
-    vaccum
+    vaccum,
+    unknown = -1
 } Gripper;
 
 typedef enum {
@@ -76,6 +77,8 @@ extern Parameter params;
 #define GRIPPERCONTROLLTOPIC "gripper/control"
 #define COORDINATESTOPIC "current/coordinates"
 #define ANGLESTOPIC "current/angles"
+#define GRIPPERMODETOPIC "gripper/mode"
+
 
 //Mqtt defines
 #define ADDRESS     "tcp://localhost:1883"

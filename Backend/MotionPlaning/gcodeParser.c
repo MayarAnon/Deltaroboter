@@ -12,6 +12,7 @@
 #include "global.h"
 
 
+
 void processLine(char* line);
 
 // Liest eine Datei und verarbeitet jede Zeile durch Aufruf der Funktion processLine.
@@ -249,6 +250,51 @@ void processLine(char* line) {
                 processGripperCommand("M400", line); // Befehl und Parameter
         }else{
             printf("wrong Gripper Typ \n");
+        }
+    }
+    else if (strcmp(command, "M500") == 0) {
+        //Magnet Wechselsystem
+        char parameter[100];
+        // Versuche, den Parameter aus dem Befehlsstring zu extrahieren
+        if (sscanf(line, "%*s %s", parameter) == 1) {
+            // Prüfe, ob der Parameter "enabled" oder "disabled" ist
+            if (strcmp(parameter, "enable") == 0 || strcmp(parameter, "disable") == 0) {
+                // Veröffentliche den Parameter unter "magnet/control"
+                char formattedMessage[100];
+                sprintf(formattedMessage, "{\"magneticGripperAttachment\":\"%s\"}", parameter); 
+                publishMessage(GRIPPERCONTROLLTOPIC, formattedMessage);
+            } else {
+                printf("Ungültiger Parameter: %s. Erwarte 'enable' oder 'disable'.\n", parameter);
+            }
+        } else {
+            printf("Kein Parameter gefunden in der Eingabe.\n");
+        }
+    }
+    else if (strcmp(command, "M600") == 0) {
+       char grippertyp[100];
+        Gripper gripper = unknown;
+        
+        if (sscanf(line, "%*s %s", grippertyp) == 1) {
+            printf("%s \n",grippertyp);
+            // Direkte Prüfung des Gripper-Modus ohne separate Funktion
+            if (strcmp(grippertyp, "parallelGripper") == 0) gripper = parallel;
+            else if (strcmp(grippertyp, "complientGripper") == 0) gripper = complient;
+            else if (strcmp(grippertyp, "magnetGripper") == 0) gripper = magnet;
+            else if (strcmp(grippertyp, "vacuumGripper") == 0) gripper = vaccum;
+            else fprintf(stderr, "Unknown gripper mode: %s\n", grippertyp);
+
+            if (gripper != unknown) {
+                // Setzen des aktuellen Greifertyps auf den gelesenen Wert
+                // Hier könnten weitere Aktionen durchgeführt werden
+                char formattedMessage[120];
+                sprintf(formattedMessage, "\"%s\"", grippertyp); 
+                publishMessage(GRIPPERMODETOPIC, formattedMessage);
+                currentGripper = gripper;
+            } else {
+                printf("Kein bekannter Grippertyp: %s\n", grippertyp);
+            }
+        } else {
+            printf("Kein Grippertyp in der Eingabe gefunden.\n");
         }
     }
     else if (strcmp(command, ";") == 0) {
