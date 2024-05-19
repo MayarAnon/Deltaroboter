@@ -1,4 +1,5 @@
 import React,{useEffect} from "react";
+import * as THREE from "three";
 import "./App.css";
 import { RecoilRoot, useSetRecoilState } from "recoil";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -8,11 +9,13 @@ import ManuellMode from "./Components/ManualMode";
 import Debugger from "./Components/Debugger"
 import GCode from "./Components/GCode";
 import DigitalTwin from "./Components/DigitalTwin";
-import { robotStateAtom } from './utils/atoms';
+import { robotStateAtom,pathPointsAtom } from './utils/atoms';
+import WebSocketConnection from "./Components/WebSocketConnection";
 const App = () => {
+  const [robotState,setRobotState] = useSetRecoilState(robotStateAtom);
+  const setPathPoints = useSetRecoilState(pathPointsAtom);
   const WebSocketConnection = () => {
-    const setRobotState = useSetRecoilState(robotStateAtom);
-  
+    
     useEffect(() => {
       const websocket = new WebSocket("ws://192.168.0.43:80");
   
@@ -46,7 +49,16 @@ const App = () => {
   
     return null;
   };
+  
 
+  useEffect(() => {
+    if (robotState.currentCoordinates.length > 0) {
+      setPathPoints(prev => [
+        ...prev,
+        new THREE.Vector3(...robotState.currentCoordinates),
+      ]);
+    }
+  }, [robotState.currentCoordinates, setPathPoints]);
   return (
      <Router>
       <RecoilRoot>
@@ -58,6 +70,7 @@ const App = () => {
             <Route path="/gcode-editor" element={<GCode/>} />
             <Route path="/digital-twin" element={<DigitalTwin/>} />          
           </Routes>
+          <WebSocketConnection />
       </RecoilRoot>
       </Router>
   );

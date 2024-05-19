@@ -4,8 +4,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import dat from "dat.gui";
 import delta_calcInverse from "../utils/IK";
-import { useRecoilValue } from "recoil";
-import { settingAtom,robotStateAtom } from "../utils/atoms";
+import { useRecoilValue,useRecoilState } from "recoil";
+import { settingAtom,robotStateAtom,pathPointsAtom } from "../utils/atoms";
 import RobotStateDisplay from "./Robotstate";
 // Constants define the geometric properties of the base and the effector as well as the length of the arms
 const baseRadius = 100;
@@ -136,9 +136,10 @@ const DigitalTwin = () => {
   const [sceneObjects, setSceneObjects] = useState(initialSceneObjects);
 
   // Initial state of the robot, updated by the WS (websocket).
-  const [robotState, setRobotState] = useRecoilValue(robotStateAtom);
+  const robotState = useRecoilValue(robotStateAtom);
+  const [digitalTwinState, setDigitalTwinState] = useState(robotState);
   const loader = new GLTFLoader(); // Loader for 3D-Models.
-  const [pathPoints, setPathPoints] = useState([]); //for path line
+  const [pathPoints, setPathPoints] = useRecoilState(pathPointsAtom); //for path line
   const [motorsLoaded, setMotorsLoaded] = useState(false);
   // Update the local storage whenever sceneObjects or cameraPosition changes
   useEffect(() => {
@@ -167,7 +168,7 @@ const DigitalTwin = () => {
   //Reset angles and coordinates when the user clicks 'resetScene' in the Controls GUI
   const resetScene = () => {
     // Reset the coordinates and angles
-    setRobotState({
+   setDigitalTwinState({
       currentCoordinates: [0, 0, -280], // Original coordinates
       currentAngles: [-31.429121, -31.429121, -31.429121], // Original angles
     });
@@ -176,7 +177,7 @@ const DigitalTwin = () => {
   };
   // Adopt coordinates from the Controls GUI and calculate motor angles using inverse kinematics – used only for offline control via the Controls
   const handleCoordinateChange = (index, value) => {
-    setRobotState((prevState) => {
+    setDigitalTwinState((prevState) => {
       // Update new coordinates based on the changed value
       const newCoordinates = [...prevState.currentCoordinates];
       newCoordinates[index] = value;
@@ -200,7 +201,9 @@ const DigitalTwin = () => {
       }
     });
   };
-
+  useEffect(()=>{
+    setDigitalTwinState(robotState)
+  },[robotState])
   // Main Effect hook: Creates the 3D scene, adds camera and light, and initializes the rendering loop
   useEffect(() => {
     // scene, kamera, renderer
@@ -268,9 +271,9 @@ const DigitalTwin = () => {
     //*********************************************************add Axes for the endeffector************************************************************************************* */
     const axesHelper = createAxesHelper(150, 3);
     scene.add(axesHelper);
-    axesHelper.position.x = robotState.currentCoordinates[0];
-    axesHelper.position.y = robotState.currentCoordinates[1];
-    axesHelper.position.z = robotState.currentCoordinates[2];
+    axesHelper.position.x = digitalTwinState.currentCoordinates[0];
+    axesHelper.position.y = digitalTwinState.currentCoordinates[1];
+    axesHelper.position.z = digitalTwinState.currentCoordinates[2];
     axesHelper.visible = sceneObjects.axesVisible;
 
     //*******************************************************add base models and Proxy Model within the scene*************************************************************************************** */
@@ -343,9 +346,9 @@ const DigitalTwin = () => {
       transparent: true,
     });
     const simpleEffector = new THREE.Mesh(effectorGeometry, effectorMaterial);
-    simpleEffector.position.x = robotState.currentCoordinates[0];
-    simpleEffector.position.y = robotState.currentCoordinates[1];
-    simpleEffector.position.z = robotState.currentCoordinates[2];
+    simpleEffector.position.x = digitalTwinState.currentCoordinates[0];
+    simpleEffector.position.y = digitalTwinState.currentCoordinates[1];
+    simpleEffector.position.z = digitalTwinState.currentCoordinates[2];
     simpleEffector.rotation.x = Math.PI / 2;
     scene.add(simpleEffector);
     //endeffector models(with gripper)
@@ -359,9 +362,9 @@ const DigitalTwin = () => {
             effector = gltf.scene;
             effector.scale.set(10, 10, 10);
             effector.position.set(
-              robotState.currentCoordinates[0],
-              robotState.currentCoordinates[1],
-              robotState.currentCoordinates[2]
+              digitalTwinState.currentCoordinates[0],
+              digitalTwinState.currentCoordinates[1],
+              digitalTwinState.currentCoordinates[2]
             );
             effector.rotation.z = Math.PI / 6;
             scene.add(effector);
@@ -496,15 +499,15 @@ const DigitalTwin = () => {
     // Add sliders to adjust the X, Y, and Z coordinates of the robot's effector, with specified ranges
     // Each slider calls handleCoordinateChange on value change to update the state
     coordinatesFolder
-      .add(robotState.currentCoordinates, "0", -200, 200)
+      .add(digitalTwinState.currentCoordinates, "0", -200, 200)
       .name("X")
       .onChange((val) => handleCoordinateChange(0, val));
     coordinatesFolder
-      .add(robotState.currentCoordinates, "1", -200, 200)
+      .add(digitalTwinState.currentCoordinates, "1", -200, 200)
       .name("Y")
       .onChange((val) => handleCoordinateChange(1, val));
     coordinatesFolder
-      .add(robotState.currentCoordinates, "2", 280, 480)
+      .add(digitalTwinState.currentCoordinates, "2", 280, 480)
       .name("Z")
       .onChange((val) => handleCoordinateChange(2, -val));
     coordinatesFolder.close();
@@ -683,7 +686,7 @@ const DigitalTwin = () => {
       opacity: 0.4,
       transparent: true,
     });
-    const jointPositions = calculateJointPositions(robotState.currentAngles);
+    const jointPositions = calculateJointPositions(digitalTwinState.currentAngles);
     jointPositions.forEach((position, index) => {
       // Creating new joints
       const jointGeometry = new THREE.SphereGeometry(10, 32, 32);
@@ -728,11 +731,11 @@ const DigitalTwin = () => {
 
       // Lower arms
       const endEffectorPosition = new THREE.Vector3(
-        robotState.currentCoordinates[0] +
+        digitalTwinState.currentCoordinates[0] +
           effectorRadius * Math.cos((index * 2 * Math.PI) / 3),
-        robotState.currentCoordinates[1] +
+        digitalTwinState.currentCoordinates[1] +
           effectorRadius * Math.sin((index * 2 * Math.PI) / 3),
-        robotState.currentCoordinates[2]
+        digitalTwinState.currentCoordinates[2]
       );
       // Lower arm model, bug: the orientation and alignment are cumbersome
       // let lowerArm;
@@ -775,69 +778,8 @@ const DigitalTwin = () => {
     });
 
     setObjects(objects); // Update scene objects
-  }, [robotState, objects]);
+  }, [digitalTwinState, objects]);
 
-  // Initializes and manages a WebSocket connection to receive real-time robot data
-  // useEffect(() => {
-  //   // Function to establish a new WebSocket connection
-  //   const connectWebSocket = () => {
-  //     // Close any existing connections to avoid multiple connections
-  //     if (websocketRef.current) {
-  //       websocketRef.current.close();
-  //     }
-
-  //     // Create a new WebSocket connection
-  //     websocketRef.current = new WebSocket("ws://192.168.0.43:80");
-
-  //     // Event: WebSocket is opened
-  //     websocketRef.current.onopen = () => {
-  //       console.log("WebSocket connected");
-  //     };
-
-  //     // Event: Message received
-  //     websocketRef.current.onmessage = (event) => {
-  //       const data = JSON.parse(event.data);
-  //       setRobotState((prevState) => ({
-  //         ...prevState,
-  //         currentCoordinates: [
-  //           data.currentCoordinates[0],
-  //           data.currentCoordinates[1],
-  //           data.currentCoordinates[2],
-  //         ],
-  //         currentAngles: [
-  //           data.currentAngles[0],
-  //           data.currentAngles[1],
-  //           data.currentAngles[2],
-  //         ],
-  //       }));
-  //     };
-
-  //     // Event: Error
-  //     websocketRef.current.onerror = (error) => {
-  //       console.error("WebSocket error:", error);
-  //     };
-
-  //     // Event: Connection closed
-  //     websocketRef.current.onclose = (event) => {
-  //       console.log("WebSocket disconnected", event.reason);
-  //       // Auto-reconnect after 5 seconds if not closed normally
-  //       if (![1000, 1005].includes(event.code)) {
-  //         // 1000: normal closure, 1005: no status rcvd
-  //         setTimeout(connectWebSocket, 5000);
-  //       }
-  //     };
-  //   };
-
-  //   // Connect on initial component load
-  //   connectWebSocket();
-
-  //   // Cleanup function
-  //   return () => {
-  //     if (websocketRef.current) {
-  //       websocketRef.current.close();
-  //     }
-  //   };
-  // }, []);
 
   // Updates the 3D scene based on changes in end effector coordinates
   useEffect(() => {
@@ -845,9 +787,9 @@ const DigitalTwin = () => {
     if (!objects.scene || !objects.axesHelper) {
       return;
     } else {
-      objects.axesHelper.position.x = robotState.currentCoordinates[0];
-      objects.axesHelper.position.y = robotState.currentCoordinates[1];
-      objects.axesHelper.position.z = robotState.currentCoordinates[2];
+      objects.axesHelper.position.x = digitalTwinState.currentCoordinates[0];
+      objects.axesHelper.position.y = digitalTwinState.currentCoordinates[1];
+      objects.axesHelper.position.z = digitalTwinState.currentCoordinates[2];
       setObjects(objects);
       objects.renderer.render(objects.scene, objects.camera);
     }
@@ -855,9 +797,9 @@ const DigitalTwin = () => {
       return;
     } else {
       objects.simpleEffector.position.set(
-        robotState.currentCoordinates[0],
-        robotState.currentCoordinates[1],
-        robotState.currentCoordinates[2]
+        digitalTwinState.currentCoordinates[0],
+        digitalTwinState.currentCoordinates[1],
+        digitalTwinState.currentCoordinates[2]
       );
       setObjects(objects);
       objects.renderer.render(objects.scene, objects.camera);
@@ -866,24 +808,16 @@ const DigitalTwin = () => {
       return;
     } else {
       objects.effector.position.set(
-        robotState.currentCoordinates[0],
-        robotState.currentCoordinates[1],
-        robotState.currentCoordinates[2]
+        digitalTwinState.currentCoordinates[0],
+        digitalTwinState.currentCoordinates[1],
+        digitalTwinState.currentCoordinates[2]
       );
       setObjects(objects);
       objects.renderer.render(objects.scene, objects.camera);
     }
-  }, [robotState.currentCoordinates, objects]);
+  }, [digitalTwinState.currentCoordinates, objects]);
 
-  //Updates the path points when coordinates change
-  useEffect(() => {
-    if (robotState.currentCoordinates.length > 0) {
-      setPathPoints((prev) => [
-        ...prev,
-        new THREE.Vector3(...robotState.currentCoordinates),
-      ]);
-    }
-  }, [robotState.currentCoordinates]);
+ 
   // Cleans up and updates the geometric representation of the robot path when coordinates change
   useEffect(() => {
     if (objects.line && pathPoints.length > 0) {
@@ -905,6 +839,7 @@ const DigitalTwin = () => {
       }
     }
   }, []);
+  
   // Main component for the digital twin model, including visual representation and controls
   return (
     <>
@@ -939,12 +874,12 @@ const DigitalTwin = () => {
             }}
           >
             Coordinates:{" "}
-            {robotState.currentCoordinates
+            {digitalTwinState.currentCoordinates
               .map((coord) => coord.toFixed(2))
               .join(", ")}
             <br />
             Angles:{" "}
-            {robotState.currentAngles
+            {digitalTwinState.currentAngles
               .map((angle) => angle.toFixed(2))
               .join(", ")}
           </div>

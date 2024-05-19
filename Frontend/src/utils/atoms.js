@@ -79,3 +79,7 @@ export const robotStateAtom = atom({
     motorsSpeed:50}
 });
 
+export const pathPointsAtom = atom({
+  key: 'pathPoints', // unique ID (with respect to other atoms/selectors)
+  default: [], // default value (aka initial value)
+});
