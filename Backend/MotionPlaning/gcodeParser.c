@@ -101,11 +101,12 @@ void processLine(char* line) {
         int InterpolationSteps = (int)distance < 2 ? 2 : (int)distance;
     
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
-        /*
+        
         for(int i=0;i<InterpolationSteps;i++){
-            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
+            printf("(%f,%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z,coordinates[i].phi);
+            fflush(stdout);
         }
-        */
+         
         processInterpolationAndCreateJSON(coordinates,InterpolationSteps,params.f);
         
         

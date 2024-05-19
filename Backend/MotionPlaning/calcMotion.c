@@ -116,7 +116,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         localPosition.x = coordinates[i].x;
         localPosition.y = coordinates[i].y;
         localPosition.z = coordinates[i].z;
-
+    
         // Berechnen & Überprüft die Machbarkeit der neuen Position
         if (delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &theta1, &theta2, &theta3) == 0) {
             // Berechnet die Schrittzahlen für die Motoren
@@ -154,7 +154,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
                 //distanz Berechnen zwischen Punkten 
                 float distance = sqrt(pow(coordinates[1].x - coordinates[0].x, 2) + pow(coordinates[1].y - coordinates[0].y, 2) + pow(coordinates[1].z - coordinates[0].z, 2));
-                int devision = distance;
+                int devision = (int)distance < 2 ? 2 : (int)distance;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
                 int totalSteps[4] = {0, 0, 0, 0};  
 

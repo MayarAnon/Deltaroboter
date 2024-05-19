@@ -30,9 +30,10 @@ void UpdateStepError(const char *json_data) {
 
     item = cJSON_GetObjectItem(json, "Motor 2");
     if (item != NULL) errorAccumulator3 -= item->valuedouble;
-
+    /*
     item = cJSON_GetObjectItem(json, "Motor 3");
     if (item != NULL) errorAccumulator4 -= item->valuedouble;
+    */
     // Aufräumen
     cJSON_Delete(json);
 }
