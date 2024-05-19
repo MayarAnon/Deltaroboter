@@ -127,7 +127,6 @@ class GripperControl:
         Sendet ein Feedback-Signal nach einer Verzögerung.
         """
         def feedback_thread():
-            time.sleep(delay)
             self.client.publish("gripper/feedback", "true")
         threading.Thread(target=feedback_thread).start()
 

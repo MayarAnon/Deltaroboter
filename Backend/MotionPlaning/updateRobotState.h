@@ -4,6 +4,8 @@
 
 #include "global.h"
 
+void UpdateStepError(const char *json_data);
+
 // Die Funktion `parseGripperMode` konvertiert einen String in einen entsprechenden Enum-Wert für Greifermodi.
 // Parameter:
 //   - const char* mode: Zeichenkette, die den Modus beschreibt (z.B. "parallelGripper")

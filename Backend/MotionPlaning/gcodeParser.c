@@ -13,6 +13,40 @@
 
 
 
+void processLine(char* line);
+
+// Liest eine Datei und verarbeitet jede Zeile durch Aufruf der Funktion processLine.
+// Parameter:
+//   - const char* filename: Pfad der Datei, die gelesen werden soll.
+void readFile(const char* filename) {
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    // Pfad zusammenbauen: Gehe einen Ordner hoch und dann in den Ordner GCodeFiles
+    char path[1024];  // Pfadgröße anpassen, falls nötig
+    snprintf(path, sizeof(path), "../GCodeFiles/%s", filename); // Baut den vollständigen Pfad zur Datei.
+    
+    FILE* file = fopen(path, "r");
+    if (!file) {
+        
+        perror(path);
+        return;
+    }
+    printf("Programm wird ausgeführt. \n");
+    params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
+    while ((read = getline(&line, &len, file)) != -1) {
+        if (stopFlag) {
+            printf("load Program wurde Abgebrochen");
+            break;
+        }
+        
+        processLine(line);
+    }
+
+    free(line);  // Wichtig, um den von getline zugewiesenen Speicher freizugeben
+    fclose(file);
+}
 
 
 // Verarbeitet eine einzelne Zeile des G-Code-Befehls.
@@ -56,22 +90,23 @@ void processLine(char* line) {
         sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
         }
         
-        float diffX = fabs(params.x - currentPosition.x);
-        float diffY = fabs(params.y - currentPosition.y);
-        float diffZ = fabs(params.z - currentPosition.z);
+        float diffX = params.x - currentPosition.x;
+        float diffY = params.y - currentPosition.y;
+        float diffZ = params.z - currentPosition.z;
 
         Coordinate targetPosition = {params.x,params.y,params.z,params.phi};
         
-        float maxDiff = fmax(diffX, fmax(diffY, diffZ));
+        float distance = sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
-        int InterpolationSteps = (int)maxDiff < 2 ? 2 : (int)maxDiff;
+        int InterpolationSteps = (int)distance < 2 ? 2 : (int)distance;
     
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
-        /*
+        
         for(int i=0;i<InterpolationSteps;i++){
-            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z + 280);
+            printf("(%f,%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z,coordinates[i].phi);
+            fflush(stdout);
         }
-        */
+         
         processInterpolationAndCreateJSON(coordinates,InterpolationSteps,params.f);
         
         
@@ -179,6 +214,17 @@ void processLine(char* line) {
         processInterpolationAndCreateJSON(targetPosition, 2, params.f);
     
     }
+    // Ruft Unterprogramme auf, die in separaten Dateien definiert sind
+    else if (strcmp(command, "M98") == 0) {
+        
+        char filename[1024];
+        if (sscanf(line, "%*s %s", filename) == 1) {
+            printf("Unterprogram %s wird Aufgerufen \n",filename);
+            readFile(filename); // Ruft die Unterprogrammdatei auf
+        } else {
+            printf("Syntaxfehler in M98 Befehl, kein Dateiname angegeben.\n");
+        }
+    }
     else if (strcmp(command, "M100") == 0) {
         if(currentGripper == parallel){
                 processGripperCommand("M100", line); // Befehl und Parameter
@@ -205,6 +251,51 @@ void processLine(char* line) {
                 processGripperCommand("M400", line); // Befehl und Parameter
         }else{
             printf("wrong Gripper Typ \n");
+        }
+    }
+    else if (strcmp(command, "M500") == 0) {
+        //Magnet Wechselsystem
+        char parameter[100];
+        // Versuche, den Parameter aus dem Befehlsstring zu extrahieren
+        if (sscanf(line, "%*s %s", parameter) == 1) {
+            // Prüfe, ob der Parameter "enabled" oder "disabled" ist
+            if (strcmp(parameter, "enable") == 0 || strcmp(parameter, "disable") == 0) {
+                // Veröffentliche den Parameter unter "magnet/control"
+                char formattedMessage[100];
+                sprintf(formattedMessage, "{\"magneticGripperAttachment\":\"%s\"}", parameter); 
+                publishMessage(GRIPPERCONTROLLTOPIC, formattedMessage);
+            } else {
+                printf("Ungültiger Parameter: %s. Erwarte 'enable' oder 'disable'.\n", parameter);
+            }
+        } else {
+            printf("Kein Parameter gefunden in der Eingabe.\n");
+        }
+    }
+    else if (strcmp(command, "M600") == 0) {
+       char grippertyp[100];
+        Gripper gripper = unknown;
+        
+        if (sscanf(line, "%*s %s", grippertyp) == 1) {
+            printf("%s \n",grippertyp);
+            // Direkte Prüfung des Gripper-Modus ohne separate Funktion
+            if (strcmp(grippertyp, "parallelGripper") == 0) gripper = parallel;
+            else if (strcmp(grippertyp, "complientGripper") == 0) gripper = complient;
+            else if (strcmp(grippertyp, "magnetGripper") == 0) gripper = magnet;
+            else if (strcmp(grippertyp, "vacuumGripper") == 0) gripper = vaccum;
+            else fprintf(stderr, "Unknown gripper mode: %s\n", grippertyp);
+
+            if (gripper != unknown) {
+                // Setzen des aktuellen Greifertyps auf den gelesenen Wert
+                // Hier könnten weitere Aktionen durchgeführt werden
+                char formattedMessage[120];
+                sprintf(formattedMessage, "\"%s\"", grippertyp); 
+                publishMessage(GRIPPERMODETOPIC, formattedMessage);
+                currentGripper = gripper;
+            } else {
+                printf("Kein bekannter Grippertyp: %s\n", grippertyp);
+            }
+        } else {
+            printf("Kein Grippertyp in der Eingabe gefunden.\n");
         }
     }
     else if (strcmp(command, ";") == 0) {

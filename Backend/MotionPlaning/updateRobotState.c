@@ -9,6 +9,34 @@
 #include <stdbool.h>
 #include "global.h"
 
+// Funktion zum Aktualisieren der Motorwerte und Ausgeben der neuen Werte
+void UpdateStepError(const char *json_data) {
+    // Parsen des JSON-Strings
+    cJSON *json = cJSON_Parse(json_data);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "Fehler vor: %s\n", error_ptr);
+        }
+        return;
+    }
+
+    // Sicherstellen, dass die JSON-Objekte vorhanden sind und Werte subtrahieren
+    cJSON *item = cJSON_GetObjectItem(json, "Motor 0");
+    if (item != NULL) errorAccumulator1 -= item->valuedouble;
+
+    item = cJSON_GetObjectItem(json, "Motor 1");
+    if (item != NULL) errorAccumulator2 -= item->valuedouble;
+
+    item = cJSON_GetObjectItem(json, "Motor 2");
+    if (item != NULL) errorAccumulator3 -= item->valuedouble;
+    /*
+    item = cJSON_GetObjectItem(json, "Motor 3");
+    if (item != NULL) errorAccumulator4 -= item->valuedouble;
+    */
+    // Aufräumen
+    cJSON_Delete(json);
+}
 
 // Die Funktion `parseGripperMode` konvertiert einen String in einen entsprechenden Enum-Wert für Greifermodi.
 // Parameter:
@@ -76,11 +104,7 @@ void parseRobotState(const char *payloadStr) {
         }
     }
 
-    // Parsing eines Booleschen Werts für Greifer-Feedback
-    cJSON *gripperFeedback = cJSON_GetObjectItemCaseSensitive(json, "gripperFeedback");
-    
-    timeFlagGripper = cJSON_IsTrue(gripperFeedback); //wird global gepublisht
-    
+
     // Parsing des Greifermodus und Konvertierung zu Enum
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
     Gripper gripperModeValue = parseGripperMode(gripperModeStr);
@@ -105,6 +129,7 @@ void parseRobotState(const char *payloadStr) {
     // Anwendung des Homing-Werts, wenn wahr
     if(homingValue && homingFlag != homingValue ){
         printf("DeltaRoboter wird Referenziert! \n");
+        robotRequiersHoming = false;
         fflush(stdout); 
         currentPosition = (Coordinate){0.0, 0.0, -280.0, 0.0};
         currentSteps = (Steps){0};

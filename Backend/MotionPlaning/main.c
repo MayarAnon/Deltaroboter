@@ -1,4 +1,4 @@
-//  gcc -o MotionPlaning ./main.c  -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c global.c gcodeParser.c manualMode.c updateRobotState.c pathInterpolation.c -lpaho-mqtt3as inverseKinematic.c calcMotion.c -lm -lcjson
+//  gcc -o MotionPlaning ./main.c  -I/usr/local/include/cjson -L/usr/local/lib/cjson mqttClient.c global.c gcodeParser.c manualMode.c updateRobotState.c pathInterpolation.c -lpaho-mqtt3c inverseKinematic.c calcMotion.c -lm -lcjson
 
 
 
@@ -53,10 +53,10 @@ void* readFileThread(void* filename) {
 void onMessage(char *topicName, char *payloadStr) {
     pthread_t thread_id; // Thread-Identifikator für Hintergrundoperationen.
     
-    if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0) {
+    if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0 && !robotRequiersHoming) {
         manualModeCoordinates(payloadStr);
     }
-    else if (strcmp(topicName, MANUELCONTROLGRIPPERTOPIC) == 0) {
+    else if (strcmp(topicName, MANUELCONTROLGRIPPERTOPIC) == 0 && !robotRequiersHoming) {
 
         manualModeGripper(payloadStr);
     }
@@ -67,7 +67,7 @@ void onMessage(char *topicName, char *payloadStr) {
             stopFlag = true; // Setzt das stopFlag, wenn die Nachricht "true" ist.
         }
     }
-    else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0) {
+    else if (strcmp(topicName, LOADPROGRAMMTOPIC) == 0 && !robotRequiersHoming) {
         
         stopFlag = false;
         char* safePayload = strdup(payloadStr);  // Dupliziere den String, um sicherzustellen, dass er nicht überschrieben wird
@@ -77,11 +77,14 @@ void onMessage(char *topicName, char *payloadStr) {
         pthread_detach(thread_id);  // Löst den Thread vom Hauptthread.
     }
     else if (strcmp(topicName, ROBOTSTATETOPIC) == 0) {
-        
-        fflush(stdout);
         parseRobotState(payloadStr);
-
     }
+    else if (strcmp(topicName, PULSECHECKER) == 0) {
+        printf("Update Pulse: %s",payloadStr);
+        fflush(stdout); // Sorgt dafür, dass "Hallo" sofort ausgegeben wird
+        UpdateStepError(payloadStr);
+    }
+    
 }
 
 // Funktion zum sicheren Beenden des Programms und Aufrufen der MQTT-Zerstörungsfunktion
@@ -112,39 +115,4 @@ int main() {
     destroyMqtt();
     return 0;
 }
-
-// Liest eine Datei und verarbeitet jede Zeile durch Aufruf der Funktion processLine.
-// Parameter:
-//   - const char* filename: Pfad der Datei, die gelesen werden soll.
-void readFile(const char* filename) {
-    char* line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    // Pfad zusammenbauen: Gehe einen Ordner hoch und dann in den Ordner GCodeFiles
-    char path[1024];  // Pfadgröße anpassen, falls nötig
-    snprintf(path, sizeof(path), "../GCodeFiles/%s", filename); // Baut den vollständigen Pfad zur Datei.
-    
-    FILE* file = fopen(path, "r");
-    if (!file) {
-        
-        perror(path);
-        return;
-    }
-    printf("Programm wird ausgeführt. \n");
-    params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
-    while ((read = getline(&line, &len, file)) != -1) {
-        if (stopFlag) {
-            printf("load Program wurde Abgebrochen");
-            break;
-        }
-        
-        processLine(line);
-    }
-
-    free(line);  // Wichtig, um den von getline zugewiesenen Speicher freizugeben
-    fclose(file);
-}
-
-
 

@@ -3,7 +3,7 @@
 // Definition und Initialisierung globaler Variablen, die den Zustand und die Konfiguration des Deltaroboters steuern.
 
 // Definition der globalen Variablen
-const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC};
+const char* globalTopicsTemp[] = {ROBOTSTATETOPIC, LOADPROGRAMMTOPIC, MANUELCONTROLCOORDINATESTOPIC, MANUELCONTROLGRIPPERTOPIC, STOPTOPIC,PULSECHECKER};
 const char** globalTopics = globalTopicsTemp; // Zuweisung des Pointers auf das Array
 int globalTopicCount = sizeof(globalTopicsTemp) / sizeof(globalTopicsTemp[0]);
 void (*globalOnMessageCallback)(char *topicName, char *payloadStr);
@@ -34,10 +34,11 @@ int speedSetting = 50;
 // `stopFlag` ist eine Boolesche Variable, die verwendet wird, um den Roboter zu stoppen
 bool stopFlag = false;
 
-// `timeFlagGripper` ist eine Boolesche Variable, die verwendet wird, um auf GripperControl in der Ausführung zu warten.
-bool timeFlagGripper = true;
+
 // 'homingFlag' ist eine Boolesche Variable, die für die Flankenerkennung von Homingsignalen in robot/state zuständig ist verwendet in updateRobotState
 bool homingFlag = false;
+
+bool robotRequiersHoming = true;
 
 // `errorAccumulator1` bis `errorAccumulator4` dienen der Fehlerakkumulation für Regelungszwecke.
 double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0, errorAccumulator4 = 0.0;

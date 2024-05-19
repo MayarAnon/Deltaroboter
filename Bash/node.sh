@@ -15,6 +15,8 @@ cd $FrontendPath
 
 npm install --no-optional --silent # installiert alle Benötigten Packages im Frontend 
 
+npm run build
+
 cd $BackendPath 
 
 npm install --no-optional --silent # installiert alle Benötigten Packages im Backend 

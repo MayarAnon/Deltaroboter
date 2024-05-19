@@ -87,7 +87,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
     Steps localSteps = currentSteps; 
     // Fehlerakkumulatoren für jeden Motor         
     double localErrorAccumulators[4] = {errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4};
-
+    
     // Berechnet die maximale Geschwindigkeit basierend auf dem Faktor 'f'
     int maxSpeed = 530 - 5 * f;
     maxSpeed = maxSpeed < 15 ? 15 : maxSpeed;
@@ -116,7 +116,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         localPosition.x = coordinates[i].x;
         localPosition.y = coordinates[i].y;
         localPosition.z = coordinates[i].z;
-
+    
         // Berechnen & Überprüft die Machbarkeit der neuen Position
         if (delta_calcInverse(localPosition.x, localPosition.y, localPosition.z, &theta1, &theta2, &theta3) == 0) {
             // Berechnet die Schrittzahlen für die Motoren
@@ -154,7 +154,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                 // Aufteilen in 20 Nachrichten, genaue Berechnung der Schritte
                 //distanz Berechnen zwischen Punkten 
                 float distance = sqrt(pow(coordinates[1].x - coordinates[0].x, 2) + pow(coordinates[1].y - coordinates[0].y, 2) + pow(coordinates[1].z - coordinates[0].z, 2));
-                int devision = distance;
+                int devision = (int)distance < 2 ? 2 : (int)distance;
                 // Zum Speichern der summierten Schritte für Genauigkeitsüberprüfung
                 int totalSteps[4] = {0, 0, 0, 0};  
 
@@ -238,6 +238,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
             // Wird ausgeführt wenn delta_calcInverse einen Fehler zurückgibt da der Wert nicht erreicht werden kann mit der Kinematik
             errorOccurred = true;
             printf("Punkt existiert nicht (%f,%f,%f),\n", coordinates[i].x, coordinates[i].y, coordinates[i].z);
+            fflush(stdout); 
             break;
         }
     }
@@ -307,30 +308,28 @@ void processGripperCommand(char* command, const char* line) {
     }
 
     // Erstellen des JSON-Strings basierend auf dem aktuellen Greifer
+    int waitTime = 0;
     char jsonString[100];
-    snprintf(jsonString, sizeof(jsonString),
-             "{\n"
-             "\"parallelGripper\": %d,\n"
-             "\"complientGripper\": %d,\n"
-             "\"magnetGripper\": %d,\n"
-             "\"vacuumGripper\": %d\n"
-             "}",
-             (currentGripper == parallel) * sValue,
-             (currentGripper == complient) * sValue,
-             (currentGripper == magnet) * sValue,
-             (currentGripper == vaccum) * sValue);
-
-
-    timeFlagGripper = false;
-    publishMessage(GRIPPERCONTROLLTOPIC, jsonString); // Nachricht senden
-
-    // Warten auf eine Zustandsaktualisierung oder Timeout
-    int releaseTimer = 0;
-    while (!timeFlagGripper && releaseTimer < 10) {
-        printf("Timerflag %d releaseTimer %d", timeFlagGripper,releaseTimer);
-        fflush(stdout);
-        usleep(1000000); // 1 Sekunde warten
-        releaseTimer++;
+    switch (currentGripper) {
+        case parallel:
+            snprintf(jsonString, sizeof(jsonString), "{\n\"parallelGripper\": %d\n}", sValue);
+            waitTime = 5000;
+            break;
+        case complient:
+            snprintf(jsonString, sizeof(jsonString), "{\n\"complientGripper\": %d\n}", sValue);
+            waitTime = 2000;
+            break;
+        case magnet:
+            snprintf(jsonString, sizeof(jsonString), "{\n\"magnetGripper\": %d\n}", sValue);
+            waitTime = 500;
+            break;
+        case vaccum:
+            snprintf(jsonString, sizeof(jsonString), "{\n\"vacuumGripper\": %d\n}", sValue);
+            waitTime = 2000;
+            break;
     }
+
+    publishMessage(GRIPPERCONTROLLTOPIC, jsonString); // Nachricht senden
+    usleep(waitTime * 1000);
     currentGripperValue = sValue; // Aktualisieren des aktuellen Greiferwertes
 }

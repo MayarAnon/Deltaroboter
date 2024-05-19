@@ -19,7 +19,8 @@ typedef enum {
     parallel,
     complient,
     magnet,
-    vaccum
+    vaccum,
+    unknown = -1
 } Gripper;
 
 typedef enum {
@@ -53,8 +54,8 @@ extern Plane currentPlane;
 extern Gripper currentGripper;
 extern int speedSetting;
 extern bool stopFlag;
-extern bool timeFlagGripper;
 extern bool homingFlag;
+extern bool robotRequiersHoming;
 extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4;
 extern int currentGripperValue;
 extern Parameter params;
@@ -69,17 +70,20 @@ extern Parameter params;
 #define MANUELCONTROLCOORDINATESTOPIC "manual/control/coordinates"
 #define MANUELCONTROLGRIPPERTOPIC "manual/control/gripper"
 #define STOPTOPIC "motors/stop"
+#define PULSECHECKER "motors/offset"
 
 //publish Topics
 #define MOTORCONTROLLTOPIC "motors/sequence"
 #define GRIPPERCONTROLLTOPIC "gripper/control"
 #define COORDINATESTOPIC "current/coordinates"
 #define ANGLESTOPIC "current/angles"
+#define GRIPPERMODETOPIC "gripper/mode"
+
 
 //Mqtt defines
 #define ADDRESS     "tcp://localhost:1883"
 #define CLIENTID    "MotionPlaning"
-#define QOS         1  // Set Quality of Service Level to 0 (At most once)
+#define QOS         0  // Set Quality of Service Level to 0 (At most once)
 
 //MotionProfil Defines
 
