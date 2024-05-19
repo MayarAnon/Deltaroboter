@@ -10,6 +10,7 @@
 //   - const char* line: Die Zeile des G-Codes, die verarbeitet werden soll.
 void processLine(const char* line); 
 
+void readFile(const char* filename);
 
 
 #endif // GCODEPARSER_H

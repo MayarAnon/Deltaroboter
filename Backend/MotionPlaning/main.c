@@ -116,38 +116,3 @@ int main() {
     return 0;
 }
 
-// Liest eine Datei und verarbeitet jede Zeile durch Aufruf der Funktion processLine.
-// Parameter:
-//   - const char* filename: Pfad der Datei, die gelesen werden soll.
-void readFile(const char* filename) {
-    char* line = NULL;
-    size_t len = 0;
-    ssize_t read;
-
-    // Pfad zusammenbauen: Gehe einen Ordner hoch und dann in den Ordner GCodeFiles
-    char path[1024];  // Pfadgröße anpassen, falls nötig
-    snprintf(path, sizeof(path), "../GCodeFiles/%s", filename); // Baut den vollständigen Pfad zur Datei.
-    
-    FILE* file = fopen(path, "r");
-    if (!file) {
-        
-        perror(path);
-        return;
-    }
-    printf("Programm wird ausgeführt. \n");
-    params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
-    while ((read = getline(&line, &len, file)) != -1) {
-        if (stopFlag) {
-            printf("load Program wurde Abgebrochen");
-            break;
-        }
-        
-        processLine(line);
-    }
-
-    free(line);  // Wichtig, um den von getline zugewiesenen Speicher freizugeben
-    fclose(file);
-}
-
-
-

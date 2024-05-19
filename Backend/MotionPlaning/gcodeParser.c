@@ -12,7 +12,40 @@
 #include "global.h"
 
 
+void processLine(char* line);
 
+// Liest eine Datei und verarbeitet jede Zeile durch Aufruf der Funktion processLine.
+// Parameter:
+//   - const char* filename: Pfad der Datei, die gelesen werden soll.
+void readFile(const char* filename) {
+    char* line = NULL;
+    size_t len = 0;
+    ssize_t read;
+
+    // Pfad zusammenbauen: Gehe einen Ordner hoch und dann in den Ordner GCodeFiles
+    char path[1024];  // Pfadgröße anpassen, falls nötig
+    snprintf(path, sizeof(path), "../GCodeFiles/%s", filename); // Baut den vollständigen Pfad zur Datei.
+    
+    FILE* file = fopen(path, "r");
+    if (!file) {
+        
+        perror(path);
+        return;
+    }
+    printf("Programm wird ausgeführt. \n");
+    params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
+    while ((read = getline(&line, &len, file)) != -1) {
+        if (stopFlag) {
+            printf("load Program wurde Abgebrochen");
+            break;
+        }
+        
+        processLine(line);
+    }
+
+    free(line);  // Wichtig, um den von getline zugewiesenen Speicher freizugeben
+    fclose(file);
+}
 
 
 // Verarbeitet eine einzelne Zeile des G-Code-Befehls.
@@ -178,6 +211,17 @@ void processLine(char* line) {
             
         processInterpolationAndCreateJSON(targetPosition, 2, params.f);
     
+    }
+    // Ruft Unterprogramme auf, die in separaten Dateien definiert sind
+    else if (strcmp(command, "M98") == 0) {
+        
+        char filename[1024];
+        if (sscanf(line, "%*s %s", filename) == 1) {
+            printf("Unterprogram %s wird Aufgerufen \n",filename);
+            readFile(filename); // Ruft die Unterprogrammdatei auf
+        } else {
+            printf("Syntaxfehler in M98 Befehl, kein Dateiname angegeben.\n");
+        }
     }
     else if (strcmp(command, "M100") == 0) {
         if(currentGripper == parallel){
