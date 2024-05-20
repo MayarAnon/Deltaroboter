@@ -15,11 +15,28 @@ const WebSocketConnection = () => {
       const data = JSON.parse(event.data);
 
 
-      if (data.error !== undefined) {
-        setErrorState({ errorCode: data.error, message: data.error !== 0 ? 'Ein Fehler ist aufgetreten' : '' });
+      //error topic handling
+      if (data.Error !== undefined) {
+        let errorMessage = '';
+        switch (data.Error) {
+          case 0:
+            errorMessage = ''; // Kein Fehler
+            break;
+          case 1:
+            errorMessage = 'Emergency stop activated'; // Notaus wurde betätigt
+            break;
+          case 2:
+            errorMessage = 'Collision with end switch'; // Kollision mit dem Endscha
+            break;
+          default:
+            errorMessage = 'An error has occurred'; // Ein unbekannter Fehler
+            break;
+        }
+      
+        setErrorState({ errorCode: data.Error, message: errorMessage });
       }
 
-      if (data.error === 0) {
+      if (data.Error === 0) {
         setRobotState(data);
         if (data.currentCoordinates.length > 0) {
           setPathPoints(prev => [

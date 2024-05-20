@@ -10,7 +10,7 @@ from datetime import datetime
 
 # Get current time in the desired format
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-logging.basicConfig(filename='../../log/homing.log', level=logging.INFO)
+logging.basicConfig(filename='../../log/SafetyAndHoming.log', level=logging.INFO)
 
 
 # Constants for the GPIO pins of the end switches and emergency stop
