@@ -80,7 +80,12 @@ void processLine(char* line) {
         
         coordinates[0] = currentPosition;
         coordinates[1] = (Coordinate){params.x,params.y,params.z,params.phi};
-
+        /*
+        for(int i=0;i<2;i++){
+            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z +310);
+            fflush(stdout);
+        }
+        */
         processInterpolationAndCreateJSON(coordinates,2, params.f);
     
     }
@@ -103,7 +108,7 @@ void processLine(char* line) {
         Coordinate* coordinates = linearInterpolation(currentPosition, targetPosition, InterpolationSteps);
         /*
         for(int i=0;i<InterpolationSteps;i++){
-            printf("(%f,%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z,coordinates[i].phi);
+            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z +310);
             fflush(stdout);
         }
         */

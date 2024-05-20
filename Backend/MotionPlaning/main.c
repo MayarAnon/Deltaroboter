@@ -54,11 +54,15 @@ void onMessage(char *topicName, char *payloadStr) {
     pthread_t thread_id; // Thread-Identifikator für Hintergrundoperationen.
 
     if(strcmp(topicName, ERRORTOPIC) == 0){
-        stopFlag = true;
-        robotRequiersHoming = true;
-        printf("ERROR: %s \n", payloadStr);
-        printf("Homing Required!\n");
-        fflush(stdout); 
+        // Umwandeln des Payload-Strings in eine Zahl
+        int payload = atoi(payloadStr);
+        if(payload != 0){
+            stopFlag = true;
+            robotRequiersHoming = true;
+            printf("ERROR: %s \n", payloadStr);
+            printf("Homing Required!\n");
+            fflush(stdout);
+        } 
     }
     else if (strcmp(topicName, MANUELCONTROLCOORDINATESTOPIC) == 0 && !robotRequiersHoming) {
         manualModeCoordinates(payloadStr);
