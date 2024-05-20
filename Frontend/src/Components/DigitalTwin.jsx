@@ -166,7 +166,7 @@ const DigitalTwin = () => {
 
   
   //Reset angles and coordinates when the user clicks 'resetScene' in the Controls GUI
-  const resetScene = () => {
+  const resetScene = (line) => {
     // Reset the coordinates and angles
    setDigitalTwinState({
       currentCoordinates: [0, 0, -280,0], // Original coordinates
@@ -174,11 +174,11 @@ const DigitalTwin = () => {
     });
 
     setPathPoints([]);
-    if (objects.line && pathPoints.length > 0) {
+    if (line && pathPoints.length > 0) {
       const geometry = new THREE.BufferGeometry();
-      objects.line.geometry.dispose(); // Clean up old geometry
-      objects.line.geometry = geometry; // Assign new geometry
-      objects.line.geometry.verticesNeedUpdate = true; // Set flag to force update
+      line.geometry.dispose(); // Clean up old geometry
+      line.geometry = geometry; // Assign new geometry
+      line.geometry.verticesNeedUpdate = true; // Set flag to force update
     }
   };
   // Adopt coordinates from the Controls GUI and calculate motor angles using inverse kinematics – used only for offline control via the Controls
@@ -488,7 +488,9 @@ const DigitalTwin = () => {
     scene.add(workspaceCylinder);
 
     //************************************************************** Dat.gui Component ******************************************************************************** */
-
+    const guiFunctions = {
+      resetSceneWrapper: () => resetScene(line) // hier übergibst du den gewünschten Parameter
+  };
     const gui = new dat.GUI({ autoPlace: false });
     gui.close();
     // Append the GUI to a specific HTML container element
@@ -498,7 +500,7 @@ const DigitalTwin = () => {
       .add({ toggleCamera: () => toggleCameraPosition() }, "toggleCamera")
       .name("Switch View");
     // Add a button to the GUI for resetting the entire scene
-    gui.add({ resetScene }, "resetScene").name("Reset Scene");
+    gui.add(guiFunctions, 'resetSceneWrapper').name("Reset Scene");
     // Create a folder in the GUI for managing effector coordinates
     const coordinatesFolder = gui.addFolder("Effector Coordinates");
 

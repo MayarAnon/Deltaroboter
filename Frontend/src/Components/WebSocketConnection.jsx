@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import  { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
 import { robotStateAtom, pathPointsAtom } from '../utils/atoms';
 import * as THREE from "three";
@@ -28,7 +28,7 @@ const WebSocketConnection = () => {
       console.log("WebSocket disconnected", event.reason);
       setTimeout(() => {
         websocket = new WebSocket("ws://192.168.0.43:80");
-      }, 5000);
+      }, 1000);
     };
 
     return () => websocket.close();
