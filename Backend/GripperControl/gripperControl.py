@@ -7,48 +7,51 @@ import signal
 import logging
 from datetime import datetime
 
-# Aktuelle Zeit in gewünschtem Format erhalten
+# Get current time in the desired format
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 logging.basicConfig(filename='../../log/gripperControl.log', level=logging.INFO)
 
-# Definiere GPIO-Pins
-ParallelGripper = 12  # PWM Output
-MagnetRelais = 16
+
+# Define GPIO pins
+
 PumpRelais = 25
+PumpValveRelais = 25
 VacuumRelais = 8
-PumpValveRelais = 7
-VacuumValveRelais = 1
-GripperMagnetRelais = 20  # Magnet Relais für die Greiferaufnahme
-# Setup der GPIO-Pins
+VacuumValveRelais = 8
+MagnetRelais = 7
+GripperMagnetRelais = 1  # Magnet relay for gripper attachment
+ParallelGripper = 12  # PWM Output
+
+# GPIO pins setup
 def setup_gpio():
     """
-    Initialisiert die GPIO-Pins und Konfiguriert den Parallelgripper mit PWM.
+    Initializes the GPIO pins and configures the parallel gripper with PWM.
     """
-    GPIO.setmode(GPIO.BCM)  # Verwende Broadcom Pin-Nummerierung
+    GPIO.setmode(GPIO.BCM)  # Use Broadcom pin numbering
     GPIO.setup(ParallelGripper, GPIO.OUT)
-    p = GPIO.PWM(ParallelGripper, 100)  # PWM mit 100Hz
+    p = GPIO.PWM(ParallelGripper, 100)  # PWM with 100Hz
     p.start(0)
 
     for pin in [PumpRelais, VacuumRelais, MagnetRelais, PumpValveRelais, VacuumValveRelais,GripperMagnetRelais]:
         GPIO.setup(pin, GPIO.OUT)
 
-# Klasse für die Steuerung des Greifers
+# Class for controlling the gripper
 class GripperControl:
     def __init__(self, id, host, port):
         """
-        Initialisiert den MQTT-Client und den PWM-Controller für den Parallelgripper.
+        Initializes the MQTT client and the PWM controller for the parallel gripper.
         """
         self.client = mqtt.Client(id)
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.connect(host, port, 60)
-        self.pwm = GPIO.PWM(ParallelGripper, 100)
-        self.pwm.start(0) #anfänglicher Duty Cycle
+        self.pwm = GPIO.PWM(ParallelGripper, 100) 
+        self.pwm.start(0) # initial duty cycle
 
     def on_connect(self, client, userdata, flags, rc):
         """
-        Wird aufgerufen, wenn eine Verbindung zum MQTT-Broker hergestellt wird.
-        Abonniert das Topic "gripper/control".
+        Called when a connection to the MQTT broker is established.
+        Subscribes to the "gripper/control" topic.
         """
         if rc == 0:
             self.client.subscribe("gripper/control")
@@ -57,63 +60,63 @@ class GripperControl:
 
     def on_message(self, client, userdata, message):
         """
-        Wird aufgerufen, wenn eine Nachricht auf dem abonnierten Topic empfangen wird.
-        Verarbeitet die empfangene Nachricht und steuert den Greifer entsprechend.
+        Called when a message is received on a subscribed topic.
+        Processes the received message and controls the gripper accordingly.
         """
+
         if message.topic == "gripper/control":
             self.handle_control_message(message.payload.decode())
 
     def handle_control_message(self, message):
         """
-        Verarbeitet die empfangene Steuerungsnachricht und steuert den Greifer entsprechend.
+        Processes the received control message and controls the gripper accordingly.
         """
         data = json.loads(message)
         logging.info(data)
         if "parallelGripper" in data:
             input_pwm = int(data["parallelGripper"])
-            pwmValue = 10 + 0.8 * input_pwm #skallierung von 0-100 auf DutyCycle von 10% bis 90%
+            pwmValue = 10 + 0.8 * input_pwm # scaling from 0-100 to duty cycle of 10% to 90%
             self.pwm.ChangeDutyCycle(pwmValue)
             GPIO.output(VacuumRelais, GPIO.LOW)
             GPIO.output(PumpRelais, GPIO.LOW)
-            self.send_feedback(2)
+            self.send_feedback(0)
 
         elif "complientGripper" in data:
             value = int(data["complientGripper"])
             if value == 1:
                 GPIO.output(PumpRelais, GPIO.HIGH)
-                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
-                time.sleep(0.1)
                 GPIO.output(PumpValveRelais, GPIO.HIGH)
-                self.send_feedback(5)
+                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
+                
+                self.send_feedback(0)
             elif value == -1:
                 GPIO.output(VacuumRelais, GPIO.HIGH)
-                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)
-                time.sleep(0.1)
                 GPIO.output(VacuumValveRelais, GPIO.HIGH)
-                self.send_feedback(5)
+                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)              
+                self.send_feedback(0)
             else:
                 GPIO.output([VacuumRelais, VacuumValveRelais, PumpRelais, PumpValveRelais], GPIO.LOW)
         elif "vacuumGripper" in data:
             value = int(data["vacuumGripper"])
             if value == 1:
                 GPIO.output(PumpRelais, GPIO.HIGH)
-                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
-                time.sleep(0.1)
                 GPIO.output(PumpValveRelais, GPIO.HIGH)
-                self.send_feedback(5)
+                GPIO.output([VacuumRelais,VacuumValveRelais], GPIO.LOW)
+                
+                self.send_feedback(0)
             elif value == -1:
                 GPIO.output(VacuumRelais, GPIO.HIGH)
-                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)
-                time.sleep(0.1)
                 GPIO.output(VacuumValveRelais, GPIO.HIGH)
-                self.send_feedback(5)
+                GPIO.output([PumpRelais,PumpValveRelais], GPIO.LOW)
+
+                self.send_feedback(0)
             else:
                 GPIO.output([VacuumRelais, VacuumValveRelais, PumpRelais, PumpValveRelais], GPIO.LOW)
         elif "magnetGripper" in data:
             value = int(data["magnetGripper"])
             GPIO.output(MagnetRelais, GPIO.HIGH if value == 1 else GPIO.LOW)
             GPIO.output([VacuumRelais, PumpRelais], GPIO.LOW)
-            self.send_feedback(1)
+            self.send_feedback(0)
         elif "magneticGripperAttachment" in data:
             if data["magneticGripperAttachment"] == "enable":
                 GPIO.output(GripperMagnetRelais, GPIO.HIGH)
@@ -124,7 +127,11 @@ class GripperControl:
     
     def send_feedback(self, delay):
         """
-        Sendet ein Feedback-Signal nach einer Verzögerung.
+        Sends a feedback signal after a delay.
+
+        Note: This function does not currently serve a meaningful purpose as there is no
+        feedback mechanism implemented in the current gripper hardware. It is implemented
+        in anticipation of a future feedback mechanism.
         """
         def feedback_thread():
             self.client.publish("gripper/feedback", "true")
@@ -132,7 +139,7 @@ class GripperControl:
 
     def cleanup(self):
         """
-        Räumt die Ressourcen auf und beendet das Programm ordnungsgemäß.
+        Cleans up resources and terminates the program properly.
         """
         logging.info(f"{current_time} Cleaning up resources...")
         self.client.loop_stop()
@@ -141,7 +148,7 @@ class GripperControl:
 
     def signal_handler(self, signum, frame):
         """
-        Behandelt Signale wie SIGTERM oder SIGINT.
+        Handles signals like SIGTERM or SIGINT.
         """
         self.cleanup()
         logging.info(f"{current_time} Signal {signum} received, exiting.")
@@ -149,7 +156,7 @@ class GripperControl:
 
     def run(self):
         """
-        Startet den MQTT-Client und wartet auf Nachrichten.
+        Starts the MQTT client and waits for messages.
         """
         self.client.loop_start()
         signal.signal(signal.SIGTERM, self.signal_handler)
