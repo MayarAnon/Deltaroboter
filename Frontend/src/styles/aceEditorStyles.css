@@ -39,7 +39,10 @@
     color: blue;
     font-weight: bold;
 }
-
+.gcode-editor .ace_filename{
+  color: green;
+  font-weight: bold;
+}
 .gcode-editor .ace_parameter {
     color: orange;
     font-weight: bold;

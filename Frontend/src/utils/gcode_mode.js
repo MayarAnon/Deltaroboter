@@ -14,7 +14,8 @@
   - error: Faulty or missing values in the G-code.
   - warning: Warnings for specific G-code commands, e.g., feedrate F must not exceed 105.
   - text: Standard text token.
-  - parameter: G-code parameters like XYZ.
+  - parameter: G-code parameters like XYZ, enable, diable, etc.
+  - filename: name of the sub gcode program to call with M98
   - interpolation: Interpolation parameters like I, J, P.
   - radius: Radius parameter (R).
   - feedrate: Feedrate parameter (F).
@@ -48,7 +49,58 @@ ace.define(
           },
           {
             token: "command",
-            regex: "\\b(G0|G1|G2|G3|G4|G17|G18|G19|G28|M100|M200|M300|M400)\\b",
+            regex: "\\b(G0|G1|G2|G3|G4|G17|G18|G19|G28|G00|G01|G02|G03|G04|G90|G91|M100|M200|M300|M400)\\b",
+          },
+          {
+            token: ["command", "text", "filename"],
+            regex: "(M98)(\\s+)(\\S+\\.gcode)",
+            onMatch: function(value, currentState, stack) {
+              var parts = value.split(/(\s+)/);
+              return [{
+                type: "command",
+                value: parts[0]
+              }, {
+                type: "text",
+                value: parts[1]
+              }, {
+                type: "filename",
+                value: parts[2] 
+              }];
+            }
+          },
+          {
+            token: ["command", "text", "parameter"],
+            regex: "(M500)(\\s+)(enable|disable)",
+            onMatch: function(value, currentState, stack) {
+              var parts = value.split(/(\s+)/);
+              return [{
+                type: "command",
+                value: parts[0]
+              }, {
+                type: "text",
+                value: parts[1]
+              }, {
+                type: "parameter",
+                value: parts[2]
+              }];
+            }
+          },
+          {
+            token: ["command", "text","parameter"],
+            regex: "(M600)(\\s+)(parallelGripper|magnetGripper|vacuumGripper|complientGripper)",
+            onMatch: function(value, currentState, stack) {
+              var parts = value.split(/(\s+)/); 
+              return [{
+                type: "command",
+                value: parts[0]
+              }, {
+                type: "text",
+                value: parts[1]
+              }, {
+                type: "parameter",
+                value: parts[2]
+              }];
+            }
           },
           {
             token: "error", // Detect missing values
