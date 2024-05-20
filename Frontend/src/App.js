@@ -9,12 +9,14 @@ import Debugger from "./Components/Debugger"
 import GCode from "./Components/GCode";
 import DigitalTwin from "./Components/DigitalTwin";
 import WebSocketConnection from "./Components/WebSocketConnection";
+import ErrorView from "./Components/ErrorView";
 const App = () => {
   
   return (
      <Router>
       <RecoilRoot>
           <Header/>
+          <ErrorView/>
           <Routes>
             <Route path="/" element={<ManuellMode/>} />
             <Route path="/debug-mode" element={<Debugger/>} />

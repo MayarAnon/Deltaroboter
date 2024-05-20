@@ -1,6 +1,6 @@
-import  { useEffect } from "react";
+import { useEffect } from "react";
 import { useSetRecoilState } from "recoil";
-import { robotStateAtom, pathPointsAtom,errorStateAtom  } from '../utils/atoms';
+import { robotStateAtom, pathPointsAtom, errorStateAtom } from '../utils/atoms';
 import * as THREE from "three";
 
 const WebSocketConnection = () => {
@@ -13,17 +13,20 @@ const WebSocketConnection = () => {
     websocket.onopen = () => console.log("WebSocket connected");
     websocket.onmessage = event => {
       const data = JSON.parse(event.data);
-      setRobotState(data);
-      if (data.error && data.error !== 0) {
-        setErrorState({ errorCode: data.error, message: 'Ein Fehler ist aufgetreten' });
-        return;
+
+
+      if (data.error !== undefined) {
+        setErrorState({ errorCode: data.error, message: data.error !== 0 ? 'Ein Fehler ist aufgetreten' : '' });
       }
 
-      if (data.currentCoordinates.length > 0) {
-        setPathPoints(prev => [
-          ...prev,
-          new THREE.Vector3(...data.currentCoordinates),
-        ]);
+      if (data.error === 0) {
+        setRobotState(data);
+        if (data.currentCoordinates.length > 0) {
+          setPathPoints(prev => [
+            ...prev,
+            new THREE.Vector3(...data.currentCoordinates),
+          ]);
+        }
       }
     };
 
