@@ -80,6 +80,11 @@ export const robotStateAtom = atom({
 });
 
 export const pathPointsAtom = atom({
-  key: 'pathPoints', // unique ID (with respect to other atoms/selectors)
-  default: [], // default value (aka initial value)
+  key: 'pathPoints', 
+  default: [],
+});
+
+export const errorStateAtom = atom({
+  key: 'errorState',
+  default: { errorCode: 0, message: '' }
 });
