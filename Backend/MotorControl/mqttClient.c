@@ -38,7 +38,7 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 int onMessage(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
     // Nachrichtenverarbeitung
     char* payloadStr = strndup(message->payload, message->payloadlen);
-    printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
+    // printf("Empfangene Nachricht auf Topic '%s': %s\n", topicName, payloadStr);
     if (strcmp(topicName, globalConfig.stopTopic) == 0 && strcmp(payloadStr, "true") == 0) {
         fprintf(stderr, "Emergency stop triggered!\n");
         emergency_stop_triggered = 1;
