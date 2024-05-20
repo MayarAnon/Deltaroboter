@@ -8,15 +8,16 @@ import signal
 import logging
 from datetime import datetime
 
-# Aktuelle Zeit in gewünschtem Format erhalten
+# Get current time in the desired format
 current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 logging.basicConfig(filename='../../log/homing.log', level=logging.INFO)
 
 
-# Konstanten für die GPIO-Pins der Endschalter
+# Constants for the GPIO pins of the end switches and emergency stop
 ENDSCHALTER_PINS = [0, 5, 6]
+NOTAUS_PIN = 19
 
-# MQTT-Konfiguration
+# MQTT configuration
 MQTT_BROKER = 'localhost'
 MQTT_PORT = 1883
 MQTT_TOPIC_CONTROL = 'homing/control'
@@ -24,35 +25,50 @@ MQTT_TOPIC_FEEDBACK = 'homing/feedback'
 MQTT_TOPIC_MOTORS_SEQUENCE = 'motors/sequence'
 MQTT_TOPIC_MOTORS_STOP = 'motors/stop'
 MQTT_TOPIC_ERRORS = 'Errors'
-# Globale Variable, um den Homing-Status zu tracken
+# Global variable to track the homing status
 is_homing_active = False
 
-# Initialisierung der GPIO-Pins
+# Initialization of GPIO pins
 GPIO.setmode(GPIO.BCM)
 for pin in ENDSCHALTER_PINS:
     GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-
+GPIO.setup(NOTAUS_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 def on_connect(client, userdata, flags, rc):
+    """
+    Callback function when the client connects to the MQTT broker.
+    Subscribes to the control topic.
+
+    Parameters:
+    - client: The MQTT client
+    - userdata: User data, not used
+    - flags: Response flags sent by the broker
+    - rc: Connection result
+    """
     logging.info(f"{current_time} Connected with result code " + str(rc))
     client.subscribe(MQTT_TOPIC_CONTROL)
 
 def send_motor_commands(pulses, timing):
+    """
+    Sends motor commands to the MQTT topic.
+
+    Parameters:
+    - pulses: List of pulses for each motor
+    - timing: List of timing for each motor
+    """
     message = json.dumps([{"motorpulses": pulses, "timing": timing}])
     client.publish(MQTT_TOPIC_MOTORS_SEQUENCE, message)
    
 
 def start_homing_process():
     """
-    Startet den Homing-Prozess für die Motoren. Dieser Prozess prüft kontinuierlich, ob jeder Motor seine Home-Position
-    erreicht hat, und passt die Motorpulsung entsprechend an. Der Prozess läuft in einer Schleife, bis alle Motoren
-    ihre Home-Position erreicht haben.
+    Starts the homing process for the motors. This process continuously checks if each motor
+    has reached its home position and adjusts the motor pulsing accordingly. The process
+    runs in a loop until all motors have reached their home position.
 
-    Verwendet die globalen Variablen `is_homing_active`, um den Prozessstatus zu verwalten und verwendet die 
-    MQTT-Topics, um Befehle zu senden und Feedback zu erhalten.
-
-    Globale Variablen:
-    - is_homing_active: Eine Boolesche Variable, die angibt, ob der Homing-Prozess aktiv ist.
+    Uses the global variable `is_homing_active` to manage the process status and uses the
+    MQTT topics to send commands and receive feedback.
     """
+
     global is_homing_active
     is_homing_active = True
     pulses = [-10, -10, -100]
@@ -78,14 +94,14 @@ def start_homing_process():
                 client.publish(MQTT_TOPIC_FEEDBACK, 'false')
                 client.publish(MQTT_TOPIC_ERRORS, '0')
                 break
-            time.sleep(0.04)  # Wartezeit zwischen den Überprüfungen
+            time.sleep(0.04) # Wait time between checks
     finally:
         is_homing_active = False
 
 def check_end_switches():
     """
-    Überwacht kontinuierlich die Zustände der Endschalter. Wenn der Homing-Prozess nicht aktiv ist und ein Endschalter aktiviert wird,
-    wird eine Nachricht gesendet, um die Motoren zu stoppen (fehler ist aufgetreten).
+    Continuously monitors the states of the end switches. If the homing process is not active
+    and an end switch is activated, a message is sent to stop the motors (an error has occurred).
     """
     while True:
         if not is_homing_active:
@@ -95,20 +111,37 @@ def check_end_switches():
                     client.publish(MQTT_TOPIC_ERRORS, '2') #error code 2
                     logging.info(f"{current_time} motor stop")
                     break
-        time.sleep(0.004)  # Kurze Verzögerung, um das Polling zu begrenzen
-
-def setup_end_switch_monitoring():
+        time.sleep(0.004)   # Short delay to limit polling
+def check_emergency_stop():
+    """
+    Continuously monitors the state of the emergency stop button. If the button is pressed
+    (pin is HIGH), a message is sent to stop the motors and an error code is published.
+    """
+    while True:
+        if GPIO.input(NOTAUS_PIN):
+            stop_homing_process()
+            client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
+            client.publish(MQTT_TOPIC_ERRORS, '1')  # Error code 1 for emergency stop
+            logging.error(f"{current_time} Emergency stop activated")
+            
+            break
+        time.sleep(0.004)  # Short delay to limit polling
+def setup_monitoring():
+    """
+    Sets up monitoring by starting threads to check the end switches and the emergency stop button.
+    """
     threading.Thread(target=check_end_switches, daemon=True).start()
+    threading.Thread(target=check_emergency_stop, daemon=True).start()
 
 def on_message(client, userdata, msg):
     """
-    Diese Funktion wird aufgerufen, wenn eine Nachricht auf einem der abonnierten Topics eintrifft.
-    Es überprüft den Inhalt der Nachricht und startet oder stoppt den Homing-Prozess entsprechend.
+    Callback function that is called when a message is received on a subscribed topic.
+    Checks the content of the message and starts or stops the homing process accordingly.
 
-    Parameter:
-    - client: Der MQTT-Client
-    - userdata: Die Benutzerdaten, normalerweise nicht verwendet
-    - msg: Die empfangene Nachricht mit .topic und .payload Eigenschaften
+    Parameters:
+    - client: The MQTT client
+    - userdata: User data, not used
+    - msg: The received message with .topic and .payload attributes
     """
     if msg.topic == MQTT_TOPIC_CONTROL:
         command = msg.payload.decode()
@@ -123,15 +156,19 @@ def on_message(client, userdata, msg):
 
 def stop_homing_process():
     """
-    Stoppt den Homing-Prozess, indem die globale Variable `is_homing_active` auf False gesetzt wird.
-    Dies wird überprüft in der Hauptschleife des Homing-Prozesses, um den Loop vorzeitig zu beenden.
+    Stops the homing process by setting the global variable `is_homing_active` to False.
+    This is checked in the main loop of the homing process to end the loop prematurely.
     """
     global is_homing_active
     is_homing_active = False
 def signal_handler(signum, frame):
     """
-    Diese Funktion wird aufgerufen, wenn das Programm ein SIGINT oder SIGTERM Signal erhält.
-    Es sorgt für die saubere Beendigung des Programms.
+    This function is called when the program receives a SIGINT or SIGTERM signal.
+    It ensures the program is cleanly terminated.
+
+    Parameters:
+    - signum: The signal number
+    - frame: The current stack frame
     """
     logging.info(f"{current_time} Cleaning up resources...")
     stop_homing_process()
@@ -140,21 +177,20 @@ def signal_handler(signum, frame):
     logging.info(f"{current_time} Shutdown complete.")
     exit(0)
 
-# Registriere den Signalhandler für SIGINT und SIGTERM
+# Register signal handler for SIGINT and SIGTERM
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
-
-# MQTT-Client-Setup
+# MQTT client setup
 client = mqtt.Client()
 client.on_connect = on_connect
 client.on_message = on_message
 client.connect(MQTT_BROKER, MQTT_PORT, 60)
 
-# Starte die Endschalter-Überwachung beim Start des Skripts
-setup_end_switch_monitoring()
+# Start monitoring of end switches and emergency stop button when the script starts
+setup_monitoring()
 
 try:
-    client.loop_forever()  # Dieser Aufruf blockiert, bis eine Ausnahme auftritt oder der Client manuell gestoppt wird.
+    client.loop_forever()  # This call blocks until an exception occurs or the client is manually stopped.
 except Exception as e:
     logging.error(f"{current_time} Exception occurred: {str(e)}")
 finally:

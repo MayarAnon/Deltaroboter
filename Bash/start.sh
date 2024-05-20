@@ -31,9 +31,9 @@ start_services() {
     nohup python statepublisher.py 2>&1 | with_timestamp >> "$LOG_DIR/statepublisher.log" &
     pids+=($!)
 
-    # Starte das Homing-Skript
+    # Starte das SafetyAndHoming-Skript
     cd "$BASE_DIR/Backend/Homing/"
-    nohup python homing.py 2>&1 | with_timestamp >> "$LOG_DIR/homing.log" &
+    nohup python SafetyAndHoming.py 2>&1 | with_timestamp >> "$LOG_DIR/SafetyAndHoming.log" &
     pids+=($!)
 
     # Starte das Gripper Control Skript
