@@ -23,7 +23,7 @@ MQTT_TOPIC_CONTROL = 'homing/control'
 MQTT_TOPIC_FEEDBACK = 'homing/feedback'
 MQTT_TOPIC_MOTORS_SEQUENCE = 'motors/sequence'
 MQTT_TOPIC_MOTORS_STOP = 'motors/stop'
-
+MQTT_TOPIC_ERRORS = 'Errors'
 # Globale Variable, um den Homing-Status zu tracken
 is_homing_active = False
 
@@ -89,9 +89,10 @@ def check_end_switches():
     while True:
         if not is_homing_active:
             for index, pin in enumerate(ENDSCHALTER_PINS):
-                if GPIO.input(pin):
-                    logging.info(f"{current_time} motor stop")
+                if GPIO.input(pin):   
                     client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
+                    client.publish(MQTT_TOPIC_ERRORS, '2') #error code 2
+                    logging.info(f"{current_time} motor stop")
                     break
         time.sleep(0.004)  # Kurze Verzögerung, um das Polling zu begrenzen
 
