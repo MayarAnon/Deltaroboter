@@ -28,11 +28,12 @@ const GCode = (p) => {
   // Function to save G-Code
   const saveGCode = () => {
     const address = `${server}/gcode`;
-
+    const fileName = sharedString.name.endsWith('.gcode') ? sharedString.name : `${sharedString.name}.gcode`;
+    const payload = { ...sharedString, name: fileName };
     // Post request to save G-Code data
 
     axios
-      .post(address, sharedString)
+      .post(address, payload)
       .then((response) => {
         console.log("Daten erfolgreich gesendet:", response.data);
         updateModeGCode(0);
@@ -43,7 +44,6 @@ const GCode = (p) => {
   };
   // Function to handle name change for saving G-Code
   const handleNameChange = (e) => {
-    console.log(e.target.value);
     setSharedString((prevSettings) => ({
       ...prevSettings,
       name: e.target.value,
