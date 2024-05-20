@@ -36,6 +36,11 @@ typedef enum {
     UnknownProfil = -1  // Hinzugefügter Wert für unbekannte Profile
 } MotionProfile;
 
+typedef enum {
+    Absolut,
+    Relativ
+} CoordinateMode;
+
 typedef struct {
     float x, y, z, phi, f, i, j, r, t;
 } Parameter;
@@ -59,7 +64,8 @@ extern bool robotRequiersHoming;
 extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccumulator4;
 extern int currentGripperValue;
 extern Parameter params;
-
+extern CoordinateMode currentCoordinateMode;
+ 
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
 #define PI 3.14159265358979323846

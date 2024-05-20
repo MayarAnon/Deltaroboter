@@ -33,6 +33,7 @@ void manualModeCoordinates(char *payloadStr) {
 
     if (memcmp(&currentPosition, &new_position, sizeof(Coordinate))) { // Vergleich mit der aktuellen Position
         char command[120];
+        currentCoordinateMode = Absolut;
         sprintf(command, "G1 X%.1f Y%.1f Z%.1f A%.1f F%d\n",
                 new_position.x, new_position.y, new_position.z, new_position.phi, speedSetting); // Senden des G-Code-Kommandos
         processLine(command);
