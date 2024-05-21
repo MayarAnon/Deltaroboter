@@ -32,8 +32,8 @@ TOPICS = [
 # Initialisiere den Zustand des Roboters
 robot_state = {
     "homing": False,
-    "currentCoordinates": [0.0, 0.0, 0.0],
-    "currentAngles": [0.0, 0.0, 0.0],
+    "currentCoordinates": [0.0, 0.0, -280.0,0.0],
+    "currentAngles": [-31.429, -31.429, -31.429,0.0],
     "gripperFeedback": False,
     "gripperMode": "parallelGripper",
     "motionProfil" : "TrapezProfil",

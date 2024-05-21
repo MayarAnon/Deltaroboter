@@ -116,6 +116,12 @@ app.post("/gcode", (req, res) => {
   });
 });
 // Endpunkt zum übermitteln von den Einstellungen
+let currentSettings = {
+  gripperMode: null,
+  motorSpeed: null,
+  motionProfil: null,
+  powerstage: null,
+};
 app.post("/updateSettings", async (req, res) => {
   const settings = req.body;
   if (!settings) {
@@ -128,22 +134,26 @@ app.post("/updateSettings", async (req, res) => {
     }
 
     // Durchlaufen aller Einstellungen und Publizieren auf den entsprechenden Topics
-    if (settings.gripperMode) {
+    if (settings.gripperMode && settings.gripperMode !== currentSettings.gripperMode) {
       const gripperModeJson = JSON.stringify(settings.gripperMode);
       await mqttClient.publish("gripper/mode", gripperModeJson);
+      currentSettings.gripperMode = settings.gripperMode;
     }
-    if (settings.motorSpeed !== undefined) {
-      // Einschließlich 0 als gültiger Wert
+    if (settings.motorSpeed !== undefined && settings.motorSpeed !== currentSettings.motorSpeed) {
       await mqttClient.publish("motors/speed", settings.motorSpeed.toString());
+      currentSettings.motorSpeed = settings.motorSpeed;
     }
-    if (settings.motionProfil) {
+    if (settings.motionProfil && settings.motionProfil !== currentSettings.motionProfil) {
       const motionProfilJson = JSON.stringify(settings.motionProfil);
       await mqttClient.publish("motors/motionProfil", motionProfilJson);
+      currentSettings.motionProfil = settings.motionProfil;
     }
-    if (settings.powerstage !== undefined) {
+    if (settings.powerstage !== undefined && settings.powerstage !== currentSettings.powerstage) {
       const powerstageJson = JSON.stringify(settings.powerstage);
       await mqttClient.publish("robot/powerstage", powerstageJson);
+      currentSettings.powerstage = settings.powerstage;
     }
+
 
     res
       .status(200)

@@ -93,7 +93,7 @@ const SettingsPage = () => {
       gripperMode: settings.gripper,
       motorSpeed: settings.speed,
       motionProfil: settings.motionProfil,
-      powerstage:settings.powerstage
+      powerstage: settings.powerstage
     };
 
     axios
@@ -220,14 +220,13 @@ const SettingsPage = () => {
         console.error("Error deactivating magnet:", error);
       });
   };
-  const [powerstage, setPowerstage] = useState(true);
   const handlePowerStage = (e) => {
-    setPowerstage(!powerstage)
+    const newPowerstage = !settings.powerstage;
     setSettings((prevSettings) => ({
       ...prevSettings,
-      powerstage: powerstage,
+      powerstage: newPowerstage,
     }));
-  }
+  };
 
   return (
     <>
@@ -323,7 +322,9 @@ const SettingsPage = () => {
         <div className="mb-4 flex items-center">
           <label>Powerstage:</label>
           <label className="powerswitch ml-2">
-            <input type="checkbox" checked={powerstage} onChange={handlePowerStage} />
+            <input type="checkbox" 
+              checked={settings.powerstage}
+              onChange={handlePowerStage} />
             <span className="powerslider"></span>
           </label>
         </div>
