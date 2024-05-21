@@ -42,6 +42,8 @@ bool robotRequiersHoming = true;
 
 CoordinateMode currentCoordinateMode = Absolut;
 
+Powerstage currentPowerstageMode = On;
+
 // `errorAccumulator1` bis `errorAccumulator4` dienen der Fehlerakkumulation für Regelungszwecke.
 double errorAccumulator1 = 0.0, errorAccumulator2 = 0.0, errorAccumulator3 = 0.0, errorAccumulator4 = 0.0;
 

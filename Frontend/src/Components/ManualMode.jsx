@@ -8,11 +8,13 @@ import {
   zValueAtom,
   phiValueAtom,
   actuatorAtom,
-  settingAtom
+  settingAtom,
+  robotStateAtom
 } from "../utils/atoms";
 // ManuellMode component responsible for manual control mode
 const ManuellMode = () => {
   const settings = useRecoilValue(settingAtom);
+  const robotState = useRecoilValue(robotStateAtom);
   const server = process.env.REACT_APP_API_URL;
   const [xValue, setXValue] = useRecoilState(xValueAtom);
   const [yValue, setYValue] = useRecoilState(yValueAtom);
@@ -21,6 +23,17 @@ const ManuellMode = () => {
   const [actuator, setActuator] = useRecoilState(actuatorAtom);
   const countIntervalRef = useRef(null);
   const isFirstRender = useRef(true);
+
+
+  // Initialize coordinates on mount
+  useEffect(() => {
+    if (robotState && robotState.currentCoordinates) {
+      setXValue(robotState.currentCoordinates[0]);
+      setYValue(robotState.currentCoordinates[1]);
+      setZValue(robotState.currentCoordinates[2]);
+      setPhiValue(robotState.currentCoordinates[3]);
+    }
+  }, []); 
 
   // Function to calculate step based on settings.speed
   const calculateStep = () => {

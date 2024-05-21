@@ -45,6 +45,11 @@ typedef struct {
     float x, y, z, phi, f, i, j, r, t;
 } Parameter;
 
+typedef enum {
+    On,
+    Off
+} Powerstage;
+
 // Global MQTT Variables
 extern const char** globalTopics;
 extern int globalTopicCount;
@@ -65,6 +70,7 @@ extern double errorAccumulator1, errorAccumulator2, errorAccumulator3, errorAccu
 extern int currentGripperValue;
 extern Parameter params;
 extern CoordinateMode currentCoordinateMode;
+extern Powerstage currentPowerstageMode;
  
 #define STEPSPERREVOLUTION 800
 #define GEARRATIO 20
