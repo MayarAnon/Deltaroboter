@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ConfirmationModal from "./ConfirmationModal";
 import { useRecoilValue } from "recoil";
-import {settingAtom } from "../utils/atoms";
+import { settingAtom } from "../utils/atoms";
 import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
@@ -103,25 +103,34 @@ const Header = () => {
       />
       <div
         style={{
-          background: `linear-gradient(45deg, ${
-            settings.color
-          }, ${lightenHexColor(settings.color, 180)})`,
+          background: `linear-gradient(45deg, ${settings.color
+            }, ${lightenHexColor(settings.color, 180)})`,
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
           borderRadius: "10px",
         }}
         className={`p-4 text-white rounded-xl font-bold  mt-10 mx-5 flex items-center justify-between border-4 border-black`}
       >
-        <div className="text-3xl sm:text-l flex item-center">
-          Deltaroboter
-          <button className=" inline-block ml-4 " onClick={toggle}>
-            <img
-              src="DHBW_Icon.png"
-              className="hidden smm:block object-contain object-center w-10 h-10 "
-              alt="DeltaPic"
-            />
-          </button>
-        </div>
+        <div>
+          <div className="flex flex-col items-center sm:flex-row">
+            <span className="text-3xl sm:text-l">Deltaroboter</span>
 
+            <button className=" inline-block ml-4 " onClick={toggle}>
+              <img
+                src="DHBW_Icon.png"
+                className="hidden smm:block object-contain object-center w-10 h-10 "
+                alt="DeltaPic"
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center mt-1 sm:mt-0 border-1 border-white rounded-lg  "style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', width: '11rem' }}>
+          <div className={`ml-2 w-3 h-3 mr-2 rounded-full ${settings.powerstage ? 'bg-green-600' : 'bg-red-600'}`}  />
+            <span className={`text-sm ${settings.powerstage ? 'text-green-600' : 'text-red-600'}`}>
+              {settings.powerstage ? 'Powerstage enabled' : 'Powerstage disabled'}
+            </span>
+            
+          </div>
+        </div>
         <button className="md:hidden" id="burgerheader" onClick={toggleMenu}>
           <img
             src="Burgermenu.png"
@@ -185,9 +194,8 @@ const Header = () => {
       {isMenuHidden === true && (
         <div
           style={{
-            background: `linear-gradient(45deg, ${
-              settings.color
-            }, ${lightenHexColor(settings.color, 180)})`,
+            background: `linear-gradient(45deg, ${settings.color
+              }, ${lightenHexColor(settings.color, 180)})`,
             boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
             borderRadius: "10px",
             position: "relative",
