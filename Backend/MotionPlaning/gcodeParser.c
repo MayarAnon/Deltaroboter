@@ -35,6 +35,7 @@ void readFile(const char* filename) {
     }
     printf("Programm wird ausgeführt. \n");
     params =(Parameter){0.0,0.0,-280.0,0.0,0,0.0,0.0,0.0,0.0};
+    currentCoordinateMode = Absolut;
     while ((read = getline(&line, &len, file)) != -1) {
         if (stopFlag) {
             printf("load Program wurde Abgebrochen");
@@ -74,32 +75,61 @@ void processLine(char* line) {
     if (strcmp(command, "G0") == 0 || strcmp(command, "G00") == 0) {
         //Parameter aus string lesen 
         Coordinate* coordinates = (Coordinate*)malloc(2 * sizeof(Coordinate));
-        for(const char *p = line; *p; ++p) {
-        sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
-        }
         
         coordinates[0] = currentPosition;
-        coordinates[1] = (Coordinate){params.x,params.y,params.z,params.phi};
-        /*
-        for(int i=0;i<2;i++){
-            printf("(%f,%f,%f),\n",coordinates[i].x, coordinates[i].y, coordinates[i].z +310);
-            fflush(stdout);
+        //Unterscheiden zwischen absoluten und Relativen Kordinatensystem
+        if(currentCoordinateMode == Absolut){
+            for(const char *p = line; *p; ++p) {
+                sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+            }
+            coordinates[1] = (Coordinate){params.x,params.y,params.z,params.phi};
         }
-        */
+        else if(currentCoordinateMode == Relativ){
+            Parameter volitaleParams = {0};
+            for(const char *p = line; *p; ++p) {
+                sscanf(p, "X%f", &volitaleParams.x) || sscanf(p, "Y%f", &volitaleParams.y) || sscanf(p, "Z%f", &volitaleParams.z) || sscanf(p, "A%f", &volitaleParams.phi) || sscanf(p, "F%f", &volitaleParams.f);
+            }
+            coordinates[1] = (Coordinate){volitaleParams.x + currentPosition.x,volitaleParams.y + currentPosition.y,volitaleParams.z + currentPosition.z,volitaleParams.phi + currentPosition.phi};
+        }
+        
         processInterpolationAndCreateJSON(coordinates,2, params.f);
     
     }
     else if (strcmp(command, "G1") == 0 || strcmp(command, "G01") == 0) {
-        //Parameter aus string lesen 
-        for(const char *p = line; *p; ++p) {
-        sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
-        }
         
-        float diffX = params.x - currentPosition.x;
-        float diffY = params.y - currentPosition.y;
-        float diffZ = params.z - currentPosition.z;
+        
+        float diffX = 0.0, diffY = 0.0,diffZ = 0.0;
 
-        Coordinate targetPosition = {params.x,params.y,params.z,params.phi};
+        Coordinate targetPosition = {0.0, 0.0, -280.0, 0.0};
+
+        if(currentCoordinateMode == Absolut){
+
+            for(const char *p = line; *p; ++p) {
+                sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+            }
+            diffX = params.x - currentPosition.x;
+            diffY = params.y - currentPosition.y;
+            diffZ = params.z - currentPosition.z;
+
+            targetPosition = (Coordinate){params.x,params.y,params.z,params.phi};
+        }
+        else if(currentCoordinateMode == Relativ){
+            Parameter volitaleParams = {0};
+            for(const char *p = line; *p; ++p) {
+                sscanf(p, "X%f", &volitaleParams.x) || sscanf(p, "Y%f", &volitaleParams.y) || sscanf(p, "Z%f", &volitaleParams.z) || sscanf(p, "A%f", &volitaleParams.phi) || sscanf(p, "F%f", &volitaleParams.f);
+            }
+            diffX = volitaleParams.x;
+            diffY = volitaleParams.y;
+            diffZ = volitaleParams.z;
+
+            targetPosition = (Coordinate){volitaleParams.x + currentPosition.x,volitaleParams.y + currentPosition.y,volitaleParams.z + currentPosition.z,volitaleParams.phi + currentPosition.phi};
+        }
+        else{
+            printf("Fehler ist aufgetreten currentCoordinateMode konnte nicht gelesen werden! \n");
+            fflush(stdout);
+        }
+
+        
         
         float distance = sqrt(diffX * diffX + diffY * diffY + diffZ * diffZ);
 
@@ -135,30 +165,55 @@ void processLine(char* line) {
         //Parameter X: X-Achse Y: Y-Achse Z: Z-Achese A: Rotationsachse Endeffektor F: Speed
         switch(currentPlane) {
         case XY_PLANE:
-            
-            for(const char *p = line; *p; ++p) {
-            sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+            if(currentCoordinateMode == Absolut){
+                for(const char *p = line; *p; ++p) {
+                    sscanf(p, "X%f", &params.x) || sscanf(p, "Y%f", &params.y) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+                }
+                center = (Coordinate){currentPosition.x + params.i,currentPosition.y + params.j,currentPosition.z,currentPosition.phi};
+                end = (Coordinate){params.x,params.y,currentPosition.z,params.phi};
+            }else if(currentCoordinateMode == Relativ){
+                Parameter volitaleParams = {0};
+                for(const char *p = line; *p; ++p) {
+                    sscanf(p, "X%f", &volitaleParams.x) || sscanf(p, "Y%f", &volitaleParams.y) || sscanf(p, "I%f", &volitaleParams.i) || sscanf(p, "J%f", &volitaleParams.j) || sscanf(p, "R%f", &volitaleParams.r)|| sscanf(p, "A%f", &volitaleParams.phi) || sscanf(p, "F%f", &volitaleParams.f);
+                }
+                center = (Coordinate){currentPosition.x + volitaleParams.i,currentPosition.y + volitaleParams.j,currentPosition.z,currentPosition.phi};
+                end = (Coordinate){volitaleParams.x + currentPosition.x,volitaleParams.y + currentPosition.y,currentPosition.z,volitaleParams.phi + currentPosition.phi};
             }
-            center = (Coordinate){currentPosition.x + params.i,currentPosition.y + params.j,currentPosition.z,currentPosition.phi};
-            end = (Coordinate){params.x,params.y,currentPosition.z,params.phi};
-            int numSteps = 0;
-            
 
             break;
         case YZ_PLANE:
-            for(const char *p = line; *p; ++p) {
-            sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+            
+            if(currentCoordinateMode == Absolut){  
+                for(const char *p = line; *p; ++p) {
+                sscanf(p, "Y%f", &params.y) || sscanf(p, "Z%f", &params.z) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+                }
+                center = (Coordinate){currentPosition.x ,currentPosition.y + params.i,currentPosition.z + params.j,currentPosition.phi};
+                end = (Coordinate){currentPosition.x,params.y,params.z,params.phi};
+            }else if(currentCoordinateMode == Relativ){
+                Parameter volitaleParams = {0};
+                for(const char *p = line; *p; ++p) {
+                sscanf(p, "Y%f", &volitaleParams.y) || sscanf(p, "Z%f", &volitaleParams.z) || sscanf(p, "I%f", &volitaleParams.i) || sscanf(p, "J%f", &volitaleParams.j) || sscanf(p, "R%f", &volitaleParams.r)|| sscanf(p, "A%f", &volitaleParams.phi) || sscanf(p, "F%f", &volitaleParams.f);
+                }
+                center = (Coordinate){currentPosition.x ,currentPosition.y + volitaleParams.i,currentPosition.z + volitaleParams.j,currentPosition.phi};
+                end = (Coordinate){currentPosition.x,volitaleParams.y + currentPosition.y,volitaleParams.z + currentPosition.z,volitaleParams.phi + currentPosition.phi};
             }
-            center = (Coordinate){currentPosition.x ,currentPosition.y + params.i,currentPosition.z + params.j,currentPosition.phi};
-            end = (Coordinate){currentPosition.x,params.y,params.z,params.phi};
             break;
         case ZX_PLANE:
-            
-            for(const char *p = line; *p; ++p) {
-            sscanf(p, "Z%f", &params.z) || sscanf(p, "X%f", &params.x) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+            if(currentCoordinateMode == Absolut){
+                for(const char *p = line; *p; ++p) {
+                    sscanf(p, "Z%f", &params.z) || sscanf(p, "X%f", &params.x) || sscanf(p, "I%f", &params.i) || sscanf(p, "J%f", &params.j) || sscanf(p, "R%f", &params.r)|| sscanf(p, "A%f", &params.phi) || sscanf(p, "F%f", &params.f);
+                }
+
+                center = (Coordinate){currentPosition.x + params.j,currentPosition.y ,currentPosition.z + params.i,currentPosition.phi};
+                end = (Coordinate){params.x,currentPosition.y,params.z,params.phi};
+            }else if(currentCoordinateMode == Relativ){
+                Parameter volitaleParams = {0};
+                for(const char *p = line; *p; ++p) {
+                    sscanf(p, "Z%f", &volitaleParams.z) || sscanf(p, "X%f", &volitaleParams.x) || sscanf(p, "I%f", &volitaleParams.i) || sscanf(p, "J%f", &volitaleParams.j) || sscanf(p, "R%f", &volitaleParams.r)|| sscanf(p, "A%f", &volitaleParams.phi) || sscanf(p, "F%f", &volitaleParams.f);
+                }
+                center = (Coordinate){currentPosition.x + volitaleParams.j,currentPosition.y ,currentPosition.z + volitaleParams.i,currentPosition.phi};
+                end = (Coordinate){volitaleParams.x + currentPosition.x,currentPosition.y,volitaleParams.z + currentPosition.z,volitaleParams.phi + currentPosition.phi};
             }
-            center = (Coordinate){currentPosition.x + params.j,currentPosition.y ,currentPosition.z + params.i,currentPosition.phi};
-            end = (Coordinate){params.x,currentPosition.y,params.z,params.phi};
             break;
         }
         
@@ -218,6 +273,12 @@ void processLine(char* line) {
             
         processInterpolationAndCreateJSON(targetPosition, 2, params.f);
     
+    }
+    else if (strcmp(command, "G90") == 0) {
+        currentCoordinateMode = Absolut;
+    }
+    else if (strcmp(command, "G91") == 0) {
+        currentCoordinateMode = Relativ;
     }
     // Ruft Unterprogramme auf, die in separaten Dateien definiert sind
     else if (strcmp(command, "M98") == 0) {

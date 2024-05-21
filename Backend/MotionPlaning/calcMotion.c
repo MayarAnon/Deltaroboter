@@ -254,8 +254,10 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
         errorAccumulator4 = localErrorAccumulators[3];
         
         char* jsonString = cJSON_Print(jsonRoot);
-        //printf(jsonString);
-        publishMessage("motors/sequence", jsonString);
+        //printf(jsonString); 
+        if(currentPowerstageMode == On){
+            publishMessage("motors/sequence", jsonString);
+        }
         publishCurrentState(currentPosition, currentAngles);
         usleep(totalDuration);
         free(jsonString);
@@ -279,57 +281,60 @@ void publishCurrentState(Coordinate pos, Angles ang) {
 }
 
 void processGripperCommand(char* command, const char* line) {
-    int sValue = 0;
-    int numParams = sscanf(line, "%*s S%d", &sValue);
-    bool validValue = false;
+    if(currentPowerstageMode == On){
+    
+        int sValue = 0;
+        int numParams = sscanf(line, "%*s S%d", &sValue);
+        bool validValue = false;
 
-    // Integrierte Validierung basierend auf dem aktuellen Greifertyp
-    switch (currentGripper) {
-        case parallel:
-            validValue = (sValue >= 0 && sValue <= 100);
-            break;
-        case complient:
-            validValue = (sValue == 1 || sValue == 0 || sValue == -1);
-            break;
-        case magnet:
-            validValue = (sValue == 1 || sValue == 0);
-            break;
-        case vaccum:
-            validValue = (sValue == 1 || sValue == 0 || sValue == -1);
-            break;
-        default:
-            validValue = false;  // Sicherstellen, dass kein ungültiger Greifertyp verwendet wird
-            break;
+        // Integrierte Validierung basierend auf dem aktuellen Greifertyp
+        switch (currentGripper) {
+            case parallel:
+                validValue = (sValue >= 0 && sValue <= 100);
+                break;
+            case complient:
+                validValue = (sValue == 1 || sValue == 0 || sValue == -1);
+                break;
+            case magnet:
+                validValue = (sValue == 1 || sValue == 0);
+                break;
+            case vaccum:
+                validValue = (sValue == 1 || sValue == 0 || sValue == -1);
+                break;
+            default:
+                validValue = false;  // Sicherstellen, dass kein ungültiger Greifertyp verwendet wird
+                break;
+        }
+
+        if (numParams < 1 || !validValue) {
+            fprintf(stderr, "Invalid parameter for command %s\n", command);
+            return;
+        }
+
+        // Erstellen des JSON-Strings basierend auf dem aktuellen Greifer
+        int waitTime = 0;
+        char jsonString[100];
+        switch (currentGripper) {
+            case parallel:
+                snprintf(jsonString, sizeof(jsonString), "{\n\"parallelGripper\": %d\n}", sValue);
+                waitTime = 5000;
+                break;
+            case complient:
+                snprintf(jsonString, sizeof(jsonString), "{\n\"complientGripper\": %d\n}", sValue);
+                waitTime = 2000;
+                break;
+            case magnet:
+                snprintf(jsonString, sizeof(jsonString), "{\n\"magnetGripper\": %d\n}", sValue);
+                waitTime = 500;
+                break;
+            case vaccum:
+                snprintf(jsonString, sizeof(jsonString), "{\n\"vacuumGripper\": %d\n}", sValue);
+                waitTime = 2000;
+                break;
+        }
+
+        publishMessage(GRIPPERCONTROLLTOPIC, jsonString); // Nachricht senden
+        usleep(waitTime * 1000);
+        currentGripperValue = sValue; // Aktualisieren des aktuellen Greiferwertes
     }
-
-    if (numParams < 1 || !validValue) {
-        fprintf(stderr, "Invalid parameter for command %s\n", command);
-        return;
-    }
-
-    // Erstellen des JSON-Strings basierend auf dem aktuellen Greifer
-    int waitTime = 0;
-    char jsonString[100];
-    switch (currentGripper) {
-        case parallel:
-            snprintf(jsonString, sizeof(jsonString), "{\n\"parallelGripper\": %d\n}", sValue);
-            waitTime = 5000;
-            break;
-        case complient:
-            snprintf(jsonString, sizeof(jsonString), "{\n\"complientGripper\": %d\n}", sValue);
-            waitTime = 2000;
-            break;
-        case magnet:
-            snprintf(jsonString, sizeof(jsonString), "{\n\"magnetGripper\": %d\n}", sValue);
-            waitTime = 500;
-            break;
-        case vaccum:
-            snprintf(jsonString, sizeof(jsonString), "{\n\"vacuumGripper\": %d\n}", sValue);
-            waitTime = 2000;
-            break;
-    }
-
-    publishMessage(GRIPPERCONTROLLTOPIC, jsonString); // Nachricht senden
-    usleep(waitTime * 1000);
-    currentGripperValue = sValue; // Aktualisieren des aktuellen Greiferwertes
 }

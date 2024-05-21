@@ -104,6 +104,18 @@ void parseRobotState(const char *payloadStr) {
         }
     }
 
+    cJSON *powerstageItem = cJSON_GetObjectItemCaseSensitive(json, "powerstage");
+    if (powerstageItem != NULL && cJSON_IsBool(powerstageItem)) {
+        bool powerstageValue = cJSON_IsTrue(powerstageItem);
+
+        // Flankenerkennung
+        if ((powerstageValue && currentPowerstageMode != On) || (!powerstageValue && currentPowerstageMode != Off)) {
+            currentPowerstageMode = powerstageValue ? On : Off;
+            printf("Powerstage mode set to %s.\n", currentPowerstageMode == On ? "ON" : "OFF");
+            fflush(stdout);  // Sicherstellen, dass die Ausgabe sofort erfolgt
+        }
+    }
+
 
     // Parsing des Greifermodus und Konvertierung zu Enum
     char *gripperModeStr = cJSON_GetObjectItemCaseSensitive(json, "gripperMode")->valuestring;
