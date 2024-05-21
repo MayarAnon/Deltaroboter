@@ -38,7 +38,7 @@ robot_state = {
     "gripperMode": "parallelGripper",
     "motionProfil" : "TrapezProfil",
     "motorsSpeed": 50,
-    "Error":0,
+    "Error":3,
     "powerstage":True
 }
 

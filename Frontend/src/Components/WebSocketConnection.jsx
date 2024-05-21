@@ -28,6 +28,9 @@ const WebSocketConnection = () => {
           case 2:
             errorMessage = 'Collision with end switch'; // Kollision mit dem Endscha
             break;
+          case 3:
+            errorMessage = 'Please calibrate the robot'; // Kollision mit dem Endscha
+            break;
           default:
             errorMessage = 'An error has occurred'; // Ein unbekannter Fehler
             break;
