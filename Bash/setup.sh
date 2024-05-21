@@ -14,7 +14,7 @@ sudo apt-get install python3-rpi.gpio
 
 
 # Stelle sicher, dass Skriptdateien im Unix-Format sind
-for script in node.sh Mosquitto.sh start.sh packages.sh service.sh; do
+for script in node.sh Mosquitto.sh start.sh packages.sh service.sh ipconfig.sh; do
     dos2unix "$script" || { echo "Fehler beim Konvertieren von $script"; exit 1; }
     chmod +x "$script" || { echo "Fehler beim Konvertieren von $script"; exit 1; }
 done
@@ -24,8 +24,14 @@ done
 ./Mosquitto.sh || { echo "Fehler beim Ausführen von Mosquitto.sh"; exit 1; }
 ./packages.sh 
 
+./ipconfig.sh || { echo "Fehler beim Ausführen von ipconfig.sh"; exit 1; }
+
 #Services starten 
 ./service.sh 
+
+#System neu starten 
+
+sudo reboot
 
 
 
