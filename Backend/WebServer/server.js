@@ -140,6 +140,10 @@ app.post("/updateSettings", async (req, res) => {
       const motionProfilJson = JSON.stringify(settings.motionProfil);
       await mqttClient.publish("motors/motionProfil", motionProfilJson);
     }
+    if (settings.powerstage !== undefined) {
+      const powerstageJson = JSON.stringify(settings.powerstage);
+      await mqttClient.publish("robot/powerstage", powerstageJson);
+    }
 
     res
       .status(200)

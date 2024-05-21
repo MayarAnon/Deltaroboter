@@ -28,6 +28,7 @@ export const settingAtom = atom({
     motionProfil: "TrapezProfil",
     workSpaceRadius: 200,
     workSpaceHeight: 200,
+    powerstage: true
   },
 });
 export const xValueAtom = atom({

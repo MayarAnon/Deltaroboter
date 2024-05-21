@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from "react";
 import InfoComponent from "./Info";
 import ConfirmationModal from "./ConfirmationModal";
-import { useRecoilState,useRecoilValue } from "recoil";
-import { settingAtom} from "../utils/atoms";
+import { useRecoilState, useRecoilValue } from "recoil";
+import { settingAtom } from "../utils/atoms";
 import axios from "axios";
 import RobotStateDisplay from "./Robotstate";
 import BB8Toggle from "./DarkmodeToggle";
@@ -93,6 +93,7 @@ const SettingsPage = () => {
       gripperMode: settings.gripper,
       motorSpeed: settings.speed,
       motionProfil: settings.motionProfil,
+      powerstage:settings.powerstage
     };
 
     axios
@@ -219,6 +220,14 @@ const SettingsPage = () => {
         console.error("Error deactivating magnet:", error);
       });
   };
+  const [powerstage, setPowerstage] = useState(true);
+  const handlePowerStage = (e) => {
+    setPowerstage(!powerstage)
+    setSettings((prevSettings) => ({
+      ...prevSettings,
+      powerstage: powerstage,
+    }));
+  }
 
   return (
     <>
@@ -311,6 +320,14 @@ const SettingsPage = () => {
           </button>
         </div>
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
+        <div className="mb-4 flex items-center">
+          <label>Powerstage:</label>
+          <label className="powerswitch ml-2">
+            <input type="checkbox" checked={powerstage} onChange={handlePowerStage} />
+            <span className="powerslider"></span>
+          </label>
+        </div>
+        <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="mb-4">
           <a href={`${server}/downloadGuide`} target="_blank">
             <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
@@ -321,7 +338,7 @@ const SettingsPage = () => {
         <div className="border-t border-gray-600 my-2"></div> {/* Divider */}
         <div className="flex justify-start space-x-4 ">
           <div className="mb-2">
-            <a href= {`${server}/downloadLogs`} target="_blank">
+            <a href={`${server}/downloadLogs`} target="_blank">
               <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
                 Download Log-Files
               </button>

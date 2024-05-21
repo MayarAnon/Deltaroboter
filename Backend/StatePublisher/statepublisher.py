@@ -25,7 +25,8 @@ TOPICS = [
     "gripper/mode",
     "motors/speed",
     "motors/motionProfil",
-    "Errors"
+    "Errors",
+    "robot/powerstage"
 ]
 
 # Initialisiere den Zustand des Roboters
@@ -37,7 +38,8 @@ robot_state = {
     "gripperMode": "parallelGripper",
     "motionProfil" : "TrapezProfil",
     "motorsSpeed": 50,
-    "Error":0
+    "Error":0,
+    "powerstage":True
 }
 
 # MQTT Callback für das Verbinden zum Broker
@@ -74,7 +76,8 @@ def on_message(client, userdata, msg):
             robot_state['motorsSpeed'] = data
         elif msg.topic == 'Errors':
             robot_state['Error'] = data
-        
+        elif msg.topic == 'robot/powerstage':
+            robot_state['powerstage'] = data
         # Veröffentliche den aktuellen Robotstate
         client.publish("robot/state", json.dumps(robot_state))
     
