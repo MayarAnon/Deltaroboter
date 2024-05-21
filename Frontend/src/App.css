@@ -235,9 +235,9 @@
   .powerswitch {
     position: relative;
     display: inline-block;
-    width: 120px;
-    height: 34px;
-    margin-left: 10px;  
+    width: 100px;
+    height: 26px;
+    margin-left: 12px;   
    }
    
    .powerswitch input {
@@ -251,7 +251,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #3C3C3C;
+    background-color: #d02121;
     -webkit-transition: .4s;
     transition: .4s;
     border-radius: 34px;
@@ -260,10 +260,10 @@
    .powerslider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
-    left: 4px;
-    bottom: 4px;
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
     background-color: white;
     -webkit-transition: .4s;
     transition: .4s;
@@ -271,7 +271,7 @@
    }
    
    input:checked + .powerslider {
-    background-color: #0E6EB8;
+    background-color: #3caa3a;
    }
    
    input:focus + .powerslider {
@@ -279,9 +279,9 @@
    }
    
    input:checked + .powerslider:before {
-    -webkit-transform: translateX(26px);
-    -ms-transform: translateX(26px);
-    transform: translateX(85px);
+    -webkit-transform: translateX(20px);
+    -ms-transform: translateX(20px);
+    transform: translateX(73px);
    }
    
    /*------ ADDED CSS ---------*/
@@ -293,7 +293,7 @@
     transform: translate(-50%,-50%);
     top: 50%;
     left: 50%;
-    font-size: 10px;
+    font-size: 9px;
     font-family: Verdana, sans-serif;
    }
    

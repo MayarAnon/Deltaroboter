@@ -124,8 +124,8 @@ const Header = () => {
           </div>
 
           <div className="flex items-center mt-1 sm:mt-0 border-1 border-white rounded-lg  "style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)', width: '11rem' }}>
-          <div className={`ml-2 w-3 h-3 mr-2 rounded-full ${settings.powerstage ? 'bg-green-600' : 'bg-red-600'}`}  />
-            <span className={`text-sm ${settings.powerstage ? 'text-green-600' : 'text-red-600'}`}>
+          <div className={`ml-2 w-3 h-3 mr-2 rounded-full ${settings.powerstage ? 'bg-green-700' : 'bg-red-700'}`}  />
+            <span className={`text-sm ${settings.powerstage ? 'text-green-800' : 'text-red-800'}`}>
               {settings.powerstage ? 'Powerstage enabled' : 'Powerstage disabled'}
             </span>
             
