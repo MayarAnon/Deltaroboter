@@ -153,6 +153,7 @@ def on_message(client, userdata, msg):
         elif command == 'false':
             logging.info(f"{current_time} Stop homing")
             stop_homing_process()
+            client.publish(MQTT_TOPIC_ERRORS, '3')
 
 def stop_homing_process():
     """
