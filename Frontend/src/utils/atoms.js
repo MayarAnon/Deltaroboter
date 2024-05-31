@@ -90,5 +90,5 @@ export const pathPointsAtom = atom({
 
 export const errorStateAtom = atom({
   key: 'errorState',
-  default: { errorCode: 0, message: '' }
+  default: { errorCode: 3, message: 'Please calibrate the robot' }
 });
