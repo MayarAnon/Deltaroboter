@@ -4,14 +4,14 @@ echo "Überprüfe die Quelldatei..."
 cat dhcpcd.conf || { echo "Quelldatei nicht gefunden oder leer"; exit 1; }
 
 echo "Kopiere Config-Datei..."
-sudo cp -a dhcpcd.conf /etc/dhcp.conf || { echo "Fehler beim Kopieren der Config-Datei"; exit 1; }
+sudo cp -a dhcpcd.conf /etc/dhcpcd.conf || { echo "Fehler beim Kopieren der Config-Datei"; exit 1; }
 
 echo "Überprüfe kopierte Datei..."
-cat /etc/dhcp.conf || { echo "Kopierte Datei ist leer oder nicht vorhanden"; exit 1; }
+cat /etc/dhcpcd.conf || { echo "Kopierte Datei ist leer oder nicht vorhanden"; exit 1; }
 
 echo "Neustart des Services..."
 
-sudo service dhcpcd restart
+sudo systemctl restart dhcpcd
 
 echo "Port für Node freigeben"
 
