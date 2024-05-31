@@ -77,7 +77,10 @@ export const robotStateAtom = atom({
     gripperFeedback:false,
     gripperMode:"parallelGripper",
     motionProfil:"TrapezProfil",
-    motorsSpeed:50}
+    motorsSpeed:50,
+    errors:3,
+    powerstage:true
+    }
 });
 
 export const pathPointsAtom = atom({

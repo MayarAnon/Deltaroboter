@@ -8,7 +8,7 @@ const WebSocketConnection = () => {
   const setPathPoints = useSetRecoilState(pathPointsAtom);
   const setErrorState = useSetRecoilState(errorStateAtom);
   useEffect(() => {
-    let websocket = new WebSocket("ws://192.168.0.43:80");
+    let websocket = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
 
     websocket.onopen = () => console.log("WebSocket connected");
     websocket.onmessage = event => {
@@ -54,7 +54,7 @@ const WebSocketConnection = () => {
     websocket.onclose = event => {
       console.log("WebSocket disconnected", event.reason);
       setTimeout(() => {
-        websocket = new WebSocket("ws://192.168.0.43:80");
+        websocket = new WebSocket(process.env.REACT_APP_WEBSOCKET_URL);
       }, 1000);
     };
 
