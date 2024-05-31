@@ -5,7 +5,7 @@ Welcome to the GitHub repository for the Delta Robot Project. This project encom
 ## Project Overview
 
 The Delta Robot Project is designed to demonstrate the principles of robotics control and simulation. It includes a modular web application developed using React, facilitating real-time communication through WebSockets and MQTT.
-![architecture](Docs/Architecture.jpg)
+![architecture](Docs/architecture.jpg)
 ## Features
 
 - **Real-time Control and Visualization**: Control and observe the delta robot within an interactive 3D environment.
