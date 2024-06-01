@@ -47,7 +47,7 @@ Follow these steps to set up the project locally:
    - WLAN network password: ChangeMe
    - Location: DE
 
-### Configuring the Raspberry Pi as an Access Point (AP-STA Mode)
+### Configuring the Raspberry Pi as an Access Point (AP-STA Mode) (https://docs.raspap.com/ap-sta/#installation)
 2. **Configure the Raspberry Pi as an Access Point**
    - Connect to the Raspberry Pi via the preconfigured "Hotspot" WLAN network and then via SSH.
    - Install RaspAP to set up the Raspberry Pi to operate simultaneously as both an Access Point (AP) and a Wireless Client/Station (STA):
