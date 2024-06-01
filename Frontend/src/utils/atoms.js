@@ -90,5 +90,5 @@ export const pathPointsAtom = atom({
 
 export const errorStateAtom = atom({
   key: 'errorState',
-  default: {}
+  default: {errorCode:0, message:''}
 });

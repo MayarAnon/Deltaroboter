@@ -37,6 +37,8 @@ const WebSocketConnection = () => {
         }
       
         setErrorState({ errorCode: data.Error, message: errorMessage });
+      }else{
+        setErrorState({ errorCode: 3, message: "Please calibrate the robot" });
       }
 
       if (data.Error === 0) {

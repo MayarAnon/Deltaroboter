@@ -8,7 +8,7 @@ const path = require("path");
 const cors = require("cors");
 const MqttClient = require("./mqttClient");
 const app = express();
-const port = 80;
+const port = 3000;
 // HTTP-Server auf dem Express-App basiert, für WebSockets erforderlich
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
@@ -34,7 +34,7 @@ app.use(cors({
 }));
 app.use((req, res, next) => {
   if (process.env.NODE_ENV === 'production') {
-      res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' http://192.168.0.43:80; style-src 'self' 'sha256-NOysBCqoEZQ4w+cB7d5fekIXPgoo1DEVyHhO0OEBfD4='; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://192.168.0.43:80 ws://192.168.0.43:80; img-src 'self' http://192.168.0.43:80 data:;");
+      res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' http://192.168.50.1:3000; style-src 'self' 'sha256-NOysBCqoEZQ4w+cB7d5fekIXPgoo1DEVyHhO0OEBfD4='; font-src 'self' https://fonts.gstatic.com; connect-src 'self' http://192.168.50.1:3000 ws://192.168.50.1:3000; img-src 'self' http://192.168.50.1:3000 data:;");
   }
   next();
 });
@@ -392,15 +392,15 @@ app.post("/magnet/control", async (req, res) => {
 wss.on("connection", function connection(ws) {
   if (isFirstStart) {
     ws.send(JSON.stringify({
-      "homing": False,
+      "homing": false,
       "currentCoordinates": [0.0, 0.0, -280.0,0.0],
       "currentAngles": [-31.429, -31.429, -31.429,0.0],
-      "gripperFeedback": False,
+      "gripperFeedback": false,
       "gripperMode": "parallelGripper",
       "motionProfil" : "TrapezProfil",
       "motorsSpeed": 50,
       "Error":3,
-      "powerstage":True
+      "powerstage":true
     }));
     isFirstStart = false;
   }
