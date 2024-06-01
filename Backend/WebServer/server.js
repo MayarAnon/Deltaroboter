@@ -12,7 +12,7 @@ const port = 80;
 // HTTP-Server auf dem Express-App basiert, für WebSockets erforderlich
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
-
+let isFirstStart = true;
 // MQTT-Client instanziieren
 const serviceName = "Webserver";
 let mqttClient;
@@ -390,6 +390,20 @@ app.post("/magnet/control", async (req, res) => {
 
 //websocket-mqtt-service
 wss.on("connection", function connection(ws) {
+  if (isFirstStart) {
+    ws.send(JSON.stringify({
+      "homing": False,
+      "currentCoordinates": [0.0, 0.0, -280.0,0.0],
+      "currentAngles": [-31.429, -31.429, -31.429,0.0],
+      "gripperFeedback": False,
+      "gripperMode": "parallelGripper",
+      "motionProfil" : "TrapezProfil",
+      "motorsSpeed": 50,
+      "Error":3,
+      "powerstage":True
+    }));
+    isFirstStart = false;
+  }
   const messageHandler = (topic, message) => {
     if (topic === "robot/state") {
       ws.send(message.toString());
