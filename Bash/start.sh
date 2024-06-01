@@ -53,7 +53,7 @@ start_services() {
 
     # Starte den Motor Controller
     cd "$BASE_DIR/Backend/MotorControl/"
-    sudo ./MotorController &
+    nohup  sudo ./MotorController 2>&1 | with_timestamp >> "$LOG_DIR/MotorController.log" &                                                                                                                                                  
     pids+=($!)
 }
 

@@ -1,6 +1,7 @@
 [Unit]
 Description=Deltaroboter Service
-After=network.target
+After=multi-user-target network-online.target mosquitto.service
+Requires= network-online.target mosquitto.service
 
 [Service]
 Type=simple
