@@ -36,14 +36,65 @@ Key components of the application communicate in real-time through WebSockets fo
 
 Follow these steps to set up the project locally:
 
-1. **Clone the Repository**
+### Preparing the Raspberry Pi SD Card
+1. **Create a Raspberry Pi Image on an SD Card**  
+   The Raspberry Pi is preconfigured as follows:
+   - Hostname: deltarobot
+   - User: pi
+   - Password: raspberry
+   - SSH authentication via password
+   - WLAN network name: Hotspot
+   - WLAN network password: ChangeMe
+   - Location: DE
 
+### Configuring the Raspberry Pi as an Access Point (AP-STA Mode)
+2. **Configure the Raspberry Pi as an Access Point**
+   - Connect to the Raspberry Pi via the preconfigured "Hotspot" WLAN network and then via SSH.
+   - Install RaspAP to set up the Raspberry Pi to operate simultaneously as both an Access Point (AP) and a Wireless Client/Station (STA):
+     ```bash
+     curl -sL https://install.raspap.com | bash
+     ```
+   - After installation, reboot the Raspberry Pi. And connect again over the preconfigured wlan-network.
+   - Access the admin interface via deltarobot.local or via the IP address (username: admin, password: secret).
+   - Configure the Raspberry Pi for AP-STA mode:
+     - Ensure the Wireless Client dashboard widget shows an active connection.
+     - Go to Hotspot > Advanced and enable the "WiFi client AP mode" option.
+     - You may also change the static IP address, the SSID, and the password. (The preconfigured static IP address is 192.168.50.1. If you configure another one, make sure to update the IP in Frontend/.env and in Backend/Webserver/server.js.)
+   - After another reboot, the Raspberry Pi AP-SSID should appear (default SSID: raspi-webgui, password: ChangeMe).
+
+### Software Installation and Configuration
+3. **Install and configure Git**
+   - Install Git and configure your user information:
+     ```bash
+     sudo apt install git
+     git config --global user.name "Your Name"
+     git config --global user.email "your.email@example.com"
+     ```
+4. **Clone the Repository**
    ```bash
    git clone https://github.com/MayarAnon/Deltaroboter.git
-   cd Deltaroboter
+      ```
+5. **setup the deltarobot**
+Navigate to the script directory and run the setup script:
+      ```bash
+      cd Deltarobot 
+      cd Bash  
+      ./setup.sh
+      ```
+6. **add the deltarobot services**
+Run the services script:
+       ```bash
+      cd Deltarobot 
+      cd Bash  
+      ./services.sh
+      ```
+7. sudo reboot
+      ```bash
+      sudo reboot
+      ```
 ## Usage
-After starting the application, you can access the web interface via http://localhost:3000 to control and observe the delta robot.
-
+After starting the application, you can access the web interface via http://192.168.50.1:3000 to control and observe the delta robot.
+under http://192.168.50.1:80 you can access the admin interface for the accesspoint
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
