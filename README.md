@@ -63,32 +63,38 @@ Follow these steps to set up the project locally:
    - After another reboot, the Raspberry Pi AP-SSID should appear (default SSID: raspi-webgui, password: ChangeMe).
 
 ### Software Installation and Configuration
-3. **Install and configure Git**
-Install Git and configure your user information:
+
+3. **Install and configure Git:**
+
+Install Git and configure your user information
   ```bash
   sudo apt install git
   git config --global user.name "Your Name"
   git config --global user.email "your.email@example.com"
   ```
-4. **Clone the Repository**
+4. **Clone the Repository:**
+
    ```bash
    git clone https://github.com/MayarAnon/Deltaroboter.git
    ```
-5. **setup the deltarobot**
-Navigate to the script directory and run the setup script:
+6. **setup the deltarobot:**
+   
+Navigate to the script directory and run the setup script
    ```bash
    cd Deltarobot 
    cd Bash  
    ./setup.sh
    ```
-6. **add the deltarobot services**
-Run the services script:
+8. **add the deltarobot services:**
+
+Run the services script
    ```bash
    cd Deltarobot 
    cd Bash  
    ./services.sh
    ```
-7. sudo reboot
+10. **sudo reboot:**
+
    ```bash
    sudo reboot
    ```
