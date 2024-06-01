@@ -64,34 +64,34 @@ Follow these steps to set up the project locally:
 
 ### Software Installation and Configuration
 3. **Install and configure Git**
-   - Install Git and configure your user information:
-     ```bash
-     sudo apt install git
-     git config --global user.name "Your Name"
-     git config --global user.email "your.email@example.com"
-     ```
+Install Git and configure your user information:
+  ```bash
+  sudo apt install git
+  git config --global user.name "Your Name"
+  git config --global user.email "your.email@example.com"
+  ```
 4. **Clone the Repository**
    ```bash
    git clone https://github.com/MayarAnon/Deltaroboter.git
-      ```
+   ```
 5. **setup the deltarobot**
 Navigate to the script directory and run the setup script:
-      ```bash
-      cd Deltarobot 
-      cd Bash  
-      ./setup.sh
-      ```
+   ```bash
+   cd Deltarobot 
+   cd Bash  
+   ./setup.sh
+   ```
 6. **add the deltarobot services**
 Run the services script:
-       ```bash
-      cd Deltarobot 
-      cd Bash  
-      ./services.sh
-      ```
+   ```bash
+   cd Deltarobot 
+   cd Bash  
+   ./services.sh
+   ```
 7. sudo reboot
-      ```bash
-      sudo reboot
-      ```
+   ```bash
+   sudo reboot
+   ```
 ## Usage
 After starting the application, you can access the web interface via http://192.168.50.1:3000 to control and observe the delta robot.
 under http://192.168.50.1:80 you can access the admin interface for the accesspoint
