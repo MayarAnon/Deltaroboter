@@ -27,11 +27,11 @@ done
 ./ipconfig.sh || { echo "Fehler beim Ausführen von ipconfig.sh"; exit 1; }
 
 #Services starten 
-./service.sh 
+#./service.sh 
 
 #System neu starten 
 
-sudo reboot
+#sudo reboot
 
 
 
