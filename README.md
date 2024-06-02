@@ -58,8 +58,8 @@ Follow these steps to set up the project locally:
    - Access the admin interface via deltarobot.local or via the IP address (username: admin, password: secret).
    - Configure the Raspberry Pi for AP-STA mode:
      - Ensure the Wireless Client dashboard widget shows an active connection.
-     - Go to Hotspot > Advanced and enable the "WiFi client AP mode" option.
-     - You may also change the static IP address, the SSID, and the password. (The preconfigured static IP address is 192.168.50.1. If you configure another one, make sure to update the IP in Frontend/.env and in Backend/Webserver/server.js.)
+     - Go to Hotspot > Advanced and enable the "WiFi client AP mode" option. Please reboot the Raspberry Pi after you activate the Wifi Client AP mode.
+     - After you restart the raspberry pi, you can also change the static IP address, the SSID, and the password. (The preconfigured static IP address is 192.168.50.1. If you configure another one, make sure to update the IP in Frontend/.env and in Backend/Webserver/server.js.)
    - After another reboot, the Raspberry Pi AP-SSID should appear (default SSID: raspi-webgui, password: ChangeMe).
 
 ### Software Installation and Configuration
@@ -81,16 +81,16 @@ Follow these steps to set up the project locally:
       
       Navigate to the script directory and run the setup script
          ```bash
-         cd Deltarobot 
-         cd Bash  
+         cd Deltarobot/ 
+         cd Bash/  
          ./setup.sh
          ```
    8. **add the deltarobot services:**
    
       Run the services script
          ```bash
-         cd Deltarobot 
-         cd Bash  
+         cd Deltarobot/ 
+         cd Bash/  
          ./services.sh
          ```
    9. **sudo reboot:**
