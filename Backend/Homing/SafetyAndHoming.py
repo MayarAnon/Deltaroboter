@@ -13,8 +13,8 @@ current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 logging.basicConfig(filename='../../log/SafetyAndHoming.log', level=logging.INFO)
 
 
-# Constants for the GPIO pins of the end switches and emergency stop
-ENDSCHALTER_PINS = [0, 5, 6]
+# Constants for the GPIO pins[26, 5, 6,13] of the end switches and emergency stop
+ENDSCHALTER_PINS = [26, 5, 6]
 NOTAUS_PIN = 19
 
 # MQTT configuration
@@ -71,7 +71,7 @@ def start_homing_process():
 
     global is_homing_active
     is_homing_active = True
-    pulses = [-10, -10, -100]
+    pulses = [-10, -10, -10,-1]
     timing = [200, 200, 5]
     try:
        
@@ -89,15 +89,18 @@ def start_homing_process():
             send_motor_commands(pulses, timing)
 
             if all_homed:
-                is_homing_active = False
-                client.publish(MQTT_TOPIC_FEEDBACK, 'ture')
+                
+                client.publish(MQTT_TOPIC_FEEDBACK, 'true')
                 client.publish(MQTT_TOPIC_FEEDBACK, 'false')
                 client.publish(MQTT_TOPIC_ERRORS, '0')
+                
                 break
             time.sleep(0.04) # Wait time between checks
     finally:
+        send_motor_commands([933,933,933], [400,400,5])
+        time.sleep(1)
         is_homing_active = False
-
+        logging.info(f"{current_time} homing done")
 def check_end_switches():
     """
     Continuously monitors the states of the end switches. If the homing process is not active
@@ -109,9 +112,9 @@ def check_end_switches():
                 if GPIO.input(pin):   
                     client.publish(MQTT_TOPIC_MOTORS_STOP, 'true')
                     client.publish(MQTT_TOPIC_ERRORS, '2') #error code 2
-                    logging.info(f"{current_time} motor stop")
+                    logging.info(f"{current_time} motor stop Error 2")
                     break
-        time.sleep(0.004)   # Short delay to limit polling
+        time.sleep(0.04)   # Short delay to limit polling
 def check_emergency_stop():
     """
     Continuously monitors the state of the emergency stop button. If the button is pressed
