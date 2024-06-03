@@ -75,7 +75,7 @@ class GripperControl:
         logging.info(data)
         if "parallelGripper" in data:
             input_pwm = int(data["parallelGripper"])
-            pwmValue = 10 + 0.8 * input_pwm # scaling from 0-100 to duty cycle of 10% to 90%
+            pwmValue = 40 + 0.128 * input_pwm # scaling from 0-100 to duty cycle of 40% to 52,8%
             self.pwm.ChangeDutyCycle(pwmValue)
             GPIO.output(VacuumRelais, GPIO.LOW)
             GPIO.output(PumpRelais, GPIO.LOW)
