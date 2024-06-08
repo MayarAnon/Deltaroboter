@@ -194,7 +194,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                     if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                         cJSON* stepObj = cJSON_CreateObject();
                         cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
-                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){messagePulsewidth, messagePulsewidth, 5}, 3));
+                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){messagePulsewidth, messagePulsewidth, 10}, 3));
                         cJSON_AddItemToArray(jsonRoot, stepObj);
                     }
                 }
@@ -229,7 +229,7 @@ void processInterpolationAndCreateJSON(Coordinate* coordinates, int Interpolatio
                     if (currentPulses[0] != 0 || currentPulses[1] != 0 || currentPulses[2] != 0 || currentPulses[3] != 0) {
                         cJSON* stepObj = cJSON_CreateObject();
                         cJSON_AddItemToObject(stepObj, "motorpulses", cJSON_CreateIntArray(currentPulses, 4));
-                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewidth, (int)pulsewidth, 5}, 3));
+                        cJSON_AddItemToObject(stepObj, "timing", cJSON_CreateIntArray((int[]){(int)pulsewidth, (int)pulsewidth, 10}, 3));
                         cJSON_AddItemToArray(jsonRoot, stepObj);
                     }
                 }

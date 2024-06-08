@@ -72,7 +72,7 @@ def start_homing_process():
     global is_homing_active
     is_homing_active = True
     pulses = [-10, -10, -10,-1]
-    timing = [200, 200, 5]
+    timing = [200, 200, 10]
     try:
        
         while is_homing_active:
@@ -97,7 +97,7 @@ def start_homing_process():
                 break
             time.sleep(0.04) # Wait time between checks
     finally:
-        send_motor_commands([933,933,933], [400,400,5])
+        send_motor_commands([933,933,933], [400,400,10])
         time.sleep(1)
         is_homing_active = False
         logging.info(f"{current_time} homing done")
