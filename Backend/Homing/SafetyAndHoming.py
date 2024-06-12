@@ -13,8 +13,8 @@ current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 logging.basicConfig(filename='../../log/SafetyAndHoming.log', level=logging.INFO)
 
 
-# Constants for the GPIO pins[26, 5, 6, 13] of the end switches and emergency stop
-ENDSCHALTER_PINS = [26, 5, 6, 13]
+# Constants for the GPIO pins[26, 5, 6, 16] of the end switches and emergency stop
+ENDSCHALTER_PINS = [26, 5, 6,16]
 NOTAUS_PIN = 19
 
 # MQTT configuration
@@ -83,7 +83,7 @@ def start_homing_process():
                     all_homed = False
                     pulses[index] = -10
                     if index == 3:
-                        pulses[index]= -1
+                        pulses[index]= -5
                 else:
                     pulses[index] = 0
                     
@@ -99,7 +99,7 @@ def start_homing_process():
                 break
             time.sleep(0.04) # Wait time between checks
     finally:
-        send_motor_commands([933,933,933,10], [400,400,10])
+        send_motor_commands([933,933,933,100], [400,400,10])
         time.sleep(1)
         is_homing_active = False
         logging.info(f"{current_time} homing done")
