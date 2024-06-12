@@ -14,7 +14,7 @@ logging.basicConfig(filename='../../log/SafetyAndHoming.log', level=logging.INFO
 
 
 # Constants for the GPIO pins[26, 5, 6, 16] of the end switches and emergency stop
-ENDSCHALTER_PINS = [26, 5, 6,16]
+ENDSCHALTER_PINS = [5, 6, 26,16]
 NOTAUS_PIN = 19
 
 # MQTT configuration
