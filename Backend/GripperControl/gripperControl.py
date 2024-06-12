@@ -29,7 +29,7 @@ def setup_gpio():
     """
     GPIO.setmode(GPIO.BCM)  # Use Broadcom pin numbering
     GPIO.setup(ParallelGripper, GPIO.OUT)
-    p = GPIO.PWM(ParallelGripper, 100)  # PWM with 100Hz
+    p = GPIO.PWM(ParallelGripper, 300)  # PWM with 100Hz
     p.start(0)
 
     for pin in [PumpRelais, VacuumRelais, MagnetRelais, PumpValveRelais, VacuumValveRelais,GripperMagnetRelais]:
@@ -45,7 +45,7 @@ class GripperControl:
         self.client.on_connect = self.on_connect
         self.client.on_message = self.on_message
         self.client.connect(host, port, 60)
-        self.pwm = GPIO.PWM(ParallelGripper, 100) 
+        self.pwm = GPIO.PWM(ParallelGripper, 300) 
         self.pwm.start(0) # initial duty cycle
 
     def on_connect(self, client, userdata, flags, rc):
@@ -75,7 +75,7 @@ class GripperControl:
         logging.info(data)
         if "parallelGripper" in data:
             input_pwm = int(data["parallelGripper"])
-            pwmValue = 40 + 0.128 * input_pwm # scaling from 0-100 to duty cycle of 40% to 52,8%
+            pwmValue = 30+0.35*input_pwm # scaling duty cycle
             self.pwm.ChangeDutyCycle(pwmValue)
             GPIO.output(VacuumRelais, GPIO.LOW)
             GPIO.output(PumpRelais, GPIO.LOW)

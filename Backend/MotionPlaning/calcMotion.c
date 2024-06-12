@@ -317,11 +317,11 @@ void processGripperCommand(char* command, const char* line) {
         switch (currentGripper) {
             case parallel:
                 snprintf(jsonString, sizeof(jsonString), "{\n\"parallelGripper\": %d\n}", sValue);
-                waitTime = 5000;
+                waitTime = 500;
                 break;
             case complient:
                 snprintf(jsonString, sizeof(jsonString), "{\n\"complientGripper\": %d\n}", sValue);
-                waitTime = 2000;
+                waitTime = 1000;
                 break;
             case magnet:
                 snprintf(jsonString, sizeof(jsonString), "{\n\"magnetGripper\": %d\n}", sValue);
@@ -329,7 +329,7 @@ void processGripperCommand(char* command, const char* line) {
                 break;
             case vaccum:
                 snprintf(jsonString, sizeof(jsonString), "{\n\"vacuumGripper\": %d\n}", sValue);
-                waitTime = 2000;
+                waitTime = 1000;
                 break;
         }
 
