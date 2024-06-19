@@ -46,11 +46,6 @@ start_services() {
     nohup ./MotionPlaning 2>&1 | with_timestamp >> "$LOG_DIR/motionPlaning.log" &
     pids+=($!)
 
-    # Starte das Motion Planning Programm
-    cd "$BASE_DIR/Backend/StepChecker/"
-    nohup ./stepChecker 2>&1 | with_timestamp >> "$LOG_DIR/stepChecker.log" &
-    pids+=($!)
-
     # Starte den Motor Controller
     cd "$BASE_DIR/Backend/MotorControl/"
     nohup  sudo ./MotorController 2>&1 | with_timestamp >> "$LOG_DIR/MotorController.log" &                                                                                                                                                  
